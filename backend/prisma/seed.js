@@ -11,7 +11,7 @@ async function main() {
       name: 'Demo Burger',
       slug: 'demo-burger',
       email: 'hola@demoburger.com',
-      phone: '+57 300 000 0000',
+      phone: '+57 300 753 8040',
       address: 'Calle Principal 123'
     }
   });
@@ -24,8 +24,8 @@ async function main() {
       logoUrl: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add',
       primaryColor: '#ea580c',
       secondaryColor: '#18181b',
-      phone: '+57 300 000 0000',
-      whatsapp: '+573000000000',
+      phone: '+57 300 753 8040',
+      whatsapp: '+573007538040',
       address: 'Calle Principal 123',
       email: 'hola@demoburger.com',
       facebookUrl: 'https://facebook.com',
