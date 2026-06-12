@@ -29,7 +29,8 @@ async function main() {
       address: 'Calle Principal 123',
       email: 'hola@demoburger.com',
       facebookUrl: 'https://facebook.com',
-      instagramUrl: 'https://instagram.com'
+      instagramUrl: 'https://instagram.com',
+      restaurantId: restaurant.id
     }
   });
 
