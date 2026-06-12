@@ -11,7 +11,26 @@ export const app = express();
 app.use(helmet());
 app.use(
   cors({
-    origin: env.FRONTEND_URL,
+    origin: (origin, callback) => {
+      // Permitir peticiones sin origen (como Postman, apps móviles o curl)
+      if (!origin) return callback(null, true);
+
+      const allowedOrigins = [
+        env.FRONTEND_URL,
+        'http://localhost:5173',
+        'http://localhost:3000'
+      ];
+
+      const isAllowed = allowedOrigins.includes(origin) || 
+                        origin.endsWith('.vercel.app') ||
+                        origin.startsWith('http://localhost:');
+
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error('Bloqueado por CORS'));
+      }
+    },
     credentials: true
   })
 );
