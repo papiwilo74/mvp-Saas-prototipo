@@ -25,10 +25,13 @@ export function LandingPage() {
             <p className="mt-3 max-w-xl text-sm leading-6 text-stone-600 sm:text-base">
               Una experiencia moderna para ordenar comida rapida sin friccion: menu visual, carrito simple y seguimiento del pedido.
             </p>
-            <div className="mt-5 flex gap-3">
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
               <Link to="/menu" className="btn-primary flex-1 sm:flex-none">
                 Ordenar ahora
                 <ArrowRight size={18} />
+              </Link>
+              <Link to="/register" className="btn-secondary flex-1 sm:flex-none">
+                Crear cuenta
               </Link>
               <a className="btn-secondary flex-1 sm:flex-none" href={`https://wa.me/${config.whatsapp?.replace(/\D/g, '') || ''}`}>
                 WhatsApp
@@ -81,4 +84,3 @@ export function LandingPage() {
     </div>
   );
 }
-
