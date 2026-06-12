@@ -26,17 +26,17 @@ export function CheckoutSuccessPage() {
           .join('\n')
       : '';
 
-    const message = `🍔 *Nuevo Pedido #${order.orderNumber} - ${restaurantName}*
+    const message = `*Nuevo Pedido #${order.orderNumber} - ${restaurantName}*
 
-👤 *Cliente:* ${order.customerName || ''}
-📞 *Teléfono:* ${order.customerPhone || ''}
+- *Cliente:* ${order.customerName || ''}
+- *Teléfono:* ${order.customerPhone || ''}
 
-🛒 *Productos:*
+- *Productos:*
 ${itemsText}
 
-💰 *Total:* ${formatCurrency(order.total)}
-💳 *Pago:* ${paymentLabels[order.paymentMethod] || 'Simulado'}
-${order.notes ? `📝 *Notas:* ${order.notes}` : ''}
+- *Total:* ${formatCurrency(order.total)}
+- *Pago:* ${paymentLabels[order.paymentMethod] || 'Simulado'}
+${order.notes ? `- *Notas:* ${order.notes}` : ''}
 
 _Pedido realizado desde la app web_`;
 
