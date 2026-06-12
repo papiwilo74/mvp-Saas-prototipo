@@ -14,5 +14,10 @@ const envSchema = z.object({
   EMAIL_FROM: z.string().default('FastFood SaaS <pedidos@example.com>')
 });
 
-export const env = envSchema.parse(process.env);
+const rawEnv = { ...process.env };
+if (rawEnv.NODE_ENV === '') {
+  delete rawEnv.NODE_ENV;
+}
+
+export const env = envSchema.parse(rawEnv);
 
