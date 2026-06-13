@@ -7,7 +7,8 @@ export const createOrderSchema = z.object({
     customer: z.object({
       name: z.string().min(2),
       phone: z.string().optional(),
-      email: z.string().email().optional()
+      email: z.string().email().optional(),
+      address: z.string().optional()
     }),
     notes: z.string().optional(),
     items: z.array(

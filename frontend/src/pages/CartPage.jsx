@@ -15,7 +15,8 @@ export function CartPage() {
   const [customer, setCustomer] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    phone: ''
+    phone: '',
+    address: ''
   });
   const [notes, setNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('CASH');
@@ -76,6 +77,10 @@ export function CartPage() {
           <label className="block space-y-1">
             <span className="label">Telefono</span>
             <input className="input" value={customer.phone} onChange={(event) => setCustomer({ ...customer, phone: event.target.value })} />
+          </label>
+          <label className="block space-y-1">
+            <span className="label">Direccion de entrega</span>
+            <input className="input" required value={customer.address} onChange={(event) => setCustomer({ ...customer, address: event.target.value })} />
           </label>
           <label className="block space-y-1">
             <span className="label">Notas</span>

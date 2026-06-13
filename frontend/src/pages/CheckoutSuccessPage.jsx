@@ -30,6 +30,7 @@ export function CheckoutSuccessPage() {
 
 - *Cliente:* ${order.customerName || ''}
 - *Teléfono:* ${order.customerPhone || ''}
+${order.customerAddress ? `- *Dirección:* ${order.customerAddress}` : ''}
 
 - *Productos:*
 ${itemsText}

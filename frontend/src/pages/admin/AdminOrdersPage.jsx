@@ -45,7 +45,11 @@ export function AdminOrdersPage() {
               {orders.map((order) => (
                 <tr key={order.id} className="border-t border-stone-200">
                   <td className="p-3 font-bold">#{order.orderNumber}</td>
-                  <td className="p-3">{order.customerName}</td>
+                  <td className="p-3">
+                    <p className="font-bold">{order.customerName}</p>
+                    {order.customerPhone && <p className="text-xs text-stone-500">{order.customerPhone}</p>}
+                    {order.customerAddress && <p className="text-xs text-stone-500 truncate max-w-[200px]">{order.customerAddress}</p>}
+                  </td>
                   <td className="p-3">{formatDate(order.createdAt)}</td>
                   <td className="p-3 font-bold">{formatCurrency(order.total)}</td>
                   <td className="p-3"><StatusBadge status={order.status} /></td>

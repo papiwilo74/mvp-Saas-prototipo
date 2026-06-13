@@ -39,6 +39,7 @@ export const createOrder = async ({ restaurantSlug = 'demo-burger', userId, cust
       customerName: customer.name,
       customerPhone: customer.phone,
       customerEmail: customer.email,
+      customerAddress: customer.address,
       notes,
       paymentMethod,
       total,

@@ -119,6 +119,7 @@ model Order {
   customerName String
   customerPhone String?
   customerEmail String?
+  customerAddress String?
   restaurantId String
   userId       String?
   createdAt    DateTime    @default(now())
