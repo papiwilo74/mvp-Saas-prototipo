@@ -56,6 +56,9 @@ model RestaurantConfig {
   email          String?
   facebookUrl    String?
   instagramUrl   String?
+  openingHours   String?
+  deliveryFee    Decimal?   @db.Decimal(10, 2)
+  paymentMethods String[]   @default([])
   restaurantId   String     @unique
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt

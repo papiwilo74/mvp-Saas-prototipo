@@ -13,7 +13,10 @@ export const updateRestaurantConfigSchema = z.object({
     address: z.string().optional(),
     email: z.string().email().optional().or(z.literal('')),
     facebookUrl: optionalUrl,
-    instagramUrl: optionalUrl
+    instagramUrl: optionalUrl,
+    openingHours: z.string().optional(),
+    deliveryFee: z.coerce.number().min(0).optional(),
+    paymentMethods: z.array(z.enum(['CASH', 'NEQUI', 'CARD'])).optional()
   })
 });
 

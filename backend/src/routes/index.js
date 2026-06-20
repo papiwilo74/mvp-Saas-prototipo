@@ -6,6 +6,7 @@ import { menuRouter } from './menu.routes.js';
 import { orderRouter } from './order.routes.js';
 import { productRouter } from './product.routes.js';
 import { restaurantConfigRouter } from './restaurantConfig.routes.js';
+import { reportRouter } from './report.routes.js';
 
 export const apiRouter = Router();
 
@@ -17,3 +18,4 @@ apiRouter.use('/customers', customerRouter);
 apiRouter.use('/products', productRouter);
 apiRouter.use('/orders', orderRouter);
 apiRouter.use('/restaurant-config', restaurantConfigRouter);
+apiRouter.use('/reports', reportRouter);

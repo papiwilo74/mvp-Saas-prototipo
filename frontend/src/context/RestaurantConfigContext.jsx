@@ -12,7 +12,10 @@ const fallbackConfig = {
   address: 'Calle Principal 123',
   email: 'hola@demoburger.com',
   facebookUrl: '',
-  instagramUrl: ''
+  instagramUrl: '',
+  openingHours: 'Lunes a domingo: 11:00 a.m. - 10:00 p.m.',
+  deliveryFee: 0,
+  paymentMethods: ['CASH', 'NEQUI', 'CARD']
 };
 
 const RestaurantConfigContext = createContext(null);

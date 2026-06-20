@@ -20,14 +20,17 @@ export function AppLayout() {
             {config.logoUrl ? <img src={config.logoUrl} alt="" className="h-9 w-9 rounded-md object-cover" /> : null}
             <span className="truncate text-base font-black">{config.restaurantName}</span>
           </Link>
-          <Link to="/cart" className="btn-primary relative min-h-10 px-3" aria-label="Carrito">
-            <ShoppingBag size={18} />
-            {count > 0 && (
-              <span className="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-stone-950 px-1 text-xs text-white">
-                {count}
-              </span>
-            )}
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link to="/login" className="btn-secondary min-h-10 px-3 text-sm">Admin</Link>
+            <Link to="/cart" className="btn-primary relative min-h-10 px-3" aria-label="Carrito">
+              <ShoppingBag size={18} />
+              {count > 0 && (
+                <span className="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-stone-950 px-1 text-xs text-white">
+                  {count}
+                </span>
+              )}
+            </Link>
+          </div>
         </div>
       </header>
 

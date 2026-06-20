@@ -3,6 +3,12 @@ import { useEffect, useState } from 'react';
 import { useRestaurantConfig } from '../../context/RestaurantConfigContext';
 import { api } from '../../services/api';
 
+const paymentOptions = [
+  ['CASH', 'Efectivo'],
+  ['NEQUI', 'Nequi'],
+  ['CARD', 'Tarjeta']
+];
+
 export function AdminSettingsPage() {
   const { config, setConfig } = useRestaurantConfig();
   const [form, setForm] = useState(config);
@@ -19,12 +25,16 @@ export function AdminSettingsPage() {
   };
 
   const update = (field, value) => setForm((current) => ({ ...current, [field]: value }));
+  const togglePayment = (value) => {
+    const current = form.paymentMethods || [];
+    update('paymentMethods', current.includes(value) ? current.filter((item) => item !== value) : [...current, value]);
+  };
 
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-3xl">
       <div className="mb-5">
         <h1 className="text-2xl font-black">Configuracion del restaurante</h1>
-        <p className="mt-1 text-sm text-stone-600">Cambia identidad, colores y datos de contacto para personalizar la demo.</p>
+        <p className="mt-1 text-sm text-stone-600">Cambia identidad, horarios, domicilio y pagos visibles para clientes.</p>
       </div>
 
       <div className="safe-panel grid gap-4 p-5 sm:grid-cols-2">
@@ -56,6 +66,31 @@ export function AdminSettingsPage() {
           <span className="label">Direccion</span>
           <input className="input" value={form.address || ''} onChange={(event) => update('address', event.target.value)} />
         </label>
+        <label className="block space-y-1 sm:col-span-2">
+          <span className="label">Horarios de atencion</span>
+          <input className="input" value={form.openingHours || ''} onChange={(event) => update('openingHours', event.target.value)} />
+        </label>
+        <label className="block space-y-1">
+          <span className="label">Costo de domicilio</span>
+          <input className="input" type="number" min="0" value={form.deliveryFee || 0} onChange={(event) => update('deliveryFee', Number(event.target.value))} />
+        </label>
+        <div className="space-y-2">
+          <span className="label">Metodos de pago visibles</span>
+          <div className="grid grid-cols-3 gap-2">
+            {paymentOptions.map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => togglePayment(value)}
+                className={`min-h-10 rounded-md border px-2 text-sm font-black ${
+                  form.paymentMethods?.includes(value) ? 'border-stone-950 bg-stone-950 text-white' : 'border-stone-300 bg-white text-stone-800'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
         <label className="block space-y-1">
           <span className="label">Email</span>
           <input className="input" type="email" value={form.email || ''} onChange={(event) => update('email', event.target.value)} />

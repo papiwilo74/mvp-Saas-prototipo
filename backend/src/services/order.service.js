@@ -4,7 +4,10 @@ import { sendOrderConfirmationEmail, sendOrderStatusEmail } from './email.servic
 import { findOrCreateCustomer } from './customer.service.js';
 
 export const createOrder = async ({ restaurantSlug = 'demo-burger', userId, customer, items, notes, paymentMethod }) => {
-  const restaurant = await prisma.restaurant.findUnique({ where: { slug: restaurantSlug } });
+  const restaurant = await prisma.restaurant.findUnique({
+    where: { slug: restaurantSlug },
+    include: { config: true }
+  });
 
   if (!restaurant) throw new ApiError(404, 'Restaurante no encontrado');
 
@@ -31,7 +34,8 @@ export const createOrder = async ({ restaurantSlug = 'demo-burger', userId, cust
     };
   });
 
-  const total = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
+  const deliveryFee = Number(restaurant.config?.deliveryFee || 0);
+  const total = orderItems.reduce((sum, item) => sum + item.subtotal, 0) + deliveryFee;
   const crmCustomer = await findOrCreateCustomer(restaurant.id, customer);
 
   const order = await prisma.order.create({
@@ -65,12 +69,26 @@ export const listMyOrders = (userId) =>
     orderBy: { createdAt: 'desc' }
   });
 
-export const listRestaurantOrders = (restaurantId) =>
-  prisma.order.findMany({
-    where: { restaurantId },
+export const listRestaurantOrders = (restaurantId, filters = {}) => {
+  const where = { restaurantId };
+
+  if (filters.status) where.status = filters.status;
+  if (filters.from || filters.to) {
+    where.createdAt = {};
+    if (filters.from) where.createdAt.gte = new Date(filters.from);
+    if (filters.to) {
+      const endDate = new Date(filters.to);
+      endDate.setHours(23, 59, 59, 999);
+      where.createdAt.lte = endDate;
+    }
+  }
+
+  return prisma.order.findMany({
+    where,
     include: { items: { include: { product: true } }, user: true },
     orderBy: { createdAt: 'desc' }
   });
+};
 
 export const updateOrderStatus = async (restaurantId, orderId, status) => {
   const order = await prisma.order.findFirst({ where: { id: orderId, restaurantId } });

@@ -20,6 +20,14 @@ export const createOrderSchema = z.object({
   })
 });
 
+export const listAdminOrdersSchema = z.object({
+  query: z.object({
+    status: z.enum(['PENDING', 'PREPARING', 'ON_THE_WAY', 'DELIVERED', 'CANCELLED']).optional(),
+    from: z.string().optional(),
+    to: z.string().optional()
+  }).optional()
+});
+
 export const updateOrderStatusSchema = z.object({
   params: z.object({ id: z.string().min(1) }),
   body: z.object({

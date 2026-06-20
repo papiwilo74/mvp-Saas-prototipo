@@ -1,40 +1,53 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '../../services/api';
 import { formatCurrency } from '../../utils/formatters';
 
+const cards = [
+  ['today', 'Ventas hoy'],
+  ['week', 'Ventas semana'],
+  ['month', 'Ventas mes']
+];
+
 export function AdminDashboardPage() {
-  const [orders, setOrders] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [summary, setSummary] = useState(null);
+  const [topProducts, setTopProducts] = useState([]);
 
   useEffect(() => {
-    Promise.all([api.get('/orders/admin'), api.get('/products')]).then(([ordersResponse, productsResponse]) => {
-      setOrders(ordersResponse.data.orders);
-      setProducts(productsResponse.data.products);
+    Promise.all([api.get('/reports/summary'), api.get('/reports/top-products')]).then(([summaryResponse, productsResponse]) => {
+      setSummary(summaryResponse.data.summary);
+      setTopProducts(productsResponse.data.products);
     });
   }, []);
-
-  const stats = useMemo(() => {
-    const revenue = orders.reduce((sum, order) => sum + Number(order.total), 0);
-    const pending = orders.filter((order) => !['DELIVERED', 'CANCELLED'].includes(order.status)).length;
-
-    return [
-      { label: 'Ventas', value: formatCurrency(revenue) },
-      { label: 'Pedidos activos', value: pending },
-      { label: 'Productos', value: products.length }
-    ];
-  }, [orders, products]);
 
   return (
     <div>
       <h1 className="text-2xl font-black">Dashboard</h1>
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
-        {stats.map((stat) => (
-          <div key={stat.label} className="rounded-md border border-stone-200 bg-white p-5 shadow-sm">
-            <p className="text-sm font-bold text-stone-600">{stat.label}</p>
-            <p className="mt-2 text-2xl font-black">{stat.value}</p>
+        {cards.map(([key, label]) => (
+          <div key={key} className="rounded-md border border-stone-200 bg-white p-5 shadow-sm">
+            <p className="text-sm font-bold text-stone-600">{label}</p>
+            <p className="mt-2 text-2xl font-black">{formatCurrency(summary?.[key]?.revenue || 0)}</p>
+            <p className="mt-1 text-xs font-bold text-stone-500">{summary?.[key]?.orders || 0} pedidos</p>
           </div>
         ))}
       </div>
+
+      <section className="mt-6 rounded-md border border-stone-200 bg-white p-5 shadow-sm">
+        <h2 className="text-lg font-black">Productos mas vendidos</h2>
+        <div className="mt-4 space-y-3">
+          {topProducts.map((product, index) => (
+            <div key={product.productId} className="grid grid-cols-[32px_1fr_auto] items-center gap-3 rounded-md bg-stone-50 p-3 text-sm">
+              <span className="grid h-8 w-8 place-items-center rounded-md bg-stone-950 font-black text-white">{index + 1}</span>
+              <div>
+                <p className="font-black">{product.name}</p>
+                <p className="text-xs text-stone-500">{product.quantity} unidades</p>
+              </div>
+              <p className="font-black">{formatCurrency(product.revenue)}</p>
+            </div>
+          ))}
+          {topProducts.length === 0 && <p className="text-sm text-stone-600">Todavia no hay ventas para mostrar.</p>}
+        </div>
+      </section>
     </div>
   );
 }

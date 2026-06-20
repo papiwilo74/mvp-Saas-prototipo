@@ -14,7 +14,7 @@ export const myOrders = async (req, res) => {
 };
 
 export const adminOrders = async (req, res) => {
-  const orders = await orderService.listRestaurantOrders(req.user.restaurantId);
+  const orders = await orderService.listRestaurantOrders(req.user.restaurantId, req.validated?.query || {});
   res.json({ orders });
 };
 
