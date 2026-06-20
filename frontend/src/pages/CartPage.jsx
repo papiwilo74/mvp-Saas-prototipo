@@ -13,11 +13,14 @@ export function CartPage() {
   const navigate = useNavigate();
   const { items, total, updateQuantity, clearCart } = useCart();
   const { config } = useRestaurantConfig();
-  const [customer, setCustomer] = useState({ name: '', email: '', phone: '', address: '' });
+  const [customer, setCustomer] = useState({ name: '', phone: '', address: '' });
   const [notes, setNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState(config.paymentMethods?.[0] || 'CASH');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  const paymentMethods = [['CASH', 'Efectivo'], ['NEQUI', 'Nequi'], ['CARD', 'Tarjeta']]
+    .filter(([value]) => (config.paymentMethods || ['CASH', 'NEQUI', 'CARD']).includes(value));
 
   const submitOrder = async (event) => {
     event.preventDefault();
@@ -81,10 +84,6 @@ export function CartPage() {
             <input className="input" required value={customer.name} onChange={(event) => setCustomer({ ...customer, name: event.target.value })} />
           </label>
           <label className="block space-y-1">
-            <span className="label">Correo opcional</span>
-            <input className="input" type="email" value={customer.email} onChange={(event) => setCustomer({ ...customer, email: event.target.value })} />
-          </label>
-          <label className="block space-y-1">
             <span className="label">Telefono / WhatsApp</span>
             <input className="input" required value={customer.phone} onChange={(event) => setCustomer({ ...customer, phone: event.target.value })} />
           </label>
@@ -99,7 +98,7 @@ export function CartPage() {
           <div>
             <p className="label mb-2">Metodo de pago</p>
             <div className="grid grid-cols-3 gap-2">
-              {[['CASH', 'Efectivo'], ['NEQUI', 'Nequi'], ['CARD', 'Tarjeta']].filter(([value]) => (config.paymentMethods || ['CASH', 'NEQUI', 'CARD']).includes(value)).map(([value, label]) => (
+              {paymentMethods.map(([value, label]) => (
                 <button
                   key={value}
                   type="button"
@@ -117,7 +116,13 @@ export function CartPage() {
           </div>
         </div>
         {error && <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">{error}</p>}
-        {Number(config.deliveryFee || 0) > 0 && <div className="mt-5 flex items-center justify-between border-t border-stone-200 pt-5 text-sm"><span className="font-bold text-stone-600">Domicilio</span><span className="font-black">{formatCurrency(config.deliveryFee)}</span></div>}\n        <div className="mt-3 flex items-center justify-between border-t border-stone-200 pt-5">
+        {Number(config.deliveryFee || 0) > 0 && (
+          <div className="mt-5 flex items-center justify-between border-t border-stone-200 pt-5 text-sm">
+            <span className="font-bold text-stone-600">Domicilio</span>
+            <span className="font-black">{formatCurrency(config.deliveryFee)}</span>
+          </div>
+        )}
+        <div className="mt-3 flex items-center justify-between border-t border-stone-200 pt-5">
           <span className="text-sm font-bold text-stone-600">Total</span>
           <span className="text-2xl font-black">{formatCurrency(total + Number(config.deliveryFee || 0))}</span>
         </div>
