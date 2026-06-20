@@ -2,55 +2,21 @@ import { CheckCircle2, MessageSquare } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useRestaurantConfig } from '../context/RestaurantConfigContext';
 import { formatCurrency } from '../utils/formatters';
-
-const paymentLabels = {
-  CASH: 'Efectivo',
-  NEQUI: 'Nequi',
-  CARD: 'Tarjeta'
-};
+import { buildWhatsAppOrderUrl, paymentLabels } from '../utils/whatsappOrder';
 
 export function CheckoutSuccessPage() {
   const { state } = useLocation();
   const order = state?.order;
   const { config } = useRestaurantConfig();
-
-  const whatsappNumber = config?.whatsapp || '';
-  const restaurantName = config?.restaurantName || 'Demo Burger';
-  const cleanPhone = whatsappNumber.replace(/\D/g, '');
-
-  let whatsappUrl = '';
-  if (order && cleanPhone) {
-    const itemsText = order.items
-      ? order.items
-          .map((item) => `• ${item.quantity}x ${item.product.name} → ${formatCurrency(item.subtotal)}`)
-          .join('\n')
-      : '';
-
-    const message = `*Nuevo Pedido #${order.orderNumber} - ${restaurantName}*
-
-- *Cliente:* ${order.customerName || ''}
-- *Teléfono:* ${order.customerPhone || ''}
-${order.customerAddress ? `- *Dirección:* ${order.customerAddress}` : ''}
-
-- *Productos:*
-${itemsText}
-
-- *Total:* ${formatCurrency(order.total)}
-- *Pago:* ${paymentLabels[order.paymentMethod] || 'Simulado'}
-${order.notes ? `- *Notas:* ${order.notes}` : ''}
-
-_Pedido realizado desde la app web_`;
-
-    whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-  }
+  const whatsappUrl = state?.whatsappUrl || buildWhatsAppOrderUrl({ order, config });
 
   return (
     <div className="container-page py-8">
       <div className="safe-panel p-6 text-center max-w-md mx-auto">
         <CheckCircle2 className="mx-auto text-emerald-600" size={54} />
-        <h1 className="mt-4 text-2xl font-black">Pedido confirmado</h1>
+        <h1 className="mt-4 text-2xl font-black">Pedido creado</h1>
         <p className="mx-auto mt-2 text-sm leading-6 text-stone-600">
-          Tu pedido quedó en estado Pendiente. Por favor, envía el detalle del pedido a nuestro WhatsApp para coordinar la entrega.
+          Guardamos tu pedido en la plataforma. Si WhatsApp no se abrio automaticamente, toca el boton para enviarlo al restaurante.
         </p>
         {order ? (
           <>
@@ -81,9 +47,8 @@ _Pedido realizado desde la app web_`;
             )}
           </>
         ) : null}
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <Link to="/orders" className="btn-secondary">Ver historial</Link>
-          <Link to="/menu" className="btn-primary">Seguir comprando</Link>
+        <div className="mt-6">
+          <Link to="/menu" className="btn-primary w-full">Seguir comprando</Link>
         </div>
       </div>
     </div>

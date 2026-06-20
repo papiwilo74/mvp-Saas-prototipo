@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export function LoginPage() {
@@ -23,7 +23,7 @@ export function LoginPage() {
   return (
     <div className="container-page flex justify-center py-10">
       <form onSubmit={onSubmit} className="w-full max-w-md rounded-md border border-stone-200 bg-white p-6 shadow-sm">
-        <h1 className="text-2xl font-black">Iniciar sesion</h1>
+        <h1 className="text-2xl font-black">Ingreso administrador</h1>
         <div className="mt-6 space-y-4">
           <label className="block space-y-1">
             <span className="label">Correo</span>
@@ -36,9 +36,6 @@ export function LoginPage() {
         </div>
         {error && <p className="mt-4 rounded-md bg-red-50 p-3 text-sm font-semibold text-red-700">{error}</p>}
         <button type="submit" className="btn-primary mt-6 w-full">Ingresar</button>
-        <p className="mt-4 text-center text-sm text-stone-600">
-          No tienes cuenta? <Link className="font-bold text-brand-700" to="/register">Registrate</Link>
-        </p>
       </form>
     </div>
   );

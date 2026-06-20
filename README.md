@@ -1,6 +1,6 @@
 # FastFood MVP Comercial
 
-MVP comercial mobile-first para demostrar una solucion de pedidos online a restaurantes de comida rapida. La prioridad es mostrar una experiencia profesional en celular y permitir personalizacion rapida por restaurante mediante configuracion.
+MVP comercial mobile-first para demostrar una solucion de pedidos online a restaurantes de comida rapida. La prioridad es mostrar una experiencia profesional en celular y permitir personalizacion rapida por restaurante mediante configuracion. El flujo publico no requiere cuenta de cliente: el pedido se guarda y se envia por WhatsApp al restaurante.
 
 ## Stack
 
@@ -51,11 +51,10 @@ cd frontend && npm run dev
 ## Credenciales seed
 
 - Admin: `admin@demo.com` / `Admin123!`
-- Cliente: `cliente@demo.com` / `Cliente123!`
 
 ## Pantallas MVP
 
-- Cliente: landing, login, registro, menu con busqueda/filtros, detalle de producto, carrito, confirmacion, historial y perfil.
+- Cliente: landing, menu con busqueda/filtros, detalle de producto, carrito, confirmacion y redireccion a WhatsApp sin crear cuenta.
 - Admin: dashboard, productos, pedidos y configuracion del restaurante.
 
 ## Personalizacion por restaurante
@@ -64,10 +63,23 @@ La entidad `RestaurantConfig` controla nombre, logo, colores, telefono, WhatsApp
 
 ## Pagos
 
-No hay pagos reales en esta etapa. El checkout simula pago por `Efectivo`, `Nequi` o `Tarjeta`, crea el pedido y lo deja en estado `Pendiente`.
+No hay pagos reales en esta etapa. El checkout registra metodo `Efectivo`, `Nequi` o `Tarjeta`, crea el pedido, lo deja en estado `Pendiente` y abre WhatsApp con el mensaje listo para el restaurante.
 
 ## Despliegue
 
 - Frontend en Vercel usando `frontend` como root directory.
 - Backend en Railway usando `backend` como root directory.
 - PostgreSQL en Supabase usando la cadena `DATABASE_URL`.
+
+## Correos y dominio
+
+Resend es opcional en el prototipo. Si no hay dominio/DNS verificado, el pedido no falla: WhatsApp y el panel admin son el canal principal. Cuando tengas dominio, configura `RESEND_API_KEY` y `EMAIL_FROM` con un remitente verificado para activar correos reales.
+
+
+## Acceso
+
+El registro publico de clientes esta deshabilitado. El cliente compra sin cuenta y el login queda para el administrador del restaurante.
+
+## Mini CRM
+
+Cada pedido crea o actualiza un cliente por restaurante. El administrador puede revisar clientes en /admin/customers, ver historial de pedidos, total comprado, datos de contacto, notas internas y abrir WhatsApp para seguimiento.

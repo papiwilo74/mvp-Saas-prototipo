@@ -11,6 +11,7 @@ export function LandingPage() {
   const { products, loading } = useMenu();
   const { addItem } = useCart();
   const featured = products.slice(0, 3);
+  const whatsappUrl = `https://wa.me/${config.whatsapp?.replace(/\D/g, '') || ''}`;
 
   return (
     <div>
@@ -23,17 +24,14 @@ export function LandingPage() {
             </div>
             <h1 className="mt-3 text-3xl font-black tracking-normal sm:text-5xl">{config.restaurantName}</h1>
             <p className="mt-3 max-w-xl text-sm leading-6 text-stone-600 sm:text-base">
-              Una experiencia moderna para ordenar comida rapida sin friccion: menu visual, carrito simple y seguimiento del pedido.
+              Una experiencia moderna para ordenar comida rapida sin friccion: menu visual, carrito simple y pedido directo por WhatsApp.
             </p>
             <div className="mt-5 flex flex-col gap-3 sm:flex-row">
               <Link to="/menu" className="btn-primary flex-1 sm:flex-none">
                 Ordenar ahora
                 <ArrowRight size={18} />
               </Link>
-              <Link to="/register" className="btn-secondary flex-1 sm:flex-none">
-                Crear cuenta
-              </Link>
-              <a className="btn-secondary flex-1 sm:flex-none" href={`https://wa.me/${config.whatsapp?.replace(/\D/g, '') || ''}`}>
+              <a className="btn-secondary flex-1 sm:flex-none" href={whatsappUrl}>
                 WhatsApp
               </a>
             </div>

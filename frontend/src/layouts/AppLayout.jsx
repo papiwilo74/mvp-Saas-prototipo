@@ -1,13 +1,11 @@
-import { Home, ReceiptText, ShoppingBag, UserRound } from 'lucide-react';
+import { Home, ShoppingBag } from 'lucide-react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useRestaurantConfig } from '../context/RestaurantConfigContext';
 
 const navItems = [
   { to: '/', label: 'Inicio', icon: Home, end: true },
-  { to: '/menu', label: 'Menu', icon: ShoppingBag },
-  { to: '/orders', label: 'Pedidos', icon: ReceiptText },
-  { to: '/profile', label: 'Perfil', icon: UserRound }
+  { to: '/menu', label: 'Menu', icon: ShoppingBag }
 ];
 
 export function AppLayout() {
@@ -38,7 +36,7 @@ export function AppLayout() {
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-stone-200 bg-white md:hidden">
-        <div className="grid h-16 grid-cols-4">
+        <div className="grid h-16 grid-cols-2">
           {navItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
@@ -59,4 +57,3 @@ export function AppLayout() {
     </div>
   );
 }
-

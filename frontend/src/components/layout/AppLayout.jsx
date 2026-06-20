@@ -1,4 +1,4 @@
-import { ShoppingCart, UserRound } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
@@ -18,9 +18,6 @@ export function AppLayout() {
             <NavLink to="/" className="rounded-md px-3 py-2 hover:bg-stone-100">
               Menu
             </NavLink>
-            <NavLink to="/orders" className="hidden rounded-md px-3 py-2 hover:bg-stone-100 sm:inline-flex">
-              Pedidos
-            </NavLink>
             {isAdmin && (
               <NavLink to="/admin" className="rounded-md px-3 py-2 hover:bg-stone-100">
                 Admin
@@ -36,12 +33,11 @@ export function AppLayout() {
             </Link>
             {user ? (
               <button type="button" onClick={logout} className="btn-secondary hidden sm:inline-flex">
-                <UserRound size={18} />
                 Salir
               </button>
             ) : (
               <Link to="/login" className="btn-primary">
-                Ingresar
+                Admin
               </Link>
             )}
           </nav>
@@ -53,4 +49,3 @@ export function AppLayout() {
     </div>
   );
 }
-

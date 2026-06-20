@@ -1,6 +1,7 @@
 import { prisma } from '../config/prisma.js';
 import { ApiError } from '../utils/apiError.js';
 import { sendOrderConfirmationEmail, sendOrderStatusEmail } from './email.service.js';
+import { findOrCreateCustomer } from './customer.service.js';
 
 export const createOrder = async ({ restaurantSlug = 'demo-burger', userId, customer, items, notes, paymentMethod }) => {
   const restaurant = await prisma.restaurant.findUnique({ where: { slug: restaurantSlug } });
@@ -31,11 +32,13 @@ export const createOrder = async ({ restaurantSlug = 'demo-burger', userId, cust
   });
 
   const total = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
+  const crmCustomer = await findOrCreateCustomer(restaurant.id, customer);
 
   const order = await prisma.order.create({
     data: {
       restaurantId: restaurant.id,
       userId,
+      customerId: crmCustomer.id,
       customerName: customer.name,
       customerPhone: customer.phone,
       customerEmail: customer.email,

@@ -41,6 +41,7 @@ model Restaurant {
   categories Category[]
   products  Product[]
   orders    Order[]
+  customers Customer[]
 }
 
 model RestaurantConfig {
@@ -109,6 +110,24 @@ model Product {
   @@unique([restaurantId, name])
 }
 
+model Customer {
+  id           String     @id @default(cuid())
+  name         String
+  phone        String?
+  email        String?
+  address      String?
+  notes        String?
+  restaurantId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  orders       Order[]
+
+  @@unique([restaurantId, phone])
+  @@index([restaurantId])
+  @@index([restaurantId, email])
+}
+
 model Order {
   id           String      @id @default(cuid())
   orderNumber  Int         @unique @default(autoincrement())
@@ -122,14 +141,17 @@ model Order {
   customerAddress String?
   restaurantId String
   userId       String?
+  customerId   String?
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
   restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   user         User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customer     Customer?   @relation(fields: [customerId], references: [id], onDelete: SetNull)
   items        OrderItem[]
 
   @@index([restaurantId])
   @@index([userId])
+  @@index([customerId])
 }
 
 model OrderItem {

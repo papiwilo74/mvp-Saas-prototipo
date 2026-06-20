@@ -26,12 +26,6 @@ export function AuthProvider({ children }) {
     return data.user;
   };
 
-  const register = async (payload) => {
-    const { data } = await api.post('/auth/register', payload);
-    localStorage.setItem('ff_token', data.token);
-    setUser(data.user);
-    return data.user;
-  };
 
   const logout = () => {
     localStorage.removeItem('ff_token');
@@ -39,7 +33,7 @@ export function AuthProvider({ children }) {
   };
 
   const value = useMemo(
-    () => ({ user, loading, isAdmin: user?.role === 'ADMIN', login, register, logout }),
+    () => ({ user, loading, isAdmin: user?.role === 'ADMIN', login, logout }),
     [user, loading]
   );
 

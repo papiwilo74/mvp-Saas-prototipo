@@ -1,10 +1,11 @@
-import { LayoutDashboard, Package, ReceiptText, Settings } from 'lucide-react';
+import { LayoutDashboard, Package, ReceiptText, Settings, UsersRound } from 'lucide-react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 
 const links = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/admin/products', label: 'Productos', icon: Package },
   { to: '/admin/orders', label: 'Pedidos', icon: ReceiptText },
+  { to: '/admin/customers', label: 'Clientes', icon: UsersRound },
   { to: '/admin/settings', label: 'Config', icon: Settings }
 ];
 
