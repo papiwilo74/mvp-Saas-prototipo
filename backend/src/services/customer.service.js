@@ -46,7 +46,11 @@ export const findOrCreateCustomer = async (restaurantId, customer) => {
   });
 };
 
-export const listCustomers = async (restaurantId, search = '') => {
+export const listCustomers = async (restaurantId, filters = {}) => {
+  const search = filters.search || '';
+  const page = filters.page || 1;
+  const pageSize = filters.pageSize || 20;
+  const skip = (page - 1) * pageSize;
   const where = {
     restaurantId,
     ...(search
@@ -60,18 +64,23 @@ export const listCustomers = async (restaurantId, search = '') => {
       : {})
   };
 
-  const customers = await prisma.customer.findMany({
-    where,
-    include: {
-      orders: {
-        orderBy: { createdAt: 'desc' },
-        take: 1,
-        select: { id: true, orderNumber: true, total: true, status: true, createdAt: true }
+  const [customers, total] = await Promise.all([
+    prisma.customer.findMany({
+      where,
+      include: {
+        orders: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: { id: true, orderNumber: true, total: true, status: true, createdAt: true }
+        },
+        _count: { select: { orders: true } }
       },
-      _count: { select: { orders: true } }
-    },
-    orderBy: { updatedAt: 'desc' }
-  });
+      orderBy: { updatedAt: 'desc' },
+      skip,
+      take: pageSize
+    }),
+    prisma.customer.count({ where })
+  ]);
 
   const totals = await prisma.order.groupBy({
     by: ['customerId'],
@@ -84,12 +93,20 @@ export const listCustomers = async (restaurantId, search = '') => {
 
   const totalByCustomer = new Map(totals.map((row) => [row.customerId, row._sum.total || 0]));
 
-  return customers.map((customer) => ({
-    ...customer,
-    totalSpent: totalByCustomer.get(customer.id) || 0,
-    lastOrder: customer.orders[0] || null,
-    orders: undefined
-  }));
+  return {
+    customers: customers.map((customer) => ({
+      ...customer,
+      totalSpent: totalByCustomer.get(customer.id) || 0,
+      lastOrder: customer.orders[0] || null,
+      orders: undefined
+    })),
+    pagination: {
+      page,
+      pageSize,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / pageSize))
+    }
+  };
 };
 
 export const getCustomer = async (restaurantId, customerId) => {

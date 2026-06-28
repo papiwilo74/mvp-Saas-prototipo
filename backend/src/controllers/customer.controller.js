@@ -1,8 +1,8 @@
 import * as customerService from '../services/customer.service.js';
 
 export const list = async (req, res) => {
-  const customers = await customerService.listCustomers(req.user.restaurantId, req.validated?.query?.search);
-  res.json({ customers });
+  const result = await customerService.listCustomers(req.user.restaurantId, req.validated?.query || {});
+  res.json(result);
 };
 
 export const detail = async (req, res) => {

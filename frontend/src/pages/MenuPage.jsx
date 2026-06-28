@@ -9,7 +9,7 @@ export function MenuPage() {
   const [query, setQuery] = useState('');
   const [onlyAvailable, setOnlyAvailable] = useState(true);
   const { addItem } = useCart();
-  const { categories, products, loading } = useMenu();
+  const { categories, products, loading, error } = useMenu();
 
   const filteredProducts = useMemo(
     () =>
@@ -27,14 +27,19 @@ export function MenuPage() {
     return <div className="container-page py-10 text-sm text-stone-600">Cargando menu...</div>;
   }
 
+  if (error) {
+    return <div className="container-page py-10 text-sm font-semibold text-red-700">{error}</div>;
+  }
+
   return (
     <section className="container-page py-5 md:py-8">
       <div className="mb-5">
-        <h1 className="text-2xl font-black">Menu</h1>
-        <p className="mt-1 text-sm text-stone-600">Elige tus favoritos y arma el pedido en segundos.</p>
+        <span className="badge-chip">Catálogo visual</span>
+        <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Menú listo para convertir</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">Elige tus favoritos, filtra por categorías y arma el pedido en segundos con una presentación más premium.</p>
       </div>
 
-      <div className="sticky top-16 z-20 -mx-4 border-y border-stone-200 bg-stone-50 px-4 py-3 sm:mx-0 sm:rounded-md sm:border">
+      <div className="glass-panel sticky top-20 z-20 -mx-4 px-4 py-4 sm:mx-0 sm:px-5">
         <label className="relative block">
           <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
           <input
@@ -48,7 +53,7 @@ export function MenuPage() {
           <button
             type="button"
             onClick={() => setActiveCategory('all')}
-            className={`min-h-10 shrink-0 rounded-md px-4 text-sm font-bold ${
+            className={`min-h-10 shrink-0 rounded-full px-4 text-sm font-bold ${
               activeCategory === 'all' ? 'bg-stone-950 text-white' : 'border border-stone-300 bg-white text-stone-800'
             }`}
           >
@@ -59,7 +64,7 @@ export function MenuPage() {
               key={category.id}
               type="button"
               onClick={() => setActiveCategory(category.id)}
-              className={`min-h-10 shrink-0 whitespace-nowrap rounded-md px-4 text-sm font-bold ${
+              className={`min-h-10 shrink-0 whitespace-nowrap rounded-full px-4 text-sm font-bold ${
                 activeCategory === category.id
                   ? 'bg-stone-950 text-white'
                   : 'border border-stone-300 bg-white text-stone-800'
@@ -71,7 +76,7 @@ export function MenuPage() {
           <button
             type="button"
             onClick={() => setOnlyAvailable((value) => !value)}
-            className={`inline-flex min-h-10 shrink-0 items-center gap-2 rounded-md px-4 text-sm font-bold ${
+            className={`inline-flex min-h-10 shrink-0 items-center gap-2 rounded-full px-4 text-sm font-bold ${
               onlyAvailable ? 'bg-green-100 text-green-800' : 'border border-stone-300 bg-white text-stone-800'
             }`}
           >
@@ -86,6 +91,9 @@ export function MenuPage() {
           <ProductCard key={product.id} product={product} onAdd={addItem} />
         ))}
       </div>
+      {!filteredProducts.length ? (
+        <div className="safe-panel mt-5 p-5 text-sm text-stone-600">No encontramos productos con esos filtros.</div>
+      ) : null}
     </section>
   );
 }

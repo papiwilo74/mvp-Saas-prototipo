@@ -13,9 +13,17 @@ export const getPublicConfig = async (restaurantSlug = 'demo-burger') =>
 export const updateConfig = async (restaurantId, data) =>
   prisma.restaurantConfig.upsert({
     where: { restaurantId },
-    update: data,
+    update: {
+      ...data,
+      deliveryZones: data.deliveryZones || [],
+      coupons: data.coupons || [],
+      businessHours: data.businessHours || null
+    },
     create: {
       ...data,
+      deliveryZones: data.deliveryZones || [],
+      coupons: data.coupons || [],
+      businessHours: data.businessHours || null,
       restaurantId
     }
   });

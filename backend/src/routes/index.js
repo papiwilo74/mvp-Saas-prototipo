@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { prisma } from '../config/prisma.js';
 import { authRouter } from './auth.routes.js';
 import { categoryRouter } from './category.routes.js';
 import { customerRouter } from './customer.routes.js';
@@ -10,7 +11,15 @@ import { reportRouter } from './report.routes.js';
 
 export const apiRouter = Router();
 
-apiRouter.get('/health', (_req, res) => res.json({ status: 'ok' }));
+apiRouter.get('/health', async (_req, res) => {
+  let database = 'ok';
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+  } catch {
+    database = 'error';
+  }
+  res.status(database === 'ok' ? 200 : 503).json({ status: database === 'ok' ? 'ok' : 'degraded', database });
+});
 apiRouter.use('/auth', authRouter);
 apiRouter.use('/menu', menuRouter);
 apiRouter.use('/categories', categoryRouter);

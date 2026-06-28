@@ -1,5 +1,6 @@
 import { MessageSquare, Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { Pagination } from '../../components/ui/Pagination';
 import { api } from '../../services/api';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 
@@ -12,21 +13,23 @@ export function AdminCustomersPage() {
   const [search, setSearch] = useState('');
   const [notes, setNotes] = useState('');
   const [savingNotes, setSavingNotes] = useState(false);
+  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, pageSize: 20 });
 
   const selectedCustomer = useMemo(
     () => selected || customers.find((customer) => customer.id === selectedId),
     [customers, selected, selectedId]
   );
 
-  const loadCustomers = () => {
-    api.get('/customers', { params: { search } }).then(({ data }) => {
+  const loadCustomers = (page = pagination.page) => {
+    api.get('/customers', { params: { search, page, pageSize: pagination.pageSize } }).then(({ data }) => {
       setCustomers(data.customers);
+      setPagination(data.pagination);
       if (!selectedId && data.customers[0]) setSelectedId(data.customers[0].id);
     });
   };
 
   useEffect(() => {
-    loadCustomers();
+    loadCustomers(1);
   }, []);
 
   useEffect(() => {
@@ -42,7 +45,7 @@ export function AdminCustomersPage() {
     event.preventDefault();
     setSelected(null);
     setSelectedId(null);
-    loadCustomers();
+    loadCustomers(1);
   };
 
   const saveNotes = async () => {
@@ -111,6 +114,9 @@ export function AdminCustomersPage() {
             </table>
           </div>
         </section>
+        <div className="lg:col-span-2">
+          <Pagination page={pagination.page} totalPages={pagination.totalPages} onChange={loadCustomers} />
+        </div>
 
         <aside className="h-fit rounded-md border border-stone-200 bg-white p-5">
           {selectedCustomer ? (

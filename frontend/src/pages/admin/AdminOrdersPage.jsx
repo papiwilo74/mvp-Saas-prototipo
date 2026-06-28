@@ -1,5 +1,6 @@
 import { Bell, MessageSquare } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Pagination } from '../../components/ui/Pagination';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { api } from '../../services/api';
 import { formatCurrency, formatDate } from '../../utils/formatters';
@@ -43,12 +44,13 @@ const playNotification = () => {
 export function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
   const [filters, setFilters] = useState({ status: '', from: '', to: '' });
+  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, pageSize: 20 });
   const [soundEnabled, setSoundEnabled] = useState(false);
   const seenOrders = useRef(new Set());
   const initialized = useRef(false);
 
-  const loadOrders = useCallback(() => {
-    const params = Object.fromEntries(Object.entries(filters).filter(([, value]) => value));
+  const loadOrders = useCallback((page = pagination.page) => {
+    const params = { ...Object.fromEntries(Object.entries(filters).filter(([, value]) => value)), page, pageSize: pagination.pageSize };
 
     return api.get('/orders/admin', { params }).then(({ data }) => {
       const incomingIds = data.orders.map((order) => order.id);
@@ -59,18 +61,19 @@ export function AdminOrdersPage() {
       seenOrders.current = new Set(incomingIds);
       initialized.current = true;
       setOrders(data.orders);
+      setPagination(data.pagination);
     });
-  }, [filters, soundEnabled]);
+  }, [filters, pagination.page, pagination.pageSize, soundEnabled]);
 
   useEffect(() => {
-    loadOrders();
+    loadOrders(1);
     const interval = setInterval(loadOrders, 15000);
     return () => clearInterval(interval);
   }, [loadOrders]);
 
   const updateStatus = async (orderId, status) => {
     await api.patch(`/orders/${orderId}/status`, { status });
-    loadOrders();
+    loadOrders(pagination.page);
   };
 
   const updateFilter = (field, value) => setFilters((current) => ({ ...current, [field]: value }));
@@ -171,6 +174,7 @@ export function AdminOrdersPage() {
           </table>
         </div>
       </div>
+      <Pagination page={pagination.page} totalPages={pagination.totalPages} onChange={loadOrders} />
     </div>
   );
 }

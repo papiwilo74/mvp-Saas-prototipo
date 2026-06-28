@@ -30,6 +30,28 @@ async function main() {
       email: 'hola@demoburger.com',
       facebookUrl: 'https://facebook.com',
       instagramUrl: 'https://instagram.com',
+      openingHours: 'Lunes a domingo: 11:00 a.m. - 10:00 p.m.',
+      businessHours: {
+        monday: ['11:00', '22:00'],
+        tuesday: ['11:00', '22:00'],
+        wednesday: ['11:00', '22:00'],
+        thursday: ['11:00', '22:00'],
+        friday: ['11:00', '23:00'],
+        saturday: ['11:00', '23:00'],
+        sunday: ['11:00', '22:00']
+      },
+      acceptsScheduledOrders: true,
+      leadTimeMinutes: 30,
+      deliveryFee: 5000,
+      deliveryZones: [
+        { id: 'zona-centro', name: 'Centro', fee: 3000, minOrder: 20000, estimatedMinutes: 25, isActive: true },
+        { id: 'zona-norte', name: 'Norte', fee: 5000, minOrder: 25000, estimatedMinutes: 35, isActive: true }
+      ],
+      coupons: [
+        { id: 'cup-bienvenida', code: 'BIENVENIDA10', description: '10% de descuento', discountType: 'PERCENTAGE', discountValue: 10, minimumOrder: 25000, isActive: true },
+        { id: 'cup-domicilio', code: 'DOMI5000', description: 'Descuento fijo', discountType: 'FIXED', discountValue: 5000, minimumOrder: 30000, isActive: true }
+      ],
+      paymentMethods: ['CASH', 'NEQUI', 'CARD'],
       restaurantId: restaurant.id
     }
   });
@@ -58,6 +80,8 @@ async function main() {
       description: 'Carne artesanal, queso cheddar, lechuga, tomate y salsa de la casa.',
       price: 24900,
       imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd',
+      trackStock: true,
+      stock: 40,
       restaurantId: restaurant.id,
       categoryId: burgers.id
     },
@@ -66,6 +90,8 @@ async function main() {
       description: 'Doble carne, bacon crocante, cebolla caramelizada y BBQ.',
       price: 32900,
       imageUrl: 'https://images.unsplash.com/photo-1550547660-d9450f859349',
+      trackStock: true,
+      stock: 25,
       restaurantId: restaurant.id,
       categoryId: burgers.id
     },
@@ -74,6 +100,8 @@ async function main() {
       description: 'Papas rusticas con paprika y salsa ranch.',
       price: 11900,
       imageUrl: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877',
+      trackStock: true,
+      stock: 60,
       restaurantId: restaurant.id,
       categoryId: sides.id
     },
@@ -82,8 +110,20 @@ async function main() {
       description: 'Limonada fresca preparada al momento.',
       price: 7900,
       imageUrl: 'https://images.unsplash.com/photo-1621263764928-df1444c5e859',
+      trackStock: true,
+      stock: 50,
       restaurantId: restaurant.id,
       categoryId: drinks.id
+    },
+    {
+      name: 'Combo Burger Duo',
+      description: 'Dos hamburguesas clasicas, una porcion de papas y dos bebidas.',
+      price: 55900,
+      imageUrl: 'https://images.unsplash.com/photo-1550547660-d9450f859349',
+      isCombo: true,
+      comboItems: ['Classic Burger', 'Classic Burger', 'Papas Crunch', 'Limonada Natural'],
+      restaurantId: restaurant.id,
+      categoryId: burgers.id
     }
   ];
 

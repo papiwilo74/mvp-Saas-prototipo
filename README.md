@@ -18,34 +18,64 @@ backend/    API REST, Prisma, autenticacion, pedidos, configuracion y correos
 
 ## Inicio rapido
 
-1. Configura variables de entorno:
+1. Configura variables de entorno para local:
 
-```bash
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
+```powershell
+Copy-Item backend/.env.example backend/.env
+Copy-Item frontend/.env.example frontend/.env
 ```
 
-2. Instala dependencias:
+2. Ajusta el backend local para que apunte a localhost:
 
-```bash
-cd backend && npm install
-cd ../frontend && npm install
+```env
+FRONTEND_URL="http://localhost:5173"
+ALLOWED_ORIGINS="http://localhost:5173"
+DATABASE_URL="postgresql://postgres:password@localhost:5432/fastfood_saas?schema=public"
 ```
 
-3. Inicializa Prisma:
+3. Instala dependencias:
 
-```bash
+```powershell
+cd backend; npm install
+cd ../frontend; npm install
+```
+
+4. Inicializa Prisma:
+
+```powershell
 cd backend
 npm run prisma:generate
 npm run prisma:migrate
 npm run prisma:seed
 ```
 
-4. Ejecuta en desarrollo:
+5. Ejecuta en desarrollo:
 
-```bash
-cd backend && npm run dev
-cd frontend && npm run dev
+```powershell
+cd backend; npm run dev
+cd ../frontend; npm run dev
+```
+
+## Variables de produccion
+
+Cuando lo subas a GitHub y luego despliegues:
+
+```env
+# backend/.env
+NODE_ENV=production
+PORT=4000
+DATABASE_URL="postgresql://postgres:TU_PASSWORD@TU_POOLER_HOST:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres:TU_PASSWORD@db.TU_REF.supabase.co:5432/postgres?sslmode=require"
+JWT_SECRET="un-secreto-largo-y-seguro"
+FRONTEND_URL="https://tu-frontend.vercel.app"
+ALLOWED_ORIGINS="https://tu-frontend.vercel.app"
+RESEND_API_KEY="re_xxxxxxxxx"
+EMAIL_FROM="FastFood SaaS <pedidos@tu-dominio.com>"
+
+# frontend/.env
+VITE_API_URL="https://tu-backend.up.railway.app/api"
+VITE_RESTAURANT_SLUG="demo-burger"
+VITE_ENABLE_ORDER_HISTORY="true"
 ```
 
 ## Credenciales seed
@@ -83,3 +113,20 @@ El registro publico de clientes esta deshabilitado. El cliente compra sin cuenta
 ## Mini CRM
 
 Cada pedido crea o actualiza un cliente por restaurante. El administrador puede revisar clientes en /admin/customers, ver historial de pedidos, total comprado, datos de contacto, notas internas y abrir WhatsApp para seguimiento.
+
+## Mejoras recientes
+
+- Paginacion en productos, pedidos y clientes del panel admin
+- Cache del menu publico en frontend
+- Rate limiting en login y endpoints publicos
+- Health check con verificacion de base de datos
+- Rutas activas para `/orders` y `/profile`
+- Demo publica con mejor presentacion visual para ventas
+- Cards de producto mas premium
+- Landing mas enfocada en valor comercial
+- Menu publico con filtros y aspecto mas vendible
+
+## Documentacion extra
+
+- `docs/MEJORAS.md`
+- `docs/ARQUITECTURA_EXPLICADA.md`

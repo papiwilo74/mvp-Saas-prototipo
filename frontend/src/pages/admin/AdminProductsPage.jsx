@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
+import { Pagination } from '../../components/ui/Pagination';
 import { api } from '../../services/api';
 import { formatCurrency } from '../../utils/formatters';
 
@@ -9,7 +10,11 @@ const emptyForm = {
   price: '',
   imageUrl: '',
   categoryId: '',
-  isAvailable: true
+  isAvailable: true,
+  trackStock: false,
+  stock: '',
+  isCombo: false,
+  comboItems: ''
 };
 
 export function AdminProductsPage() {
@@ -17,21 +22,29 @@ export function AdminProductsPage() {
   const [categories, setCategories] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
+  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, pageSize: 20 });
+  const [uploading, setUploading] = useState(false);
 
-  const load = () =>
-    Promise.all([api.get('/products'), api.get('/categories')]).then(([productsResponse, categoriesResponse]) => {
+  const load = (page = pagination.page) =>
+    Promise.all([api.get('/products', { params: { page, pageSize: pagination.pageSize } }), api.get('/categories')]).then(([productsResponse, categoriesResponse]) => {
       setProducts(productsResponse.data.products);
+      setPagination(productsResponse.data.pagination);
       setCategories(categoriesResponse.data.categories);
       setForm((current) => ({ ...current, categoryId: current.categoryId || categoriesResponse.data.categories[0]?.id || '' }));
     });
 
   useEffect(() => {
-    load();
+    load(1);
   }, []);
 
   const onSubmit = async (event) => {
     event.preventDefault();
-    const payload = { ...form, price: Number(form.price) };
+    const payload = {
+      ...form,
+      price: Number(form.price),
+      stock: form.trackStock ? Number(form.stock || 0) : null,
+      comboItems: form.isCombo ? form.comboItems.split(',').map((item) => item.trim()).filter(Boolean) : []
+    };
 
     if (editingId) {
       await api.put(`/products/${editingId}`, payload);
@@ -41,7 +54,22 @@ export function AdminProductsPage() {
 
     setEditingId(null);
     setForm({ ...emptyForm, categoryId: categories[0]?.id || '' });
-    load();
+    load(pagination.page);
+  };
+
+  const uploadImage = async (file) => {
+    if (!file) return;
+    const body = new FormData();
+    body.append('image', file);
+    setUploading(true);
+    try {
+      const { data } = await api.post('/products/upload-image', body, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setForm((current) => ({ ...current, imageUrl: data.imageUrl }));
+    } finally {
+      setUploading(false);
+    }
   };
 
   const editProduct = (product) => {
@@ -52,13 +80,17 @@ export function AdminProductsPage() {
       price: Number(product.price),
       imageUrl: product.imageUrl || '',
       categoryId: product.categoryId,
-      isAvailable: product.isAvailable
+      isAvailable: product.isAvailable,
+      trackStock: product.trackStock,
+      stock: product.stock ?? '',
+      isCombo: product.isCombo,
+      comboItems: (product.comboItems || []).join(', ')
     });
   };
 
   const deleteProduct = async (productId) => {
     await api.delete(`/products/${productId}`);
-    load();
+    load(pagination.page);
   };
 
   return (
@@ -83,6 +115,11 @@ export function AdminProductsPage() {
             <input className="input" value={form.imageUrl} onChange={(event) => setForm({ ...form, imageUrl: event.target.value })} />
           </label>
           <label className="block space-y-1">
+            <span className="label">Subir imagen</span>
+            <input className="input" type="file" accept="image/*" onChange={(event) => uploadImage(event.target.files?.[0])} />
+            {uploading ? <p className="text-xs text-stone-500">Subiendo...</p> : null}
+          </label>
+          <label className="block space-y-1">
             <span className="label">Categoria</span>
             <select className="input" value={form.categoryId} onChange={(event) => setForm({ ...form, categoryId: event.target.value })}>
               {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
@@ -92,6 +129,26 @@ export function AdminProductsPage() {
             <input type="checkbox" checked={form.isAvailable} onChange={(event) => setForm({ ...form, isAvailable: event.target.checked })} />
             Disponible
           </label>
+          <label className="flex items-center gap-3 text-sm font-semibold">
+            <input type="checkbox" checked={form.trackStock} onChange={(event) => setForm({ ...form, trackStock: event.target.checked })} />
+            Controlar inventario
+          </label>
+          {form.trackStock ? (
+            <label className="block space-y-1">
+              <span className="label">Stock</span>
+              <input className="input" type="number" min="0" value={form.stock} onChange={(event) => setForm({ ...form, stock: event.target.value })} />
+            </label>
+          ) : null}
+          <label className="flex items-center gap-3 text-sm font-semibold">
+            <input type="checkbox" checked={form.isCombo} onChange={(event) => setForm({ ...form, isCombo: event.target.checked })} />
+            Es combo
+          </label>
+          {form.isCombo ? (
+            <label className="block space-y-1">
+              <span className="label">Items del combo</span>
+              <input className="input" value={form.comboItems} onChange={(event) => setForm({ ...form, comboItems: event.target.value })} placeholder="Classic Burger, Papas Crunch, Limonada Natural" />
+            </label>
+          ) : null}
         </div>
         <button type="submit" className="btn-primary mt-5 w-full">{editingId ? 'Guardar cambios' : 'Crear producto'}</button>
       </form>
@@ -105,6 +162,8 @@ export function AdminProductsPage() {
               <div className="min-w-0 flex-1">
                 <h3 className="font-black">{product.name}</h3>
                 <p className="text-sm text-stone-600">{product.category?.name}</p>
+                {product.isCombo ? <p className="text-xs font-bold text-purple-700">Combo</p> : null}
+                {product.trackStock ? <p className="text-xs text-stone-500">Stock: {product.stock ?? 0}</p> : null}
                 <p className="mt-1 font-bold">{formatCurrency(product.price)}</p>
               </div>
               <div className="flex gap-2">
@@ -119,6 +178,9 @@ export function AdminProductsPage() {
           ))}
         </div>
       </section>
+      <div className="lg:col-span-2">
+        <Pagination page={pagination.page} totalPages={pagination.totalPages} onChange={load} />
+      </div>
     </div>
   );
 }

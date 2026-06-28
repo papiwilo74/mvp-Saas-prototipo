@@ -14,7 +14,12 @@ const fallbackConfig = {
   facebookUrl: '',
   instagramUrl: '',
   openingHours: 'Lunes a domingo: 11:00 a.m. - 10:00 p.m.',
+  businessHours: null,
+  acceptsScheduledOrders: false,
+  leadTimeMinutes: 30,
   deliveryFee: 0,
+  deliveryZones: [],
+  coupons: [],
   paymentMethods: ['CASH', 'NEQUI', 'CARD']
 };
 

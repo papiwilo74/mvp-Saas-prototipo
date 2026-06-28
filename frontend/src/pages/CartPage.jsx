@@ -1,3 +1,4 @@
+import { Clock3, MapPinned, ShieldCheck, Ticket } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CartItem } from '../components/cart/CartItem';
@@ -6,21 +7,36 @@ import { env } from '../config/env';
 import { useCart } from '../context/CartContext';
 import { useRestaurantConfig } from '../context/RestaurantConfigContext';
 import { api } from '../services/api';
-import { formatCurrency } from '../utils/formatters';
+import { formatCurrency, formatDate } from '../utils/formatters';
 import { buildWhatsAppOrderUrl } from '../utils/whatsappOrder';
 
 export function CartPage() {
   const navigate = useNavigate();
   const { items, total, updateQuantity, clearCart } = useCart();
   const { config } = useRestaurantConfig();
-  const [customer, setCustomer] = useState({ name: '', phone: '', address: '' });
+  const [customer, setCustomer] = useState({ name: '', phone: '', address: '', email: '' });
   const [notes, setNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState(config.paymentMethods?.[0] || 'CASH');
+  const [couponCode, setCouponCode] = useState('');
+  const [deliveryZoneName, setDeliveryZoneName] = useState(config.deliveryZones?.[0]?.name || '');
+  const [scheduledFor, setScheduledFor] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   const paymentMethods = [['CASH', 'Efectivo'], ['NEQUI', 'Nequi'], ['CARD', 'Tarjeta']]
     .filter(([value]) => (config.paymentMethods || ['CASH', 'NEQUI', 'CARD']).includes(value));
+  const activeZones = (config.deliveryZones || []).filter((zone) => zone.isActive !== false);
+  const selectedZone = activeZones.find((zone) => zone.name === deliveryZoneName);
+  const deliveryFee = Number(selectedZone?.fee ?? config.deliveryFee ?? 0);
+  const activeCoupons = (config.coupons || []).filter((coupon) => coupon.isActive !== false);
+  const selectedCoupon = activeCoupons.find((coupon) => coupon.code?.toLowerCase() === couponCode.trim().toLowerCase());
+  const discountAmount =
+    selectedCoupon?.discountType === 'PERCENTAGE'
+      ? total * (Number(selectedCoupon.discountValue || 0) / 100)
+      : Number(selectedCoupon?.discountValue || 0);
+  const totalWithExtras = Math.max(0, total + deliveryFee - (selectedCoupon ? discountAmount : 0));
+  const subtotal = total;
+  const scheduledPreview = scheduledFor ? formatDate(scheduledFor) : '';
 
   const submitOrder = async (event) => {
     event.preventDefault();
@@ -33,6 +49,9 @@ export function CartPage() {
         paymentMethod,
         customer,
         notes,
+        couponCode: couponCode.trim() || undefined,
+        deliveryZoneName: deliveryZoneName || undefined,
+        scheduledFor: scheduledFor || undefined,
         items: items.map((item) => ({ productId: item.product.id, quantity: item.quantity }))
       };
 
@@ -65,19 +84,30 @@ export function CartPage() {
   }
 
   return (
-    <div className="container-page grid gap-5 py-5 md:gap-8 md:py-10 lg:grid-cols-[1fr_380px]">
-      <section className="rounded-md border border-stone-200 bg-white p-5">
-        <h1 className="text-2xl font-black">Carrito</h1>
-        <p className="mt-1 text-sm text-stone-600">Completa tus datos y enviaremos el pedido al WhatsApp del restaurante.</p>
-        <div className="mt-4">
+    <div className="container-page grid gap-6 py-5 md:gap-8 md:py-10 lg:grid-cols-[1fr_420px]">
+      <section className="glass-panel p-5 sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <span className="badge-chip">Checkout directo</span>
+            <h1 className="mt-3 text-3xl font-black tracking-tight">Tu pedido está casi listo</h1>
+            <p className="mt-2 text-sm leading-6 text-stone-600">Completa tus datos y envía el pedido al WhatsApp del restaurante con una experiencia más profesional.</p>
+          </div>
+          <div className="grid gap-2 sm:max-w-[220px]">
+            <div className="safe-panel p-3">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-500">Zonas</p>
+              <p className="mt-1 text-sm font-black">{selectedZone?.name || 'General'}</p>
+            </div>
+          </div>
+        </div>
+        <div className="mt-5">
           {items.map((item) => (
             <CartItem key={item.product.id} item={item} onQuantityChange={updateQuantity} />
           ))}
         </div>
       </section>
 
-      <form onSubmit={submitOrder} className="h-fit rounded-md border border-stone-200 bg-white p-5 shadow-sm">
-        <h2 className="text-xl font-black">Datos del pedido</h2>
+      <form onSubmit={submitOrder} className="glass-panel h-fit p-5 sm:p-6">
+        <h2 className="text-2xl font-black tracking-tight">Datos del pedido</h2>
         <div className="mt-5 space-y-4">
           <label className="block space-y-1">
             <span className="label">Nombre</span>
@@ -92,6 +122,34 @@ export function CartPage() {
             <input className="input" required value={customer.address} onChange={(event) => setCustomer({ ...customer, address: event.target.value })} />
           </label>
           <label className="block space-y-1">
+            <span className="label">Email</span>
+            <input className="input" type="email" value={customer.email} onChange={(event) => setCustomer({ ...customer, email: event.target.value })} />
+          </label>
+          {activeZones.length ? (
+            <label className="block space-y-1">
+              <span className="label">Zona de entrega</span>
+              <select className="input" value={deliveryZoneName} onChange={(event) => setDeliveryZoneName(event.target.value)}>
+                {activeZones.map((zone) => (
+                  <option key={zone.name} value={zone.name}>
+                    {zone.name} - {formatCurrency(zone.fee || 0)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+          {config.acceptsScheduledOrders ? (
+            <label className="block space-y-1">
+              <span className="label">Programar pedido</span>
+              <input className="input" type="datetime-local" value={scheduledFor} onChange={(event) => setScheduledFor(event.target.value)} />
+            </label>
+          ) : null}
+          {activeCoupons.length ? (
+            <label className="block space-y-1">
+              <span className="label">Cupon</span>
+              <input className="input" value={couponCode} onChange={(event) => setCouponCode(event.target.value.toUpperCase())} placeholder="Ej: BIENVENIDA10" />
+            </label>
+          ) : null}
+          <label className="block space-y-1">
             <span className="label">Notas</span>
             <textarea className="input min-h-24" value={notes} onChange={(event) => setNotes(event.target.value)} />
           </label>
@@ -103,7 +161,7 @@ export function CartPage() {
                   key={value}
                   type="button"
                   onClick={() => setPaymentMethod(value)}
-                  className={`min-h-11 rounded-md border px-2 text-sm font-black ${
+                  className={`min-h-11 rounded-full border px-2 text-sm font-black ${
                     paymentMethod === value
                       ? 'border-stone-950 bg-stone-950 text-white'
                       : 'border-stone-300 bg-white text-stone-800'
@@ -115,16 +173,69 @@ export function CartPage() {
             </div>
           </div>
         </div>
+        <div className="mt-5 grid gap-3">
+          {selectedZone ? (
+            <div className="safe-panel p-4">
+              <div className="flex items-start gap-3">
+                <MapPinned className="mt-0.5 text-[color:var(--color-primary)]" size={18} />
+                <div>
+                  <p className="text-sm font-black">Entrega en {selectedZone.name}</p>
+                  <p className="mt-1 text-sm text-stone-600">Costo {formatCurrency(selectedZone.fee || 0)}{selectedZone.estimatedMinutes ? ` · aprox. ${selectedZone.estimatedMinutes} min` : ''}</p>
+                </div>
+              </div>
+            </div>
+          ) : null}
+          {scheduledPreview ? (
+            <div className="safe-panel p-4">
+              <div className="flex items-start gap-3">
+                <Clock3 className="mt-0.5 text-[color:var(--color-primary)]" size={18} />
+                <div>
+                  <p className="text-sm font-black">Pedido programado</p>
+                  <p className="mt-1 text-sm text-stone-600">{scheduledPreview}</p>
+                </div>
+              </div>
+            </div>
+          ) : null}
+          {selectedCoupon ? (
+            <div className="safe-panel p-4">
+              <div className="flex items-start gap-3">
+                <Ticket className="mt-0.5 text-[color:var(--color-primary)]" size={18} />
+                <div>
+                  <p className="text-sm font-black">Cupón aplicado: {selectedCoupon.code}</p>
+                  <p className="mt-1 text-sm text-stone-600">Ahorro estimado de {formatCurrency(discountAmount)}</p>
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </div>
         {error && <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">{error}</p>}
-        {Number(config.deliveryFee || 0) > 0 && (
-          <div className="mt-5 flex items-center justify-between border-t border-stone-200 pt-5 text-sm">
-            <span className="font-bold text-stone-600">Domicilio</span>
-            <span className="font-black">{formatCurrency(config.deliveryFee)}</span>
+        <div className="mt-5 rounded-[28px] bg-stone-950 p-5 text-white">
+          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-stone-300">
+            <ShieldCheck size={14} />
+            Resumen final
           </div>
-        )}
-        <div className="mt-3 flex items-center justify-between border-t border-stone-200 pt-5">
-          <span className="text-sm font-bold text-stone-600">Total</span>
-          <span className="text-2xl font-black">{formatCurrency(total + Number(config.deliveryFee || 0))}</span>
+          <div className="mt-4 space-y-3 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-stone-300">Subtotal</span>
+              <span className="font-black">{formatCurrency(subtotal)}</span>
+            </div>
+            {deliveryFee > 0 && (
+              <div className="flex items-center justify-between">
+                <span className="text-stone-300">Domicilio</span>
+                <span className="font-black">{formatCurrency(deliveryFee)}</span>
+              </div>
+            )}
+            {selectedCoupon ? (
+              <div className="flex items-center justify-between">
+                <span className="text-stone-300">Descuento {selectedCoupon.code}</span>
+                <span className="font-black text-emerald-300">- {formatCurrency(discountAmount)}</span>
+              </div>
+            ) : null}
+          </div>
+          <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
+            <span className="text-sm font-bold text-stone-300">Total</span>
+            <span className="text-3xl font-black">{formatCurrency(totalWithExtras)}</span>
+          </div>
         </div>
         <button type="submit" disabled={submitting} className="btn-primary mt-5 w-full">
           {submitting ? 'Creando pedido...' : 'Enviar pedido por WhatsApp'}

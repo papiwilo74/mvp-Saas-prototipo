@@ -1,6 +1,25 @@
 import { z } from 'zod';
 
 const optionalUrl = z.string().url().optional().or(z.literal(''));
+const deliveryZoneSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(2),
+  fee: z.coerce.number().min(0),
+  minOrder: z.coerce.number().min(0).optional().nullable(),
+  estimatedMinutes: z.coerce.number().int().min(0).optional().nullable(),
+  isActive: z.boolean().optional()
+});
+const couponSchema = z.object({
+  id: z.string().optional(),
+  code: z.string().min(3),
+  description: z.string().optional().or(z.literal('')),
+  discountType: z.enum(['PERCENTAGE', 'FIXED']),
+  discountValue: z.coerce.number().positive(),
+  minimumOrder: z.coerce.number().min(0).optional().nullable(),
+  startsAt: z.string().optional().or(z.literal('')),
+  endsAt: z.string().optional().or(z.literal('')),
+  isActive: z.boolean().optional()
+});
 
 export const updateRestaurantConfigSchema = z.object({
   body: z.object({
@@ -15,7 +34,12 @@ export const updateRestaurantConfigSchema = z.object({
     facebookUrl: optionalUrl,
     instagramUrl: optionalUrl,
     openingHours: z.string().optional(),
+    businessHours: z.any().optional(),
+    acceptsScheduledOrders: z.boolean().optional(),
+    leadTimeMinutes: z.coerce.number().int().min(0).optional(),
     deliveryFee: z.coerce.number().min(0).optional(),
+    deliveryZones: z.array(deliveryZoneSchema).optional(),
+    coupons: z.array(couponSchema).optional(),
     paymentMethods: z.array(z.enum(['CASH', 'NEQUI', 'CARD'])).optional()
   })
 });

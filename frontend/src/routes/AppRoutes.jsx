@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { ProtectedRoute } from '../components/routing/ProtectedRoute';
+import { env } from '../config/env';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { AppLayout } from '../layouts/AppLayout';
 import { AdminCustomersPage } from '../pages/admin/AdminCustomersPage';
@@ -12,6 +13,8 @@ import { CheckoutSuccessPage } from '../pages/CheckoutSuccessPage';
 import { LandingPage } from '../pages/LandingPage';
 import { LoginPage } from '../pages/LoginPage';
 import { MenuPage } from '../pages/MenuPage';
+import { OrderHistoryPage } from '../pages/OrderHistoryPage';
+import { ProfilePage } from '../pages/ProfilePage';
 import { ProductDetailPage } from '../pages/ProductDetailPage';
 
 export function AppRoutes() {
@@ -24,6 +27,8 @@ export function AppRoutes() {
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
         <Route path="/login" element={<LoginPage />} />
+        {env.enableOrderHistory ? <Route path="/orders" element={<ProtectedRoute><OrderHistoryPage /></ProtectedRoute>} /> : null}
+        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       </Route>
 
       <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminLayout /></ProtectedRoute>}>

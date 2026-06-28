@@ -7,16 +7,20 @@ export function LoginPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const onSubmit = async (event) => {
     event.preventDefault();
     setError('');
 
     try {
+      setSubmitting(true);
       const user = await login(form);
       navigate(user.role === 'ADMIN' ? '/admin' : '/');
-    } catch {
-      setError('Credenciales invalidas');
+    } catch (requestError) {
+      setError(requestError.response?.data?.message || 'Credenciales invalidas');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -35,7 +39,7 @@ export function LoginPage() {
           </label>
         </div>
         {error && <p className="mt-4 rounded-md bg-red-50 p-3 text-sm font-semibold text-red-700">{error}</p>}
-        <button type="submit" className="btn-primary mt-6 w-full">Ingresar</button>
+        <button type="submit" disabled={submitting} className="btn-primary mt-6 w-full">{submitting ? 'Ingresando...' : 'Ingresar'}</button>
       </form>
     </div>
   );

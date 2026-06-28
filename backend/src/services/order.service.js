@@ -3,7 +3,29 @@ import { ApiError } from '../utils/apiError.js';
 import { sendOrderConfirmationEmail, sendOrderStatusEmail } from './email.service.js';
 import { findOrCreateCustomer } from './customer.service.js';
 
-export const createOrder = async ({ restaurantSlug = 'demo-burger', userId, customer, items, notes, paymentMethod }) => {
+const normalizeCoupons = (config) => Array.isArray(config?.coupons) ? config.coupons : [];
+const normalizeZones = (config) => Array.isArray(config?.deliveryZones) ? config.deliveryZones : [];
+
+const calculateCouponDiscount = ({ subtotal, coupon }) => {
+  if (!coupon || !coupon.isActive) return 0;
+  if (coupon.minimumOrder && subtotal < Number(coupon.minimumOrder)) return 0;
+  if (coupon.discountType === 'PERCENTAGE') {
+    return Math.min(subtotal, subtotal * (Number(coupon.discountValue) / 100));
+  }
+  return Math.min(subtotal, Number(coupon.discountValue));
+};
+
+export const createOrder = async ({
+  restaurantSlug = 'demo-burger',
+  userId,
+  customer,
+  items,
+  notes,
+  paymentMethod,
+  couponCode,
+  deliveryZoneName,
+  scheduledFor
+}) => {
   const restaurant = await prisma.restaurant.findUnique({
     where: { slug: restaurantSlug },
     include: { config: true }
@@ -23,6 +45,9 @@ export const createOrder = async ({ restaurantSlug = 'demo-burger', userId, cust
   const productsById = new Map(products.map((product) => [product.id, product]));
   const orderItems = items.map((item) => {
     const product = productsById.get(item.productId);
+    if (product.trackStock && typeof product.stock === 'number' && item.quantity > product.stock) {
+      throw new ApiError(400, `Stock insuficiente para ${product.name}`);
+    }
     const unitPrice = Number(product.price);
     const subtotal = unitPrice * item.quantity;
 
@@ -34,11 +59,41 @@ export const createOrder = async ({ restaurantSlug = 'demo-burger', userId, cust
     };
   });
 
-  const deliveryFee = Number(restaurant.config?.deliveryFee || 0);
-  const total = orderItems.reduce((sum, item) => sum + item.subtotal, 0) + deliveryFee;
+  const subtotal = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
+  const deliveryZones = normalizeZones(restaurant.config);
+  const selectedZone = deliveryZoneName
+    ? deliveryZones.find((zone) => zone.name === deliveryZoneName && zone.isActive !== false)
+    : null;
+  const deliveryFee = Number(selectedZone?.fee ?? restaurant.config?.deliveryFee ?? 0);
+  const coupons = normalizeCoupons(restaurant.config);
+  const selectedCoupon = couponCode
+    ? coupons.find((coupon) => coupon.code?.toLowerCase() === couponCode.toLowerCase())
+    : null;
+  const discountAmount = calculateCouponDiscount({ subtotal, coupon: selectedCoupon });
+  const total = Math.max(0, subtotal + deliveryFee - discountAmount);
+
+  if (scheduledFor && restaurant.config?.acceptsScheduledOrders) {
+    const scheduledDate = new Date(scheduledFor);
+    const minimumDate = new Date(Date.now() + Number(restaurant.config?.leadTimeMinutes || 30) * 60000);
+    if (Number.isNaN(scheduledDate.getTime()) || scheduledDate < minimumDate) {
+      throw new ApiError(400, 'La programacion del pedido no cumple con el tiempo minimo requerido');
+    }
+  }
+
   const crmCustomer = await findOrCreateCustomer(restaurant.id, customer);
 
-  const order = await prisma.order.create({
+  const order = await prisma.$transaction(async (transaction) => {
+    for (const item of items) {
+      const product = productsById.get(item.productId);
+      if (product.trackStock) {
+        await transaction.product.update({
+          where: { id: product.id },
+          data: { stock: Math.max(0, (product.stock || 0) - item.quantity) }
+        });
+      }
+    }
+
+    return transaction.order.create({
     data: {
       restaurantId: restaurant.id,
       userId,
@@ -47,14 +102,21 @@ export const createOrder = async ({ restaurantSlug = 'demo-burger', userId, cust
       customerPhone: customer.phone,
       customerEmail: customer.email,
       customerAddress: customer.address,
+      deliveryZoneName: selectedZone?.name || null,
+      scheduledFor: scheduledFor ? new Date(scheduledFor) : null,
       notes,
       paymentMethod,
+      subtotal,
+      deliveryFeeApplied: deliveryFee,
+      discountAmount,
+      couponCode: selectedCoupon?.code || null,
       total,
       items: { create: orderItems }
     },
     include: {
       items: { include: { product: true } }
     }
+  });
   });
 
   await sendOrderConfirmationEmail({ to: customer.email, order });
@@ -70,6 +132,9 @@ export const listMyOrders = (userId) =>
   });
 
 export const listRestaurantOrders = (restaurantId, filters = {}) => {
+  const page = filters.page || 1;
+  const pageSize = filters.pageSize || 20;
+  const skip = (page - 1) * pageSize;
   const where = { restaurantId };
 
   if (filters.status) where.status = filters.status;
@@ -83,11 +148,24 @@ export const listRestaurantOrders = (restaurantId, filters = {}) => {
     }
   }
 
-  return prisma.order.findMany({
-    where,
-    include: { items: { include: { product: true } }, user: true },
-    orderBy: { createdAt: 'desc' }
-  });
+  return Promise.all([
+    prisma.order.findMany({
+      where,
+      include: { items: { include: { product: true } }, user: true },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: pageSize
+    }),
+    prisma.order.count({ where })
+  ]).then(([orders, total]) => ({
+    orders,
+    pagination: {
+      page,
+      pageSize,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / pageSize))
+    }
+  }));
 };
 
 export const updateOrderStatus = async (restaurantId, orderId, status) => {

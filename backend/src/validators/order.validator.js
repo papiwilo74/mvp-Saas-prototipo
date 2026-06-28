@@ -4,6 +4,9 @@ export const createOrderSchema = z.object({
   body: z.object({
     restaurantSlug: z.string().optional(),
     paymentMethod: z.enum(['CASH', 'NEQUI', 'CARD']).default('CASH'),
+    couponCode: z.string().optional(),
+    deliveryZoneName: z.string().optional(),
+    scheduledFor: z.string().datetime().optional(),
     customer: z.object({
       name: z.string().min(2),
       phone: z.string().optional(),
@@ -24,7 +27,9 @@ export const listAdminOrdersSchema = z.object({
   query: z.object({
     status: z.enum(['PENDING', 'PREPARING', 'ON_THE_WAY', 'DELIVERED', 'CANCELLED']).optional(),
     from: z.string().optional(),
-    to: z.string().optional()
+    to: z.string().optional(),
+    page: z.coerce.number().int().positive().default(1),
+    pageSize: z.coerce.number().int().positive().max(100).default(20)
   }).optional()
 });
 
