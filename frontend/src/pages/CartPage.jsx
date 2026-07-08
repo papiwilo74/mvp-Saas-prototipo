@@ -149,7 +149,7 @@ export function CartPage() {
           <div>
             <span className="badge-chip">Checkout directo</span>
             <h1 className="mt-3 text-3xl font-black tracking-tight">Tu pedido esta casi listo</h1>
-            <p className="mt-2 text-sm leading-6 text-stone-600">Completa tus datos y envia el pedido al WhatsApp del restaurante.</p>
+            <p className="mt-2 text-sm leading-6 text-stone-600">Completa tus datos y confirma el pedido. El restaurante lo recibe al instante en su panel.</p>
           </div>
           <div className="grid gap-2 sm:max-w-[220px]">
             <div className="safe-panel p-3">
@@ -341,7 +341,7 @@ export function CartPage() {
           </div>
         </div>
         <button type="submit" disabled={submitting} className="btn-primary mt-5 w-full">
-          {submitting ? 'Procesando...' : paymentMethod === 'WOMPI' ? 'Pagar en linea' : 'Enviar pedido por WhatsApp'}
+          {submitting ? 'Procesando...' : paymentMethod === 'WOMPI' ? 'Pagar en linea' : 'Confirmar pedido'}
         </button>
       </form>
     </div>

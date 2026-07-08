@@ -33,7 +33,7 @@ export function LandingPage() {
                 {config.restaurantName}
               </h1>
               <p className="mt-4 max-w-2xl text-base leading-7 text-stone-600 sm:text-lg">
-                Una vitrina digital premium para vender combos, impulsar recompra y recibir pedidos por WhatsApp con una experiencia rapida, visual y confiable.
+                Una vitrina digital premium para vender combos, impulsar recompra y recibir pedidos directamente en tu panel con una experiencia rapida, visual y confiable.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <span className="badge-chip">
