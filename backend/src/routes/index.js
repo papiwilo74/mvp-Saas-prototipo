@@ -9,6 +9,7 @@ import { orderRouter } from './order.routes.js';
 import { paymentRouter } from './payment.routes.js';
 import { productRouter } from './product.routes.js';
 import { reportRouter } from './report.routes.js';
+import { restaurantConfigRouter } from './restaurantConfig.routes.js';
 import { superadminRouter } from './superadmin.routes.js';
 import { analyticsRouter } from './analytics.routes.js';
 import { mapsRouter } from './maps.routes.js';
