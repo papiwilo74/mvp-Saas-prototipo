@@ -83,6 +83,9 @@ model RestaurantConfig {
   paymentMethods String[]   @default([])
   wompiPublicKey String?
   wompiPrivateKey String?
+  whatsappToken String?
+  whatsappPhoneNumberId String?
+  googleMapsApiKey String?
   loyaltyProgram Json?
   restaurantId   String     @unique
   createdAt      DateTime   @default(now())
@@ -196,6 +199,7 @@ model Order {
   deliveryZoneName String?
   scheduledFor DateTime?
   wompiTransactionId String?
+  tableNumber  Int?
   restaurantId String
   userId       String?
   customerId   String?

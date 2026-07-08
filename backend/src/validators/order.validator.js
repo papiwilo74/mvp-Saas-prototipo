@@ -9,6 +9,7 @@ export const createOrderSchema = z.object({
     scheduledFor: z.string().datetime().optional(),
     pointsRedeemed: z.coerce.number().int().min(0).optional(),
     wompiTransactionId: z.string().optional(),
+    tableNumber: z.coerce.number().int().min(1).optional(),
     customer: z.object({
       name: z.string().min(2),
       phone: z.string().optional(),

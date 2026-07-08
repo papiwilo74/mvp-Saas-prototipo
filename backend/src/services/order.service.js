@@ -3,6 +3,7 @@ import { ApiError } from '../utils/apiError.js';
 import { sendOrderConfirmationEmail, sendOrderStatusEmail } from './email.service.js';
 import { findOrCreateCustomer } from './customer.service.js';
 import { emitNewOrder, emitOrderStatusChanged } from './socket.service.js';
+import { sendStatusUpdate } from './whatsapp.service.js';
 
 const normalizeCoupons = (config) => Array.isArray(config?.coupons) ? config.coupons : [];
 const normalizeZones = (config) => Array.isArray(config?.deliveryZones) ? config.deliveryZones : [];
@@ -44,7 +45,8 @@ export const createOrder = async ({
   deliveryZoneName,
   scheduledFor,
   pointsRedeemed = 0,
-  wompiTransactionId
+  wompiTransactionId,
+  tableNumber
 }) => {
   const restaurant = await prisma.restaurant.findUnique({
     where: { slug: restaurantSlug },
@@ -158,6 +160,7 @@ export const createOrder = async ({
         pointsRedeemed: pointsRedeemed || 0,
         couponCode: selectedCoupon?.code || null,
         wompiTransactionId: wompiTransactionId || null,
+        tableNumber: tableNumber || null,
         total,
         items: { create: orderItems }
       },
@@ -230,6 +233,7 @@ export const updateOrderStatus = async (restaurantId, orderId, status) => {
 
   emitOrderStatusChanged(restaurantId, updatedOrder);
   await sendOrderStatusEmail({ to: updatedOrder.customerEmail, order: updatedOrder });
+  await sendStatusUpdate(restaurantId, updatedOrder.customerPhone, updatedOrder.orderNumber, status);
 
   return updatedOrder;
 };

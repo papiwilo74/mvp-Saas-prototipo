@@ -1,4 +1,4 @@
-import { CookingPot, LayoutDashboard, Package, ReceiptText, Settings, UsersRound } from 'lucide-react';
+import { BarChart3, CookingPot, LayoutDashboard, Package, ReceiptText, Settings, UsersRound } from 'lucide-react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 
 const links = [
@@ -6,6 +6,7 @@ const links = [
   { to: '/admin/products', label: 'Productos', icon: Package },
   { to: '/admin/orders', label: 'Pedidos', icon: ReceiptText },
   { to: '/admin/kitchen', label: 'Cocina', icon: CookingPot },
+  { to: '/admin/analytics', label: 'Reportes', icon: BarChart3 },
   { to: '/admin/customers', label: 'Clientes', icon: UsersRound },
   { to: '/admin/settings', label: 'Config', icon: Settings }
 ];

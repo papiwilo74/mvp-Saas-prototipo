@@ -4,6 +4,7 @@ import { env } from '../config/env';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { AppLayout } from '../layouts/AppLayout';
 import { SuperAdminLayout } from '../layouts/SuperAdminLayout';
+import { AdminAnalyticsPage } from '../pages/admin/AdminAnalyticsPage';
 import { AdminCustomersPage } from '../pages/admin/AdminCustomersPage';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
 import { AdminKitchenPage } from '../pages/admin/AdminKitchenPage';
@@ -42,6 +43,7 @@ export function AppRoutes() {
         <Route path="products" element={<AdminProductsPage />} />
         <Route path="orders" element={<AdminOrdersPage />} />
         <Route path="kitchen" element={<AdminKitchenPage />} />
+        <Route path="analytics" element={<AdminAnalyticsPage />} />
         <Route path="customers" element={<AdminCustomersPage />} />
         <Route path="settings" element={<AdminSettingsPage />} />
       </Route>

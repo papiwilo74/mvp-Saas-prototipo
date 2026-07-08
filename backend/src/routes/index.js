@@ -8,9 +8,10 @@ import { menuRouter } from './menu.routes.js';
 import { orderRouter } from './order.routes.js';
 import { paymentRouter } from './payment.routes.js';
 import { productRouter } from './product.routes.js';
-import { restaurantConfigRouter } from './restaurantConfig.routes.js';
 import { reportRouter } from './report.routes.js';
 import { superadminRouter } from './superadmin.routes.js';
+import { analyticsRouter } from './analytics.routes.js';
+import { mapsRouter } from './maps.routes.js';
 
 export const apiRouter = Router();
 
@@ -34,3 +35,5 @@ apiRouter.use('/reports', reportRouter);
 apiRouter.use('/export', exportRouter);
 apiRouter.use('/payments', paymentRouter);
 apiRouter.use('/superadmin', superadminRouter);
+apiRouter.use('/analytics', analyticsRouter);
+apiRouter.use('/maps', mapsRouter);

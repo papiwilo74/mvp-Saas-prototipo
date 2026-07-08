@@ -1,4 +1,4 @@
-import { Clock3, CreditCard, MapPinned, ShieldCheck, Star, Ticket } from 'lucide-react';
+import { Clock3, CreditCard, MapPin, MapPinned, ShieldCheck, Star, Ticket, QrCode } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CartItem } from '../components/cart/CartItem';
@@ -32,6 +32,7 @@ export function CartPage() {
   const [couponCode, setCouponCode] = useState('');
   const [deliveryZoneName, setDeliveryZoneName] = useState(config.deliveryZones?.[0]?.name || '');
   const [scheduledFor, setScheduledFor] = useState('');
+  const [tableNumber, setTableNumber] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [phoneError, setPhoneError] = useState('');
@@ -97,6 +98,7 @@ export function CartPage() {
         deliveryZoneName: deliveryZoneName || undefined,
         scheduledFor: scheduledFor || undefined,
         pointsRedeemed: loyaltyEnabled ? pointsToRedeem : 0,
+        tableNumber: tableNumber ? Number(tableNumber) : undefined,
         items: items.map((item) => ({ productId: item.product.id, quantity: item.quantity }))
       };
 
@@ -183,6 +185,13 @@ export function CartPage() {
           <label className="block space-y-1">
             <span className="label">Direccion de entrega {fieldErrors.address && <span className="text-red-500">*</span>}</span>
             <input className={`input ${fieldErrors.address ? 'border-red-400 ring-2 ring-red-100' : ''}`} required value={customer.address} onChange={(event) => updateCustomer('address', event.target.value)} />
+          </label>
+          <label className="block space-y-1">
+            <span className="label">Numero de mesa (opcional)</span>
+            <div className="relative">
+              <QrCode className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={16} />
+              <input className="input pl-10" type="number" min="1" value={tableNumber} onChange={(e) => setTableNumber(e.target.value)} placeholder="Ej: 5" />
+            </div>
           </label>
           <label className="block space-y-1">
             <span className="label">Email</span>

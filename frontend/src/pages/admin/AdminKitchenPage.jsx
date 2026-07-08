@@ -140,6 +140,11 @@ export function AdminKitchenPage() {
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="text-xl font-black">#{order.orderNumber}</span>
+                          {order.tableNumber && (
+                            <span className="badge-chip bg-stone-950 text-white border-0">
+                              Mesa {order.tableNumber}
+                            </span>
+                          )}
                           {order.scheduledFor && (
                             <span className="badge-chip">
                               <Clock3 size={12} />

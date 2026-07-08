@@ -143,7 +143,19 @@ export function AdminSettingsPage() {
         </div>
 
         <div className="border-t border-stone-200 pt-4 sm:col-span-2">
-          <span className="label">Programa de fidelizacion</span>
+          <span className="label">WhatsApp Business API</span>
+          <p className="text-xs text-stone-500 mb-3">Notificaciones automaticas al cliente cuando cambia el estado del pedido.</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <input className="input" placeholder="Token de acceso" type="password" value={form.whatsappToken || ''} onChange={(event) => update('whatsappToken', event.target.value)} />
+            <input className="input" placeholder="Phone Number ID" value={form.whatsappPhoneNumberId || ''} onChange={(event) => update('whatsappPhoneNumberId', event.target.value)} />
+          </div>
+        </div>
+
+        <div className="border-t border-stone-200 pt-4 sm:col-span-2">
+          <span className="label">Google Maps API Key</span>
+          <p className="text-xs text-stone-500 mb-3">Validacion de direcciones en zonas de cobertura.</p>
+          <input className="input" placeholder="AIzaSy..." type="password" value={form.googleMapsApiKey || ''} onChange={(event) => update('googleMapsApiKey', event.target.value)} />
+        </div>
           <div className="mt-3 space-y-3">
             <label className="flex items-center gap-3 text-sm font-semibold">
               <input type="checkbox" checked={Boolean(form.loyaltyProgram?.enabled)} onChange={(event) => update('loyaltyProgram', { ...(form.loyaltyProgram || {}), enabled: event.target.checked })} />

@@ -44,6 +44,9 @@ export const updateRestaurantConfigSchema = z.object({
     paymentMethods: z.array(z.enum(['CASH', 'NEQUI', 'CARD', 'WOMPI'])).optional(),
     wompiPublicKey: z.string().optional().or(z.literal('')),
     wompiPrivateKey: z.string().optional().or(z.literal('')),
+    whatsappToken: z.string().optional().or(z.literal('')),
+    whatsappPhoneNumberId: z.string().optional().or(z.literal('')),
+    googleMapsApiKey: z.string().optional().or(z.literal('')),
     loyaltyProgram: z.any().optional()
   })
 });
