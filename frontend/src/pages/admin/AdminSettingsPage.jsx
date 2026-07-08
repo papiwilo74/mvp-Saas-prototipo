@@ -156,6 +156,9 @@ export function AdminSettingsPage() {
           <p className="text-xs text-stone-500 mb-3">Validacion de direcciones en zonas de cobertura.</p>
           <input className="input" placeholder="AIzaSy..." type="password" value={form.googleMapsApiKey || ''} onChange={(event) => update('googleMapsApiKey', event.target.value)} />
         </div>
+
+        <div className="border-t border-stone-200 pt-4 sm:col-span-2">
+          <span className="label">Programa de fidelizacion</span>
           <div className="mt-3 space-y-3">
             <label className="flex items-center gap-3 text-sm font-semibold">
               <input type="checkbox" checked={Boolean(form.loyaltyProgram?.enabled)} onChange={(event) => update('loyaltyProgram', { ...(form.loyaltyProgram || {}), enabled: event.target.checked })} />
