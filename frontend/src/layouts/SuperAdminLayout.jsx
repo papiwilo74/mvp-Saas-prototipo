@@ -1,6 +1,6 @@
 import { Building2, LayoutDashboard, LogOut, Plus } from 'lucide-react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 const links = [
   { to: '/superadmin', label: 'Dashboard', icon: LayoutDashboard, end: true },
