@@ -5,11 +5,11 @@ export const listProducts = async (restaurantId, pagination = {}) => {
   const page = pagination.page || 1;
   const pageSize = pagination.pageSize || 20;
   const skip = (page - 1) * pageSize;
-  const where = { restaurantId };
+  const where = { restaurantId, isDeleted: false };
   const [products, total] = await Promise.all([
     prisma.product.findMany({
       where,
-      include: { category: true },
+      include: { category: true, images: { orderBy: { sortOrder: 'asc' } } },
       orderBy: { createdAt: 'desc' },
       skip,
       take: pageSize
@@ -41,7 +41,7 @@ export const createProduct = (restaurantId, data) =>
   });
 
 export const updateProduct = async (restaurantId, productId, data) => {
-  const product = await prisma.product.findFirst({ where: { id: productId, restaurantId } });
+  const product = await prisma.product.findFirst({ where: { id: productId, restaurantId, isDeleted: false } });
 
   if (!product) throw new ApiError(404, 'Producto no encontrado');
 
@@ -56,10 +56,12 @@ export const updateProduct = async (restaurantId, productId, data) => {
 };
 
 export const deleteProduct = async (restaurantId, productId) => {
-  const product = await prisma.product.findFirst({ where: { id: productId, restaurantId } });
+  const product = await prisma.product.findFirst({ where: { id: productId, restaurantId, isDeleted: false } });
 
   if (!product) throw new ApiError(404, 'Producto no encontrado');
 
-  await prisma.product.delete({ where: { id: productId } });
+  await prisma.product.update({
+    where: { id: productId },
+    data: { isDeleted: true }
+  });
 };
-

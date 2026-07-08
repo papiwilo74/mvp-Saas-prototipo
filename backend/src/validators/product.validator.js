@@ -1,5 +1,16 @@
 import { z } from 'zod';
 
+const variantOptionSchema = z.object({
+  name: z.string().min(1),
+  priceAdjustment: z.coerce.number().default(0)
+});
+
+const productVariantSchema = z.object({
+  name: z.string().min(1),
+  options: z.array(variantOptionSchema).min(1),
+  required: z.boolean().optional()
+});
+
 const productBody = z.object({
   name: z.string().min(2),
   description: z.string().min(5),
@@ -10,6 +21,7 @@ const productBody = z.object({
   stock: z.coerce.number().int().min(0).optional().nullable(),
   isCombo: z.boolean().optional(),
   comboItems: z.array(z.string().min(1)).optional(),
+  variants: z.array(productVariantSchema).optional(),
   categoryId: z.string().min(1)
 });
 
@@ -30,4 +42,3 @@ export const listProductsSchema = z.object({
     pageSize: z.coerce.number().int().positive().max(100).default(20)
   }).optional()
 });
-

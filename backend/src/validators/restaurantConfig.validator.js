@@ -25,6 +25,7 @@ export const updateRestaurantConfigSchema = z.object({
   body: z.object({
     restaurantName: z.string().min(2),
     logoUrl: optionalUrl,
+    heroImageUrl: optionalUrl,
     primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
     secondaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
     phone: z.string().optional(),
@@ -40,7 +41,10 @@ export const updateRestaurantConfigSchema = z.object({
     deliveryFee: z.coerce.number().min(0).optional(),
     deliveryZones: z.array(deliveryZoneSchema).optional(),
     coupons: z.array(couponSchema).optional(),
-    paymentMethods: z.array(z.enum(['CASH', 'NEQUI', 'CARD'])).optional()
+    paymentMethods: z.array(z.enum(['CASH', 'NEQUI', 'CARD', 'WOMPI'])).optional(),
+    wompiPublicKey: z.string().optional().or(z.literal('')),
+    wompiPrivateKey: z.string().optional().or(z.literal('')),
+    loyaltyProgram: z.any().optional()
   })
 });
 

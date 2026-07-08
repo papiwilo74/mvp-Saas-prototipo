@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { api } from '../../services/api';
 import { formatCurrency } from '../../utils/formatters';
 
@@ -9,15 +9,21 @@ const cards = [
 ];
 
 export function AdminDashboardPage() {
-  const [summary, setSummary] = useState(null);
-  const [topProducts, setTopProducts] = useState([]);
+  const { data: summary } = useQuery({
+    queryKey: ['reports', 'summary'],
+    queryFn: async () => {
+      const { data } = await api.get('/reports/summary');
+      return data.summary;
+    }
+  });
 
-  useEffect(() => {
-    Promise.all([api.get('/reports/summary'), api.get('/reports/top-products')]).then(([summaryResponse, productsResponse]) => {
-      setSummary(summaryResponse.data.summary);
-      setTopProducts(productsResponse.data.products);
-    });
-  }, []);
+  const { data: topProducts = [] } = useQuery({
+    queryKey: ['reports', 'top-products'],
+    queryFn: async () => {
+      const { data } = await api.get('/reports/top-products');
+      return data.products;
+    }
+  });
 
   return (
     <div>

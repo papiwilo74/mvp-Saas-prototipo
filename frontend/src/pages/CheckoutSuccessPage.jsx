@@ -1,4 +1,4 @@
-import { CheckCircle2, Clock3, MapPinned, MessageSquare, ShoppingBag, Ticket } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Clock3, MapPinned, MessageSquare, ShoppingBag, Ticket } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useRestaurantConfig } from '../context/RestaurantConfigContext';
 import { formatCurrency, formatDate } from '../utils/formatters';
@@ -7,6 +7,7 @@ import { buildWhatsAppOrderUrl, paymentLabels } from '../utils/whatsappOrder';
 export function CheckoutSuccessPage() {
   const { state } = useLocation();
   const order = state?.order;
+  const pointsEarned = state?.pointsEarned || 0;
   const { config } = useRestaurantConfig();
   const whatsappUrl = state?.whatsappUrl || buildWhatsAppOrderUrl({ order, config });
   const scheduledText = order?.scheduledFor ? formatDate(order.scheduledFor) : '';
@@ -16,9 +17,11 @@ export function CheckoutSuccessPage() {
       <div className="glass-panel mx-auto max-w-2xl p-6 text-center sm:p-8">
         <span className="badge-chip text-emerald-700">Pedido confirmado</span>
         <CheckCircle2 className="mx-auto mt-5 text-emerald-600" size={60} />
-        <h1 className="mt-4 text-3xl font-black tracking-tight">Pedido creado con éxito</h1>
+        <h1 className="mt-4 text-3xl font-black tracking-tight">Pedido creado con exito</h1>
         <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-stone-600">
-          Guardamos tu pedido en la plataforma. Si WhatsApp no se abrió automáticamente, toca el botón para enviarlo al restaurante y dejarlo listo para producción.
+          {pointsEarned > 0
+            ? `Tu pedido fue registrado en el sistema. Ganaste ${pointsEarned} puntos por esta compra.`
+            : 'Tu pedido fue registrado en el sistema. Envia el mensaje de WhatsApp para notificar al restaurante.'}
         </p>
         {order ? (
           <>
@@ -36,10 +39,16 @@ export function CheckoutSuccessPage() {
                   <span className="text-stone-600">Pago</span>
                   <span className="font-black">{paymentLabels[order.paymentMethod] || 'Simulado'}</span>
                 </div>
+                {order.deliveryFeeApplied > 0 ? (
+                  <div className="mt-3 flex justify-between gap-3">
+                    <span className="text-stone-600">Domicilio</span>
+                    <span className="font-black">{formatCurrency(order.deliveryFeeApplied)}</span>
+                  </div>
+                ) : null}
                 {order.couponCode ? (
                   <div className="mt-3 flex items-center gap-2 text-sm font-semibold text-emerald-700">
                     <Ticket size={16} />
-                    Cupón aplicado: {order.couponCode}
+                    Cupon aplicado: {order.couponCode}
                   </div>
                 ) : null}
               </div>
@@ -48,7 +57,7 @@ export function CheckoutSuccessPage() {
                   <ShoppingBag className="mt-0.5 text-[color:var(--color-primary)]" size={18} />
                   <div>
                     <p className="font-black">Pedido guardado en sistema</p>
-                    <p className="mt-1 text-stone-600">Ahora puedes compartirlo por WhatsApp con el restaurante y continuar la compra si deseas.</p>
+                    <p className="mt-1 text-stone-600">Ahora puedes compartirlo por WhatsApp con el restaurante.</p>
                   </div>
                 </div>
                 {order.deliveryZoneName ? (
@@ -84,8 +93,12 @@ export function CheckoutSuccessPage() {
             )}
           </>
         ) : null}
-        <div className="mt-6">
-          <Link to="/menu" className="btn-primary w-full">Seguir comprando</Link>
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <Link to="/menu" className="btn-primary flex-1">
+            Seguir comprando
+            <ArrowRight size={18} />
+          </Link>
+          <Link to="/" className="btn-secondary flex-1">Volver al inicio</Link>
         </div>
       </div>
     </div>

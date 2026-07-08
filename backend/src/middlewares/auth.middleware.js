@@ -2,15 +2,21 @@ import { prisma } from '../config/prisma.js';
 import { ApiError } from '../utils/apiError.js';
 import { verifyToken } from '../utils/token.js';
 
+const extractToken = (req) => {
+  const header = req.headers.authorization;
+  if (header?.startsWith('Bearer ')) return header.split(' ')[1];
+  return req.cookies?.ff_token || null;
+};
+
 export const authenticate = async (req, _res, next) => {
   try {
-    const header = req.headers.authorization;
+    const token = extractToken(req);
 
-    if (!header?.startsWith('Bearer ')) {
+    if (!token) {
       throw new ApiError(401, 'Token requerido');
     }
 
-    const payload = verifyToken(header.split(' ')[1]);
+    const payload = verifyToken(token);
     const user = await prisma.user.findUnique({
       where: { id: payload.sub },
       select: { id: true, name: true, email: true, role: true, restaurantId: true }
@@ -29,13 +35,11 @@ export const authenticate = async (req, _res, next) => {
 
 export const optionalAuthenticate = async (req, _res, next) => {
   try {
-    const header = req.headers.authorization;
+    const token = extractToken(req);
 
-    if (!header?.startsWith('Bearer ')) {
-      return next();
-    }
+    if (!token) return next();
 
-    const payload = verifyToken(header.split(' ')[1]);
+    const payload = verifyToken(token);
     const user = await prisma.user.findUnique({
       where: { id: payload.sub },
       select: { id: true, name: true, email: true, role: true, restaurantId: true }

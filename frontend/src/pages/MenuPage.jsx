@@ -1,6 +1,7 @@
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { ProductCard } from '../components/menu/ProductCard';
+import { ProductSkeleton } from '../components/ui/Skeleton';
 import { useCart } from '../context/CartContext';
 import { useMenu } from '../hooks/useMenu';
 
@@ -23,10 +24,6 @@ export function MenuPage() {
     [products, activeCategory, query, onlyAvailable]
   );
 
-  if (loading) {
-    return <div className="container-page py-10 text-sm text-stone-600">Cargando menu...</div>;
-  }
-
   if (error) {
     return <div className="container-page py-10 text-sm font-semibold text-red-700">{error}</div>;
   }
@@ -34,9 +31,9 @@ export function MenuPage() {
   return (
     <section className="container-page py-5 md:py-8">
       <div className="mb-5">
-        <span className="badge-chip">Catálogo visual</span>
-        <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Menú listo para convertir</h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">Elige tus favoritos, filtra por categorías y arma el pedido en segundos con una presentación más premium.</p>
+        <span className="badge-chip">Catalogo visual</span>
+        <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Menu listo para convertir</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">Elige tus favoritos, filtra por categorias y arma el pedido en segundos con una presentacion mas premium.</p>
       </div>
 
       <div className="glass-panel sticky top-20 z-20 -mx-4 px-4 py-4 sm:mx-0 sm:px-5">
@@ -87,14 +84,15 @@ export function MenuPage() {
       </div>
 
       <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredProducts.map((product) => (
-          <ProductCard key={product.id} product={product} onAdd={addItem} />
-        ))}
+        {loading
+          ? Array.from({ length: 6 }).map((_, i) => <ProductSkeleton key={i} />)
+          : filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} onAdd={addItem} />
+            ))}
       </div>
-      {!filteredProducts.length ? (
+      {!loading && !filteredProducts.length ? (
         <div className="safe-panel mt-5 p-5 text-sm text-stone-600">No encontramos productos con esos filtros.</div>
       ) : null}
     </section>
   );
 }
-

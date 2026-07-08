@@ -25,6 +25,21 @@ enum PaymentMethod {
   CASH
   NEQUI
   CARD
+  WOMPI
+}
+
+enum PaymentStatus {
+  PENDING
+  APPROVED
+  DECLINED
+  ERROR
+}
+
+enum LoyaltyTier {
+  BRONCE
+  PLATA
+  ORO
+  DIAMANTE
 }
 
 model Restaurant {
@@ -48,6 +63,7 @@ model RestaurantConfig {
   id             String     @id @default(cuid())
   restaurantName String
   logoUrl        String?
+  heroImageUrl   String?
   primaryColor   String     @default("#ea580c")
   secondaryColor String     @default("#141414")
   phone          String?
@@ -64,6 +80,9 @@ model RestaurantConfig {
   deliveryZones  Json?
   coupons        Json?
   paymentMethods String[]   @default([])
+  wompiPublicKey String?
+  wompiPrivateKey String?
+  loyaltyProgram Json?
   restaurantId   String     @unique
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
@@ -98,24 +117,37 @@ model Category {
   @@index([restaurantId])
 }
 
+model ProductImage {
+  id        String  @id @default(cuid())
+  url       String
+  sortOrder Int     @default(0)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
 model Product {
-  id           String     @id @default(cuid())
+  id           String         @id @default(cuid())
   name         String
   description  String
-  price        Decimal    @db.Decimal(10, 2)
+  price        Decimal        @db.Decimal(10, 2)
   imageUrl     String?
-  isAvailable  Boolean    @default(true)
-  trackStock   Boolean    @default(false)
+  isAvailable  Boolean        @default(true)
+  trackStock   Boolean        @default(false)
   stock        Int?
-  isCombo      Boolean    @default(false)
-  comboItems   String[]   @default([])
+  isCombo      Boolean        @default(false)
+  comboItems   String[]       @default([])
+  variants     Json?
+  isDeleted    Boolean        @default(false)
   restaurantId String
   categoryId   String
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  category     Category   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  restaurant   Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  category     Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   orderItems   OrderItem[]
+  images       ProductImage[]
 
   @@index([restaurantId])
   @@index([categoryId])
@@ -123,17 +155,20 @@ model Product {
 }
 
 model Customer {
-  id           String     @id @default(cuid())
+  id           String        @id @default(cuid())
   name         String
   phone        String?
   email        String?
   address      String?
   notes        String?
+  points       Int           @default(0)
+  tier         LoyaltyTier   @default(BRONCE)
   restaurantId String
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   orders       Order[]
+  transactions PaymentTransaction[]
 
   @@unique([restaurantId, phone])
   @@index([restaurantId])
@@ -145,9 +180,11 @@ model Order {
   orderNumber  Int         @unique @default(autoincrement())
   status       OrderStatus @default(PENDING)
   paymentMethod PaymentMethod @default(CASH)
+  paymentStatus PaymentStatus @default(PENDING)
   subtotal     Decimal     @default(0) @db.Decimal(10, 2)
   deliveryFeeApplied Decimal @default(0) @db.Decimal(10, 2)
   discountAmount Decimal   @default(0) @db.Decimal(10, 2)
+  pointsRedeemed Int       @default(0)
   total        Decimal     @db.Decimal(10, 2)
   couponCode   String?
   notes        String?
@@ -157,6 +194,7 @@ model Order {
   customerAddress String?
   deliveryZoneName String?
   scheduledFor DateTime?
+  wompiTransactionId String?
   restaurantId String
   userId       String?
   customerId   String?
@@ -185,4 +223,17 @@ model OrderItem {
 
   @@index([orderId])
   @@index([productId])
+}
+
+model PaymentTransaction {
+  id            String        @id @default(cuid())
+  wompiId       String        @unique
+  status        PaymentStatus @default(PENDING)
+  amountInCents Int
+  currency      String        @default("COP")
+  reference     String
+  customerId    String?
+  customer      Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }

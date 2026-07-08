@@ -3,10 +3,12 @@ import { z } from 'zod';
 export const createOrderSchema = z.object({
   body: z.object({
     restaurantSlug: z.string().optional(),
-    paymentMethod: z.enum(['CASH', 'NEQUI', 'CARD']).default('CASH'),
+    paymentMethod: z.enum(['CASH', 'NEQUI', 'CARD', 'WOMPI']).default('CASH'),
     couponCode: z.string().optional(),
     deliveryZoneName: z.string().optional(),
     scheduledFor: z.string().datetime().optional(),
+    pointsRedeemed: z.coerce.number().int().min(0).optional(),
+    wompiTransactionId: z.string().optional(),
     customer: z.object({
       name: z.string().min(2),
       phone: z.string().optional(),

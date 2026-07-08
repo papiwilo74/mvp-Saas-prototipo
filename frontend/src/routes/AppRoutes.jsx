@@ -5,6 +5,7 @@ import { AdminLayout } from '../layouts/AdminLayout';
 import { AppLayout } from '../layouts/AppLayout';
 import { AdminCustomersPage } from '../pages/admin/AdminCustomersPage';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
+import { AdminKitchenPage } from '../pages/admin/AdminKitchenPage';
 import { AdminOrdersPage } from '../pages/admin/AdminOrdersPage';
 import { AdminProductsPage } from '../pages/admin/AdminProductsPage';
 import { AdminSettingsPage } from '../pages/admin/AdminSettingsPage';
@@ -35,6 +36,7 @@ export function AppRoutes() {
         <Route index element={<AdminDashboardPage />} />
         <Route path="products" element={<AdminProductsPage />} />
         <Route path="orders" element={<AdminOrdersPage />} />
+        <Route path="kitchen" element={<AdminKitchenPage />} />
         <Route path="customers" element={<AdminCustomersPage />} />
         <Route path="settings" element={<AdminSettingsPage />} />
       </Route>

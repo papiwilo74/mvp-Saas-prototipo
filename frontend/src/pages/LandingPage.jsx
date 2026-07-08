@@ -1,6 +1,7 @@
 import { ArrowRight, Clock, Flame, MapPinned, Percent, ShieldCheck, Star, WalletCards } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ProductCard } from '../components/menu/ProductCard';
+import { ProductSkeleton } from '../components/ui/Skeleton';
 import { useCart } from '../context/CartContext';
 import { useRestaurantConfig } from '../context/RestaurantConfigContext';
 import { useMenu } from '../hooks/useMenu';
@@ -14,6 +15,7 @@ export function LandingPage() {
   const combos = products.filter((product) => product.isCombo).slice(0, 2);
   const topZone = (config.deliveryZones || []).find((zone) => zone.isActive !== false);
   const whatsappUrl = `https://wa.me/${config.whatsapp?.replace(/\D/g, '') || ''}`;
+  const heroImage = config.heroImageUrl || 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd';
 
   return (
     <div className="pb-8">
@@ -31,7 +33,7 @@ export function LandingPage() {
                 {config.restaurantName}
               </h1>
               <p className="mt-4 max-w-2xl text-base leading-7 text-stone-600 sm:text-lg">
-                Una vitrina digital premium para vender combos, impulsar recompra y recibir pedidos por WhatsApp con una experiencia rápida, visual y confiable.
+                Una vitrina digital premium para vender combos, impulsar recompra y recibir pedidos por WhatsApp con una experiencia rapida, visual y confiable.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <span className="badge-chip">
@@ -49,7 +51,7 @@ export function LandingPage() {
               </div>
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <Link to="/menu" className="btn-primary flex-1 sm:flex-none">
-                  Ver menú y ordenar
+                  Ver menu y ordenar
                   <ArrowRight size={18} />
                 </Link>
                 <a className="btn-secondary flex-1 sm:flex-none" href={whatsappUrl}>
@@ -69,19 +71,19 @@ export function LandingPage() {
                 </div>
                 <div className="safe-panel p-4">
                   <p className="text-xs font-black uppercase tracking-[0.2em] text-stone-500">Horario</p>
-                  <p className="mt-2 text-lg font-black">{config.acceptsScheduledOrders ? 'Pedido programable' : 'Atención directa'}</p>
+                  <p className="mt-2 text-lg font-black">{config.acceptsScheduledOrders ? 'Pedido programable' : 'Atencion directa'}</p>
                   <p className="mt-1 text-sm text-stone-600">{config.openingHours}</p>
                 </div>
               </div>
             </div>
             <div className="relative">
               <div className="absolute -top-5 left-4 z-10 max-w-[220px] rounded-[28px] bg-white p-4 shadow-soft">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-500">Promoción activa</p>
-                <p className="mt-2 text-lg font-black">Cupón {config.coupons?.[0]?.code || 'BIENVENIDA10'}</p>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-500">Promocion activa</p>
+                <p className="mt-2 text-lg font-black">Cupon {config.coupons?.[0]?.code || 'BIENVENIDA10'}</p>
                 <p className="mt-1 text-sm text-stone-600">{config.coupons?.[0]?.description || '10% de descuento para impulsar la primera compra'}</p>
               </div>
               <img
-                src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd"
+                src={heroImage}
                 alt="Comida destacada"
                 className="h-[420px] w-full rounded-[32px] object-cover shadow-soft"
               />
@@ -106,7 +108,7 @@ export function LandingPage() {
             </span>
             <div>
               <p className="font-black">Promos que convierten</p>
-              <p className="text-sm text-stone-600">Cupones, combos y campañas para elevar el ticket promedio.</p>
+              <p className="text-sm text-stone-600">Cupones, combos y campanas para elevar el ticket promedio.</p>
             </div>
           </div>
           <div className="safe-panel flex items-center gap-4 p-5">
@@ -115,7 +117,7 @@ export function LandingPage() {
             </span>
             <div>
               <p className="font-black">Visual premium</p>
-              <p className="text-sm text-stone-600">Un catálogo que se siente más marca propia y menos formulario.</p>
+              <p className="text-sm text-stone-600">Un catalogo que se siente mas marca propia y menos formulario.</p>
             </div>
           </div>
           <div className="safe-panel flex items-center gap-4 p-5">
@@ -123,8 +125,8 @@ export function LandingPage() {
               <Clock size={20} />
             </span>
             <div>
-              <p className="font-black">Operación más ordenada</p>
-              <p className="text-sm text-stone-600">Pedidos programados, zonas de entrega y control básico de stock.</p>
+              <p className="font-black">Operacion mas ordenada</p>
+              <p className="text-sm text-stone-600">Pedidos programados, zonas de entrega y control basico de stock.</p>
             </div>
           </div>
         </div>
@@ -134,15 +136,16 @@ export function LandingPage() {
         <div className="mb-5 flex items-end justify-between gap-3">
           <div>
             <h2 className="section-title">Destacados que venden solos</h2>
-            <p className="section-copy">Una selección pensada para impresionar al restaurante cuando vea la demo.</p>
+            <p className="section-copy">Una seleccion pensada para impresionar al restaurante cuando vea la demo.</p>
           </div>
           <Link to="/menu" className="text-sm font-black text-[color:var(--color-primary)]">Ver menu</Link>
         </div>
-        {loading ? <p className="text-sm text-stone-600">Cargando...</p> : null}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {featured.map((product) => (
-            <ProductCard key={product.id} product={product} onAdd={addItem} />
-          ))}
+          {loading
+            ? Array.from({ length: 3 }).map((_, i) => <ProductSkeleton key={i} />)
+            : featured.map((product) => (
+                <ProductCard key={product.id} product={product} onAdd={addItem} />
+              ))}
         </div>
       </section>
 
@@ -152,19 +155,19 @@ export function LandingPage() {
             <div>
               <h2 className="section-title">La demo ya comunica valor de negocio</h2>
               <p className="section-copy">
-                Presenta catálogo, promociones, tiempos de entrega y pedido directo en una sola experiencia. Esto te ayuda a vender implementación a restaurantes desde la primera reunión.
+                Presenta catalogo, promociones, tiempos de entrega y pedido directo en una sola experiencia. Esto te ayuda a vender implementacion a restaurantes desde la primera reunion.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="safe-panel p-5">
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-500">Ideal para mostrar</p>
-                <p className="mt-2 text-lg font-black">Marca, menú y promos</p>
+                <p className="mt-2 text-lg font-black">Marca, menu y promos</p>
                 <p className="mt-1 text-sm text-stone-600">Se ve como un negocio listo para recibir pedidos.</p>
               </div>
               <div className="safe-panel p-5">
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-500">Ideal para vender</p>
                 <p className="mt-2 text-lg font-black">Canal directo propio</p>
-                <p className="mt-1 text-sm text-stone-600">Menos dependencia de plataformas externas y mejor relación con clientes.</p>
+                <p className="mt-1 text-sm text-stone-600">Menos dependencia de plataformas externas y mejor relacion con clientes.</p>
               </div>
             </div>
           </div>

@@ -1,20 +1,25 @@
-import { Save } from 'lucide-react';
+import { QrCode, Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { QRCode } from '../../components/ui/QRCode';
 import { useRestaurantConfig } from '../../context/RestaurantConfigContext';
 import { api } from '../../services/api';
 
 const paymentOptions = [
   ['CASH', 'Efectivo'],
   ['NEQUI', 'Nequi'],
-  ['CARD', 'Tarjeta']
+  ['CARD', 'Tarjeta'],
+  ['WOMPI', 'Pago en linea (Wompi)']
 ];
 
 export function AdminSettingsPage() {
   const { config, setConfig } = useRestaurantConfig();
   const [form, setForm] = useState(config);
   const [saved, setSaved] = useState(false);
+  const [showQR, setShowQR] = useState(false);
 
   useEffect(() => setForm(config), [config]);
+
+  const menuUrl = `${window.location.origin}/menu`;
 
   const onSubmit = async (event) => {
     event.preventDefault();
@@ -36,6 +41,11 @@ export function AdminSettingsPage() {
     const current = form.paymentMethods || [];
     update('paymentMethods', current.includes(value) ? current.filter((item) => item !== value) : [...current, value]);
   };
+  const removeArrayItem = (field, index) => {
+    const next = [...(form[field] || [])];
+    next.splice(index, 1);
+    update(field, next);
+  };
 
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-3xl">
@@ -52,6 +62,10 @@ export function AdminSettingsPage() {
         <label className="block space-y-1 sm:col-span-2">
           <span className="label">Logo URL</span>
           <input className="input" value={form.logoUrl || ''} onChange={(event) => update('logoUrl', event.target.value)} />
+        </label>
+        <label className="block space-y-1 sm:col-span-2">
+          <span className="label">Imagen Hero (Landing)</span>
+          <input className="input" value={form.heroImageUrl || ''} onChange={(event) => update('heroImageUrl', event.target.value)} placeholder="https://..." />
         </label>
         <label className="block space-y-1">
           <span className="label">Color primario</span>
@@ -118,6 +132,38 @@ export function AdminSettingsPage() {
           <span className="label">Facebook</span>
           <input className="input" value={form.facebookUrl || ''} onChange={(event) => update('facebookUrl', event.target.value)} />
         </label>
+
+        <div className="border-t border-stone-200 pt-4 sm:col-span-2">
+          <span className="label">Wompi (Pagos en linea)</span>
+          <p className="text-xs text-stone-500 mb-3">Configura las llaves de Wompi para aceptar pagos con tarjeta, Nequi, etc.</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <input className="input" placeholder="Llave publica (pub_test_...)" value={form.wompiPublicKey || ''} onChange={(event) => update('wompiPublicKey', event.target.value)} />
+            <input className="input" type="password" placeholder="Llave privada (prv_test_...)" value={form.wompiPrivateKey || ''} onChange={(event) => update('wompiPrivateKey', event.target.value)} />
+          </div>
+        </div>
+
+        <div className="border-t border-stone-200 pt-4 sm:col-span-2">
+          <span className="label">Programa de fidelizacion</span>
+          <div className="mt-3 space-y-3">
+            <label className="flex items-center gap-3 text-sm font-semibold">
+              <input type="checkbox" checked={Boolean(form.loyaltyProgram?.enabled)} onChange={(event) => update('loyaltyProgram', { ...(form.loyaltyProgram || {}), enabled: event.target.checked })} />
+              Activar programa de puntos
+            </label>
+            {form.loyaltyProgram?.enabled && (
+              <div className="grid gap-2 sm:grid-cols-3">
+                <div>
+                  <span className="text-xs text-stone-500">Puntos por peso gastado</span>
+                  <input className="input" type="number" step="0.001" value={form.loyaltyProgram?.pointsPerPeso || 0.01} onChange={(event) => update('loyaltyProgram', { ...form.loyaltyProgram, pointsPerPeso: Number(event.target.value) })} />
+                </div>
+                <div>
+                  <span className="text-xs text-stone-500">Valor de cada punto ($)</span>
+                  <input className="input" type="number" value={form.loyaltyProgram?.pointsValue || 10} onChange={(event) => update('loyaltyProgram', { ...form.loyaltyProgram, pointsValue: Number(event.target.value) })} />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="space-y-3 sm:col-span-2">
           <div className="flex items-center justify-between">
             <span className="label">Zonas de entrega</span>
@@ -128,7 +174,10 @@ export function AdminSettingsPage() {
               <input className="input" placeholder="Nombre" value={zone.name || ''} onChange={(event) => updateArrayItem('deliveryZones', index, 'name', event.target.value)} />
               <input className="input" type="number" min="0" placeholder="Costo" value={zone.fee || 0} onChange={(event) => updateArrayItem('deliveryZones', index, 'fee', Number(event.target.value))} />
               <input className="input" type="number" min="0" placeholder="Pedido minimo" value={zone.minOrder || 0} onChange={(event) => updateArrayItem('deliveryZones', index, 'minOrder', Number(event.target.value))} />
-              <input className="input" type="number" min="0" placeholder="Min estimados" value={zone.estimatedMinutes || 0} onChange={(event) => updateArrayItem('deliveryZones', index, 'estimatedMinutes', Number(event.target.value))} />
+              <div className="flex gap-2">
+                <input className="input" type="number" min="0" placeholder="Min" value={zone.estimatedMinutes || 0} onChange={(event) => updateArrayItem('deliveryZones', index, 'estimatedMinutes', Number(event.target.value))} />
+                <button type="button" onClick={() => removeArrayItem('deliveryZones', index)} className="text-red-500 hover:text-red-700 text-xs font-bold shrink-0">X</button>
+              </div>
             </div>
           ))}
         </div>
@@ -139,8 +188,11 @@ export function AdminSettingsPage() {
           </div>
           {(form.coupons || []).map((coupon, index) => (
             <div key={`coupon-${index}`} className="grid gap-2 rounded-md border border-stone-200 p-3 sm:grid-cols-2">
-              <input className="input" placeholder="Codigo" value={coupon.code || ''} onChange={(event) => updateArrayItem('coupons', index, 'code', event.target.value.toUpperCase())} />
-              <input className="input" placeholder="Descripcion" value={coupon.description || ''} onChange={(event) => updateArrayItem('coupons', index, 'description', event.target.value)} />
+              <div className="flex gap-2 sm:col-span-2">
+                <input className="input" placeholder="Codigo" value={coupon.code || ''} onChange={(event) => updateArrayItem('coupons', index, 'code', event.target.value.toUpperCase())} />
+                <button type="button" onClick={() => removeArrayItem('coupons', index)} className="text-red-500 hover:text-red-700 text-xs font-bold shrink-0">X</button>
+              </div>
+              <input className="input sm:col-span-2" placeholder="Descripcion" value={coupon.description || ''} onChange={(event) => updateArrayItem('coupons', index, 'description', event.target.value)} />
               <select className="input" value={coupon.discountType || 'PERCENTAGE'} onChange={(event) => updateArrayItem('coupons', index, 'discountType', event.target.value)}>
                 <option value="PERCENTAGE">Porcentaje</option>
                 <option value="FIXED">Valor fijo</option>
@@ -150,6 +202,23 @@ export function AdminSettingsPage() {
           ))}
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={() => setShowQR(!showQR)}
+        className="btn-secondary mt-4 w-full sm:w-auto"
+      >
+        <QrCode size={18} />
+        {showQR ? 'Ocultar QR' : 'Generar QR del menu'}
+      </button>
+
+      {showQR && (
+        <div className="safe-panel mt-4 p-5 text-center">
+          <p className="label mb-3">Escanea para ver el menu</p>
+          <QRCode url={menuUrl} />
+          <p className="mt-2 text-xs text-stone-500">{menuUrl}</p>
+        </div>
+      )}
 
       {saved ? <p className="mt-4 rounded-md bg-emerald-50 p-3 text-sm font-bold text-emerald-700">Configuracion guardada</p> : null}
       <button type="submit" className="btn-primary mt-5 w-full sm:w-auto">
