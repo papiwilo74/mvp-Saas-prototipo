@@ -1,17 +1,24 @@
 function getRestaurantSlug() {
-  if (typeof window === 'undefined') {
-    return 'demo-burger';
-  }
+  if (typeof window === 'undefined') return 'demo-burger';
 
-  const params = new URLSearchParams(window.location.search);
-  const fromUrl = params.get('restaurant');
-  if (fromUrl) {
-    sessionStorage.setItem('ff_restaurant_slug', fromUrl);
-    return fromUrl;
+  const { pathname, search, hostname } = window.location;
+
+  const params = new URLSearchParams(search);
+  const fromQuery = params.get('restaurant');
+  if (fromQuery) {
+    sessionStorage.setItem('ff_restaurant_slug', fromQuery);
+    return fromQuery;
   }
 
   const stored = sessionStorage.getItem('ff_restaurant_slug');
   if (stored) return stored;
+
+  const reservedPaths = ['menu', 'cart', 'admin', 'superadmin', 'login', 'checkout', 'profile', 'orders', 'products', 'icons', 'assets', 'sw.js', 'manifest.json', 'favicon.ico'];
+  const pathSlug = pathname.replace(/^\/+|\/+$/g, '');
+  if (pathSlug && !reservedPaths.includes(pathSlug) && !pathSlug.includes('/') && !pathSlug.includes('.')) {
+    sessionStorage.setItem('ff_restaurant_slug', pathSlug);
+    return pathSlug;
+  }
 
   return import.meta.env.VITE_RESTAURANT_SLUG || 'demo-burger';
 }

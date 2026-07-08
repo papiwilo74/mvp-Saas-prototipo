@@ -34,6 +34,13 @@
       ]
     }
   ],
+  "rewrites": [
+    { "source": "/sw.js", "destination": "/sw.js" },
+    { "source": "/manifest.json", "destination": "/manifest.json" },
+    { "source": "/icons/:path*", "destination": "/icons/:path*" },
+    { "source": "/assets/:path*", "destination": "/assets/:path*" },
+    { "source": "/(.*)", "destination": "/" }
+  ],
   "redirects": [
     { "source": "/.env", "destination": "/", "permanent": false },
     { "source": "/.env.local", "destination": "/", "permanent": false },
