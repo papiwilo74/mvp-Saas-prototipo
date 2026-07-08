@@ -16,7 +16,7 @@ export function LoginPage() {
     try {
       setSubmitting(true);
       const user = await login(form);
-      navigate(user.role === 'ADMIN' ? '/admin' : '/');
+      navigate(user.role === 'SUPERADMIN' ? '/superadmin' : user.role === 'ADMIN' ? '/admin' : '/');
     } catch (requestError) {
       setError(requestError.response?.data?.message || 'Credenciales invalidas');
     } finally {

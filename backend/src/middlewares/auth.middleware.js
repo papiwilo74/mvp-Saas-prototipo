@@ -53,8 +53,16 @@ export const optionalAuthenticate = async (req, _res, next) => {
 };
 
 export const requireAdmin = (req, _res, next) => {
-  if (req.user?.role !== 'ADMIN') {
+  if (req.user?.role !== 'ADMIN' && req.user?.role !== 'SUPERADMIN') {
     return next(new ApiError(403, 'Acceso solo para administradores'));
+  }
+
+  return next();
+};
+
+export const requireSuperAdmin = (req, _res, next) => {
+  if (req.user?.role !== 'SUPERADMIN') {
+    return next(new ApiError(403, 'Acceso solo para super administradores'));
   }
 
   return next();

@@ -3,6 +3,7 @@ import { ProtectedRoute } from '../components/routing/ProtectedRoute';
 import { env } from '../config/env';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { AppLayout } from '../layouts/AppLayout';
+import { SuperAdminLayout } from '../layouts/SuperAdminLayout';
 import { AdminCustomersPage } from '../pages/admin/AdminCustomersPage';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
 import { AdminKitchenPage } from '../pages/admin/AdminKitchenPage';
@@ -17,6 +18,10 @@ import { MenuPage } from '../pages/MenuPage';
 import { OrderHistoryPage } from '../pages/OrderHistoryPage';
 import { ProfilePage } from '../pages/ProfilePage';
 import { ProductDetailPage } from '../pages/ProductDetailPage';
+import { SuperAdminDashboardPage } from '../pages/superadmin/SuperAdminDashboardPage';
+import { SuperAdminNewRestaurantPage } from '../pages/superadmin/SuperAdminNewRestaurantPage';
+import { SuperAdminRestaurantDetailPage } from '../pages/superadmin/SuperAdminRestaurantDetailPage';
+import { SuperAdminRestaurantsPage } from '../pages/superadmin/SuperAdminRestaurantsPage';
 
 export function AppRoutes() {
   return (
@@ -41,9 +46,14 @@ export function AppRoutes() {
         <Route path="settings" element={<AdminSettingsPage />} />
       </Route>
 
+      <Route path="/superadmin" element={<ProtectedRoute requireSuperAdmin><SuperAdminLayout /></ProtectedRoute>}>
+        <Route index element={<SuperAdminDashboardPage />} />
+        <Route path="restaurants" element={<SuperAdminRestaurantsPage />} />
+        <Route path="restaurants/:id" element={<SuperAdminRestaurantDetailPage />} />
+        <Route path="new" element={<SuperAdminNewRestaurantPage />} />
+      </Route>
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
-
-

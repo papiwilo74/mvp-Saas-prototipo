@@ -10,6 +10,7 @@ import { paymentRouter } from './payment.routes.js';
 import { productRouter } from './product.routes.js';
 import { restaurantConfigRouter } from './restaurantConfig.routes.js';
 import { reportRouter } from './report.routes.js';
+import { superadminRouter } from './superadmin.routes.js';
 
 export const apiRouter = Router();
 
@@ -32,3 +33,4 @@ apiRouter.use('/restaurant-config', restaurantConfigRouter);
 apiRouter.use('/reports', reportRouter);
 apiRouter.use('/export', exportRouter);
 apiRouter.use('/payments', paymentRouter);
+apiRouter.use('/superadmin', superadminRouter);
