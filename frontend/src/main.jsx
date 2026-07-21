@@ -7,6 +7,7 @@ import { AuthProvider } from './context/AuthContext.jsx';
 import { CartProvider } from './context/CartContext.jsx';
 import { RestaurantConfigProvider } from './context/RestaurantConfigContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
+import './styles/theme.css';
 import './styles/index.css';
 
 const queryClient = new QueryClient({

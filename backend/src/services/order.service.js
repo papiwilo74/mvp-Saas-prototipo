@@ -4,35 +4,32 @@ import { sendOrderConfirmationEmail, sendOrderStatusEmail } from './email.servic
 import { findOrCreateCustomer } from './customer.service.js';
 import { emitNewOrder, emitOrderStatusChanged } from './socket.service.js';
 import { sendStatusUpdate } from './whatsapp.service.js';
+import {
+  normalizeCoupons,
+  normalizeZones,
+  normalizeLoyalty,
+  getTier,
+  calculateCouponDiscount,
+  calculatePointsDiscount,
+  detectZoneFromAddress,
+  POINTS_PER_PESO
+} from './order.pricing.service.js';
+import { validateStock, deductStock } from './order.inventory.service.js';
 
-const normalizeCoupons = (config) => Array.isArray(config?.coupons) ? config.coupons : [];
-const normalizeZones = (config) => Array.isArray(config?.deliveryZones) ? config.deliveryZones : [];
-const normalizeLoyalty = (config) => config?.loyaltyProgram || null;
-
-const TIER_THRESHOLDS = { BRONCE: 0, PLATA: 500, ORO: 2000, DIAMANTE: 5000 };
-const POINTS_PER_PESO = 0.01;
-const POINTS_VALUE = 10;
-
-const getTier = (points) => {
-  if (points >= 5000) return 'DIAMANTE';
-  if (points >= 2000) return 'ORO';
-  if (points >= 500) return 'PLATA';
-  return 'BRONCE';
-};
-
-const calculateCouponDiscount = ({ subtotal, coupon }) => {
-  if (!coupon || !coupon.isActive) return 0;
-  if (coupon.minimumOrder && subtotal < Number(coupon.minimumOrder)) return 0;
-  if (coupon.discountType === 'PERCENTAGE') {
-    return Math.min(subtotal, subtotal * (Number(coupon.discountValue) / 100));
-  }
-  return Math.min(subtotal, Number(coupon.discountValue));
-};
-
-const calculatePointsDiscount = ({ loyalty, pointsRedeemed }) => {
-  if (!loyalty?.enabled || !pointsRedeemed || pointsRedeemed <= 0) return 0;
-  return pointsRedeemed * POINTS_VALUE;
-};
+export { listMyOrders, listRestaurantOrders, listKitchenOrders } from './order.query.service.js';
+export {
+  normalizeCoupons,
+  normalizeZones,
+  normalizeLoyalty,
+  getTier,
+  calculateCouponDiscount,
+  calculatePointsDiscount,
+  detectZoneFromAddress,
+  TIER_THRESHOLDS,
+  POINTS_PER_PESO,
+  POINTS_VALUE
+} from './order.pricing.service.js';
+export { validateStock, deductStock } from './order.inventory.service.js';
 
 export const createOrder = async ({
   restaurantSlug = 'demo-burger',
@@ -65,11 +62,11 @@ export const createOrder = async ({
   }
 
   const productsById = new Map(products.map((product) => [product.id, product]));
+
+  validateStock(productsById, items);
+
   const orderItems = items.map((item) => {
     const product = productsById.get(item.productId);
-    if (product.trackStock && typeof product.stock === 'number' && item.quantity > product.stock) {
-      throw new ApiError(400, `Stock insuficiente para ${product.name}`);
-    }
     const unitPrice = Number(product.price);
     const subtotal = unitPrice * item.quantity;
 
@@ -78,9 +75,43 @@ export const createOrder = async ({
 
   const subtotal = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
   const deliveryZones = normalizeZones(restaurant.config);
-  const selectedZone = deliveryZoneName
-    ? deliveryZones.find((zone) => zone.name === deliveryZoneName && zone.isActive !== false)
-    : null;
+
+  const { zone: detectedZone, geoStatus } = await detectZoneFromAddress(restaurant.id, customer.address, deliveryZones);
+
+  let selectedZone = null;
+  const warnings = [];
+
+  if (deliveryZoneName) {
+    selectedZone = deliveryZones.find((zone) => zone.name === deliveryZoneName && zone.isActive !== false);
+
+    if (detectedZone && selectedZone && detectedZone.id !== selectedZone.id) {
+      if (wompiTransactionId) {
+        warnings.push(
+          `La direccion ingresada corresponde a la zona "${detectedZone.name}", no a "${selectedZone.name}". El pedido se proceso con "${selectedZone.name}" porque el cobro por Wompi ya fue realizado.`
+        );
+      } else {
+        warnings.push(
+          `La direccion ingresada corresponde a la zona "${detectedZone.name}", no a "${selectedZone.name}". Se usara "${detectedZone.name}" como zona de entrega.`
+        );
+        selectedZone = detectedZone;
+      }
+    }
+
+    if (!detectedZone && geoStatus === 'geocode_failed') {
+      console.warn(
+        `[Geocerca] No se pudo verificar direccion para rest. ${restaurant.id}. Usando zona "${selectedZone?.name}" seleccionada por el cliente.`
+      );
+    }
+  } else if (detectedZone) {
+    selectedZone = detectedZone;
+  }
+
+  if (geoStatus === 'outside_all_zones' && selectedZone) {
+    warnings.push(
+      `La direccion ingresada no coincide con ninguna zona de entrega. Se usara "${selectedZone.name}" segun tu seleccion.`
+    );
+  }
+
   const deliveryFee = Number(selectedZone?.fee ?? restaurant.config?.deliveryFee ?? 0);
   const coupons = normalizeCoupons(restaurant.config);
   const selectedCoupon = couponCode
@@ -108,15 +139,7 @@ export const createOrder = async ({
   }
 
   const order = await prisma.$transaction(async (transaction) => {
-    for (const item of items) {
-      const product = productsById.get(item.productId);
-      if (product.trackStock) {
-        await transaction.product.update({
-          where: { id: product.id },
-          data: { stock: Math.max(0, (product.stock || 0) - item.quantity) }
-        });
-      }
-    }
+    await deductStock(transaction, items, productsById);
 
     if (loyalty?.enabled && pointsRedeemed > 0) {
       await transaction.customer.update({
@@ -140,8 +163,20 @@ export const createOrder = async ({
 
     const paymentStatus = paymentMethod === 'WOMPI' ? 'PENDING' : 'APPROVED';
 
+    await transaction.orderCounter.upsert({
+      where: { restaurantId: restaurant.id },
+      create: { restaurantId: restaurant.id, lastOrderNumber: 0 },
+      update: {}
+    });
+
+    const { lastOrderNumber: orderNumber } = await transaction.orderCounter.update({
+      where: { restaurantId: restaurant.id },
+      data: { lastOrderNumber: { increment: 1 } }
+    });
+
     return transaction.order.create({
       data: {
+        orderNumber,
         restaurantId: restaurant.id,
         userId,
         customerId: crmCustomer.id,
@@ -171,54 +206,12 @@ export const createOrder = async ({
   emitNewOrder(restaurant.id, order);
   await sendOrderConfirmationEmail({ to: customer.email, order });
 
-  return { order, earnedPoints: loyalty?.enabled ? Math.floor(subtotal * POINTS_PER_PESO) : 0 };
+  return {
+    order,
+    earnedPoints: loyalty?.enabled ? Math.floor(subtotal * POINTS_PER_PESO) : 0,
+    warnings: warnings.length > 0 ? warnings : undefined
+  };
 };
-
-export const listMyOrders = (userId) =>
-  prisma.order.findMany({
-    where: { userId },
-    include: { items: { include: { product: true } } },
-    orderBy: { createdAt: 'desc' }
-  });
-
-export const listRestaurantOrders = (restaurantId, filters = {}) => {
-  const page = filters.page || 1;
-  const pageSize = filters.pageSize || 20;
-  const skip = (page - 1) * pageSize;
-  const where = { restaurantId };
-
-  if (filters.status) where.status = filters.status;
-  if (filters.from || filters.to) {
-    where.createdAt = {};
-    if (filters.from) where.createdAt.gte = new Date(filters.from);
-    if (filters.to) {
-      const endDate = new Date(filters.to);
-      endDate.setHours(23, 59, 59, 999);
-      where.createdAt.lte = endDate;
-    }
-  }
-
-  return Promise.all([
-    prisma.order.findMany({
-      where,
-      include: { items: { include: { product: true } }, user: true },
-      orderBy: { createdAt: 'desc' },
-      skip,
-      take: pageSize
-    }),
-    prisma.order.count({ where })
-  ]).then(([orders, total]) => ({
-    orders,
-    pagination: { page, pageSize, total, totalPages: Math.max(1, Math.ceil(total / pageSize)) }
-  }));
-};
-
-export const listKitchenOrders = async (restaurantId) =>
-  prisma.order.findMany({
-    where: { restaurantId, status: { in: ['PENDING', 'PREPARING'] } },
-    include: { items: { include: { product: true } } },
-    orderBy: [{ scheduledFor: { sort: 'asc', nulls: 'first' } }, { createdAt: 'asc' }]
-  });
 
 export const updateOrderStatus = async (restaurantId, orderId, status) => {
   const order = await prisma.order.findFirst({ where: { id: orderId, restaurantId } });

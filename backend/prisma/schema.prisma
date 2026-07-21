@@ -58,6 +58,7 @@ model Restaurant {
   products  Product[]
   orders    Order[]
   customers Customer[]
+  orderCounter OrderCounter?
 }
 
 model RestaurantConfig {
@@ -179,9 +180,16 @@ model Customer {
   @@index([restaurantId, email])
 }
 
+model OrderCounter {
+  id              String     @id @default(cuid())
+  restaurantId    String     @unique
+  lastOrderNumber Int        @default(0)
+  restaurant      Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+}
+
 model Order {
   id           String      @id @default(cuid())
-  orderNumber  Int         @unique @default(autoincrement())
+  orderNumber  Int
   status       OrderStatus @default(PENDING)
   paymentMethod PaymentMethod @default(CASH)
   paymentStatus PaymentStatus @default(PENDING)
@@ -210,6 +218,7 @@ model Order {
   customer     Customer?   @relation(fields: [customerId], references: [id], onDelete: SetNull)
   items        OrderItem[]
 
+  @@unique([restaurantId, orderNumber])
   @@index([restaurantId])
   @@index([userId])
   @@index([customerId])

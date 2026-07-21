@@ -1,32 +1,32 @@
 import { Star, Timer, TrendingUp, UsersRound } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
 import { api } from '../../services/api';
+import { useApiQuery, apiQueryKey } from '../../hooks/useApiQuery';
 import { formatCurrency } from '../../utils/formatters';
 
 export function AdminAnalyticsPage() {
-  const { data: peakHours } = useQuery({
-    queryKey: ['analytics', 'peak-hours'],
-    queryFn: async () => {
+  const { data: peakHours } = useApiQuery(
+    apiQueryKey('analytics', 'peak-hours'),
+    async () => {
       const { data } = await api.get('/analytics/peak-hours');
       return data;
     }
-  });
+  );
 
-  const { data: revenueByDay } = useQuery({
-    queryKey: ['analytics', 'revenue-by-day'],
-    queryFn: async () => {
+  const { data: revenueByDay } = useApiQuery(
+    apiQueryKey('analytics', 'revenue-by-day'),
+    async () => {
       const { data } = await api.get('/analytics/revenue-by-day');
       return data;
     }
-  });
+  );
 
-  const { data: frequentCustomers } = useQuery({
-    queryKey: ['analytics', 'frequent-customers'],
-    queryFn: async () => {
+  const { data: frequentCustomers } = useApiQuery(
+    apiQueryKey('analytics', 'frequent-customers'),
+    async () => {
       const { data } = await api.get('/analytics/frequent-customers');
       return data;
     }
-  });
+  );
 
   const maxPeakCount = Math.max(1, ...(peakHours || []).map((h) => h.count));
   const maxRevenue = Math.max(1, ...(revenueByDay || []).map((d) => d.revenue));

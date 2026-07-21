@@ -11,16 +11,22 @@
     "prisma:deploy": "prisma migrate deploy",
     "prisma:seed": "node prisma/seed.js",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "bootstrap": "node scripts/bootstrap.js",
+    "db:setup": "npx prisma migrate dev && npx prisma db seed",
+    "db:reset": "npx prisma migrate reset --force",
+    "env:validate": "node -e \"require('./src/config/env.js')\"",
+    "verify:deploy": "node scripts/deploy-verify.js",
+    "verify:local": "node scripts/deploy-verify.js --url=http://localhost:4000/api"
   },
   "dependencies": {
     "@prisma/client": "^6.9.0",
     "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.10.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.19.2",
-    "fastfood-saas-mvp": "file:..",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
@@ -32,6 +38,7 @@
   "devDependencies": {
     "nodemon": "^3.1.4",
     "prisma": "^6.9.0",
+    "supertest": "^7.2.2",
     "vitest": "^3.2.7"
   },
   "prisma": {

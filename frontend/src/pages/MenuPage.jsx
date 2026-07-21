@@ -1,6 +1,7 @@
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { ProductCard } from '../components/menu/ProductCard';
+import { EmptyState } from '../components/ui/EmptyState';
 import { ProductSkeleton } from '../components/ui/Skeleton';
 import { useCart } from '../context/CartContext';
 import { useMenu } from '../hooks/useMenu';
@@ -24,8 +25,35 @@ export function MenuPage() {
     [products, activeCategory, query, onlyAvailable]
   );
 
+  if (loading) {
+    return (
+      <section className="container-page py-5 md:py-8">
+        <div className="mb-5">
+          <span className="badge-chip">Catalogo visual</span>
+          <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Menu listo para convertir</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">Elige tus favoritos, filtra por categorias y arma el pedido en segundos con una presentacion mas premium.</p>
+        </div>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => <ProductSkeleton key={i} />)}
+        </div>
+      </section>
+    );
+  }
+
   if (error) {
-    return <div className="container-page py-10 text-sm font-semibold text-red-700">{error}</div>;
+    return (
+      <div className="container-page py-10">
+        <EmptyState title="No pudimos cargar el menu" isLoading={false} isError errorMessage={error} />
+      </div>
+    );
+  }
+
+  if (!products.length && !loading) {
+    return (
+      <div className="container-page py-10">
+        <EmptyState title="No hay productos disponibles" description="El restaurante aun no ha agregado productos al menu." />
+      </div>
+    );
   }
 
   return (
@@ -84,13 +112,11 @@ export function MenuPage() {
       </div>
 
       <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {loading
-          ? Array.from({ length: 6 }).map((_, i) => <ProductSkeleton key={i} />)
-          : filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} onAdd={addItem} />
-            ))}
+        {filteredProducts.map((product) => (
+          <ProductCard key={product.id} product={product} onAdd={addItem} />
+        ))}
       </div>
-      {!loading && !filteredProducts.length ? (
+      {!filteredProducts.length ? (
         <div className="safe-panel mt-5 p-5 text-sm text-stone-600">No encontramos productos con esos filtros.</div>
       ) : null}
     </section>

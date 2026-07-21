@@ -2,6 +2,7 @@ import { Clock3, Home, ShoppingBag, Store } from 'lucide-react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useRestaurantConfig } from '../context/RestaurantConfigContext';
+import { DemoBanner } from '../components/ui/DemoBanner';
 
 const navItems = [
   { to: '/', label: 'Inicio', icon: Home, end: true },
@@ -16,6 +17,7 @@ export function AppLayout() {
   return (
     <div className="app-shell">
       <header className="sticky top-0 z-30 border-b border-white/60 bg-[#f7f1e8]/90 backdrop-blur">
+        <DemoBanner />
         <div className="container-page flex flex-col gap-3 py-3 md:flex-row md:items-center md:justify-between">
           <Link to="/" className="flex min-w-0 items-center gap-2">
             {config.logoUrl ? <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-2xl object-cover shadow-soft" /> : null}

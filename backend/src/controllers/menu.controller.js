@@ -1,5 +1,6 @@
 import { ApiError } from '../utils/apiError.js';
 import * as menuService from '../services/menu.service.js';
+import { toMenuResponse } from '../dto/menu.dto.js';
 
 export const getMenu = async (req, res) => {
   const restaurantSlug = req.query.restaurant || 'demo-burger';
@@ -9,5 +10,5 @@ export const getMenu = async (req, res) => {
 
   if (!restaurant) throw new ApiError(404, 'Restaurante no encontrado');
 
-  res.json({ restaurant });
+  res.json({ restaurant: toMenuResponse(restaurant) });
 };

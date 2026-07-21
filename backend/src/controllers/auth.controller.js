@@ -1,4 +1,5 @@
 import * as authService from '../services/auth.service.js';
+import { toPublicUser } from '../dto/user.dto.js';
 
 export const login = async (req, res) => {
   const result = await authService.login(req.validated.body);
@@ -10,7 +11,7 @@ export const login = async (req, res) => {
     maxAge: 24 * 60 * 60 * 1000
   });
 
-  res.json({ user: result.user });
+  res.json({ user: toPublicUser(result.user) });
 };
 
 export const logout = async (_req, res) => {
@@ -19,5 +20,5 @@ export const logout = async (_req, res) => {
 };
 
 export const me = async (req, res) => {
-  res.json({ user: req.user });
+  res.json({ user: toPublicUser(req.user) });
 };

@@ -44,8 +44,33 @@ async function main() {
       leadTimeMinutes: 30,
       deliveryFee: 5000,
       deliveryZones: [
-        { id: 'zona-centro', name: 'Centro', fee: 3000, minOrder: 20000, estimatedMinutes: 25, isActive: true },
-        { id: 'zona-norte', name: 'Norte', fee: 5000, minOrder: 25000, estimatedMinutes: 35, isActive: true }
+        {
+          id: 'zona-centro',
+          name: 'Centro',
+          fee: 3000,
+          minOrder: 20000,
+          estimatedMinutes: 25,
+          isActive: true,
+          coordinates: { lat: 10.9639, lng: -74.7964, radiusKm: 2.5 }
+        },
+        {
+          id: 'zona-norte',
+          name: 'Norte',
+          fee: 5000,
+          minOrder: 25000,
+          estimatedMinutes: 35,
+          isActive: true,
+          coordinates: { lat: 11.005, lng: -74.81, radiusKm: 3 }
+        },
+        {
+          id: 'zona-sur',
+          name: 'Sur',
+          fee: 6000,
+          minOrder: 30000,
+          estimatedMinutes: 40,
+          isActive: true,
+          coordinates: { lat: 10.92, lng: -74.78, radiusKm: 3 }
+        }
       ],
       coupons: [
         { id: 'cup-bienvenida', code: 'BIENVENIDA10', description: '10% de descuento', discountType: 'PERCENTAGE', discountValue: 10, minimumOrder: 25000, isActive: true },

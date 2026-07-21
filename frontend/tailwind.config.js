@@ -11,7 +11,13 @@ export default {
           600: '#ea580c',
           700: '#c2410c'
         },
-        ink: '#141414'
+        ink: '#141414',
+        admin: {
+          bg: '#fafaf9',
+          card: '#ffffff',
+          border: '#e7e5e4',
+          muted: '#78716c'
+        }
       },
       boxShadow: {
         soft: '0 16px 40px rgba(20, 20, 20, 0.08)'
@@ -20,4 +26,3 @@ export default {
   },
   plugins: []
 };
-

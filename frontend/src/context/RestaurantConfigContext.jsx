@@ -1,6 +1,8 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { createContext, useContext, useEffect, useMemo } from 'react';
 import { env } from '../config/env';
 import { api } from '../services/api';
+import { apiQueryKey } from '../hooks/useApiQuery';
 
 const fallbackConfig = {
   restaurantName: 'Demo Burger',
@@ -26,25 +28,36 @@ const fallbackConfig = {
 const RestaurantConfigContext = createContext(null);
 
 export function RestaurantConfigProvider({ children }) {
-  const [config, setConfig] = useState(fallbackConfig);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    api
-      .get('/restaurant-config', { params: { restaurant: env.restaurantSlug } })
-      .then(({ data }) => {
-        setConfig(data.restaurant.config || fallbackConfig);
-      })
-      .catch(() => setConfig(fallbackConfig))
-      .finally(() => setLoading(false));
-  }, []);
+  const { data, isLoading, isError } = useQuery({
+    queryKey: apiQueryKey('restaurantConfig', env.restaurantSlug),
+    queryFn: async () => {
+      const { data } = await api.get('/restaurant-config', { params: { restaurant: env.restaurantSlug } });
+      return data.restaurant.config || fallbackConfig;
+    },
+    staleTime: 10 * 60 * 1000,
+    retry: 2,
+    placeholderData: fallbackConfig,
+  });
+
+  const config = data || fallbackConfig;
+
+  const setConfig = (newConfig) => {
+    queryClient.setQueryData(apiQueryKey('restaurantConfig', env.restaurantSlug), newConfig);
+  };
 
   useEffect(() => {
     document.documentElement.style.setProperty('--color-primary', config.primaryColor);
     document.documentElement.style.setProperty('--color-secondary', config.secondaryColor);
   }, [config]);
 
-  const value = useMemo(() => ({ config, setConfig, loading }), [config, loading]);
+  const value = useMemo(() => ({
+    config,
+    setConfig,
+    loading: isLoading && !data,
+    isError
+  }), [config, isLoading, isError, data]);
 
   return <RestaurantConfigContext.Provider value={value}>{children}</RestaurantConfigContext.Provider>;
 }

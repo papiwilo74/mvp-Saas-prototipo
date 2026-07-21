@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useApiQuery, apiQueryKey } from '../../hooks/useApiQuery';
 import { api } from '../../services/api';
 import { formatCurrency } from '../../utils/formatters';
 
@@ -9,21 +9,21 @@ const cards = [
 ];
 
 export function AdminDashboardPage() {
-  const { data: summary } = useQuery({
-    queryKey: ['reports', 'summary'],
-    queryFn: async () => {
+  const { data: summary } = useApiQuery(
+    apiQueryKey('reports', 'summary'),
+    async () => {
       const { data } = await api.get('/reports/summary');
       return data.summary;
     }
-  });
+  );
 
-  const { data: topProducts = [] } = useQuery({
-    queryKey: ['reports', 'top-products'],
-    queryFn: async () => {
+  const { data: topProducts = [] } = useApiQuery(
+    apiQueryKey('reports', 'top-products'),
+    async () => {
       const { data } = await api.get('/reports/top-products');
       return data.products;
     }
-  });
+  );
 
   return (
     <div>
