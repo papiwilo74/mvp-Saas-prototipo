@@ -48,6 +48,13 @@ const allowedOrigins = validatedEnv.ALLOWED_ORIGINS
   ? validatedEnv.ALLOWED_ORIGINS.split(',').map((o) => normalizeUrl(o.trim())).filter(Boolean).join(',')
   : undefined;
 
+export const env = {
+  ...validatedEnv,
+  FRONTEND_URL: frontendUrl,
+  ALLOWED_ORIGINS: allowedOrigins
+};
+
+// Production checks (console is fine here — runs before logger is available)
 if (validatedEnv.NODE_ENV === 'production') {
   if (frontendUrl.includes('localhost') || frontendUrl.includes('127.0.0.1')) {
     console.error('❌ FRONTEND_URL must not be localhost in production.');
@@ -60,16 +67,4 @@ if (validatedEnv.NODE_ENV === 'production') {
   if (validatedEnv.JWT_SECRET.length < 32) {
     console.warn('⚠️  WARNING: Using a short JWT_SECRET in production. Use at least 32 chars.');
   }
-  if (!validatedEnv.RESEND_API_KEY) {
-    console.warn('⚠️  WARNING: RESEND_API_KEY is not set. Emails will be disabled.');
-  }
-  if (!validatedEnv.CLOUDINARY_CLOUD_NAME) {
-    console.warn('⚠️  WARNING: Cloudinary is not configured. Image uploads will fail.');
-  }
 }
-
-export const env = {
-  ...validatedEnv,
-  FRONTEND_URL: frontendUrl,
-  ALLOWED_ORIGINS: allowedOrigins
-};

@@ -15,6 +15,12 @@ export function AuthProvider({ children }) {
       .finally(() => setLoading(false));
   }, []);
 
+  const register = async (payload) => {
+    const { data } = await api.post('/auth/register', payload);
+    setUser(data.user);
+    return data.user;
+  };
+
   const login = async (payload) => {
     const { data } = await api.post('/auth/login', payload);
     setUser(data.user);
@@ -31,7 +37,7 @@ export function AuthProvider({ children }) {
   };
 
   const value = useMemo(
-    () => ({ user, loading, isAdmin: user?.role === 'ADMIN' || user?.role === 'SUPERADMIN', isSuperAdmin: user?.role === 'SUPERADMIN', login, logout }),
+    () => ({ user, loading, isAdmin: user?.role === 'ADMIN' || user?.role === 'SUPERADMIN', isSuperAdmin: user?.role === 'SUPERADMIN', register, login, logout }),
     [user, loading]
   );
 

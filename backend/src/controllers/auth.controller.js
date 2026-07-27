@@ -1,6 +1,19 @@
 import * as authService from '../services/auth.service.js';
 import { toPublicUser } from '../dto/user.dto.js';
 
+export const register = async (req, res) => {
+  const result = await authService.register(req.validated.body);
+
+  res.cookie('ff_token', result.token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 24 * 60 * 60 * 1000
+  });
+
+  res.status(201).json({ user: toPublicUser(result.user) });
+};
+
 export const login = async (req, res) => {
   const result = await authService.login(req.validated.body);
 

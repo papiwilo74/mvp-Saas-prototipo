@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export function LoginPage() {
@@ -40,6 +40,10 @@ export function LoginPage() {
         </div>
         {error && <p className="mt-4 rounded-md bg-red-50 p-3 text-sm font-semibold text-red-700">{error}</p>}
         <button type="submit" disabled={submitting} className="btn-primary mt-6 w-full">{submitting ? 'Ingresando...' : 'Ingresar'}</button>
+        <p className="mt-4 text-center text-xs text-stone-500">
+          No tienes cuenta?{' '}
+          <Link to="/register" className="font-bold text-stone-950 underline">Crear cuenta</Link>
+        </p>
       </form>
     </div>
   );

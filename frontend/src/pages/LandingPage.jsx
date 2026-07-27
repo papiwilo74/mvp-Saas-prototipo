@@ -1,4 +1,4 @@
-import { ArrowRight, Clock, Flame, MapPinned, Percent, ShieldCheck, Star, WalletCards } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Clock, Flame, MapPinned, Percent, ShieldCheck, Smartphone, Star, Store, Users, WalletCards } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ProductCard } from '../components/menu/ProductCard';
 import { ProductSkeleton } from '../components/ui/Skeleton';
@@ -169,6 +169,63 @@ export function LandingPage() {
                 <p className="mt-2 text-lg font-black">Canal directo propio</p>
                 <p className="mt-1 text-sm text-stone-600">Menos dependencia de plataformas externas y mejor relacion con clientes.</p>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="container-page pt-10 pb-6">
+        <div className="rounded-[32px] bg-gradient-to-br from-stone-950 to-stone-900 px-6 py-10 text-white sm:px-10 sm:py-12">
+          <div className="mx-auto max-w-2xl text-center">
+            <Store size={32} className="mx-auto text-orange-400" />
+            <h2 className="mt-4 text-3xl font-black tracking-tight">Tu propio canal de pedidos</h2>
+            <p className="mt-3 text-base leading-7 text-stone-400">
+              Esta demo es un producto SaaS listo para implementar en tu restaurante. 
+              Catalogo digital, domicilios, cupones, panel admin, CRM de clientes y mas.
+            </p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <div className="flex items-start gap-3 rounded-2xl bg-white/10 p-4 text-left">
+                <CheckCircle2 size={20} className="mt-0.5 shrink-0 text-emerald-400" />
+                <div>
+                  <p className="font-bold">Catalogo y pedidos</p>
+                  <p className="text-sm text-stone-400">Menu visual, combos, variantes y pedidos directos por WhatsApp.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 rounded-2xl bg-white/10 p-4 text-left">
+                <Smartphone size={20} className="mt-0.5 shrink-0 text-orange-400" />
+                <div>
+                  <p className="font-bold">Panel admin</p>
+                  <p className="text-sm text-stone-400">Dashboard, cocina, clientes, reportes y configuracion en tiempo real.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 rounded-2xl bg-white/10 p-4 text-left">
+                <Users size={20} className="mt-0.5 shrink-0 text-blue-400" />
+                <div>
+                  <p className="font-bold">CRM y fidelizacion</p>
+                  <p className="text-sm text-stone-400">Historial de clientes, puntos, pedidos programados y notas internas.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 rounded-2xl bg-white/10 p-4 text-left">
+                <WalletCards size={20} className="mt-0.5 shrink-0 text-amber-400" />
+                <div>
+                  <p className="font-bold">Cupones y promos</p>
+                  <p className="text-sm text-stone-400">Crea descuentos, combos y campanas para aumentar el ticket promedio.</p>
+                </div>
+              </div>
+            </div>
+            <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+              <a
+                href={`https://wa.me/${config.whatsapp?.replace(/\D/g, '') || ''}?text=${encodeURIComponent('Hola, quiero informacion sobre el SaaS de pedidos para mi restaurante.')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl bg-orange-600 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-orange-500"
+              >
+                Quiero esto para mi restaurante
+                <ArrowRight size={18} />
+              </a>
+              <Link to="/menu" className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10">
+                Ver demo como cliente
+              </Link>
             </div>
           </div>
         </div>

@@ -1,0 +1,72 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fastfood_saas
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      target: development
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/fastfood_saas?schema=public
+      DIRECT_URL: postgresql://postgres:postgres@postgres:5432/fastfood_saas?schema=public
+      JWT_SECRET: dev-secret-change-in-production-please-use-a-long-random-string
+      JWT_EXPIRES_IN: 7d
+      FRONTEND_URL: http://localhost:5173
+      ALLOWED_ORIGINS: http://localhost:5173
+      LOGIN_RATE_LIMIT_WINDOW_MS: "900000"
+      LOGIN_RATE_LIMIT_MAX: "50"
+      PUBLIC_RATE_LIMIT_WINDOW_MS: "60000"
+      PUBLIC_RATE_LIMIT_MAX: "200"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/prisma:/app/prisma
+      - ./backend/scripts:/app/scripts
+      - ./backend/uploads:/app/uploads
+    command: >
+      sh -c "npx prisma migrate deploy && npx prisma db seed && npm run dev"
+
+  frontend:
+    image: node:20-alpine
+    working_dir: /app
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:4000/api
+      VITE_RESTAURANT_SLUG: demo-burger
+      VITE_ENABLE_ORDER_HISTORY: "true"
+      VITE_DEMO_MODE: "true"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/package.json:/app/package.json
+      - ./frontend/vite.config.js:/app/vite.config.js
+      - ./frontend/tailwind.config.js:/app/tailwind.config.js
+      - ./frontend/postcss.config.js:/app/postcss.config.js
+      - ./frontend/index.html:/app/index.html
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

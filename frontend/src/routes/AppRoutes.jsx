@@ -15,6 +15,7 @@ import { CartPage } from '../pages/CartPage';
 import { CheckoutSuccessPage } from '../pages/CheckoutSuccessPage';
 import { LandingPage } from '../pages/LandingPage';
 import { LoginPage } from '../pages/LoginPage';
+import { RegisterPage } from '../pages/RegisterPage';
 import { MenuPage } from '../pages/MenuPage';
 import { OrderHistoryPage } from '../pages/OrderHistoryPage';
 import { ProfilePage } from '../pages/ProfilePage';
@@ -34,6 +35,7 @@ export function AppRoutes() {
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         {env.enableOrderHistory ? <Route path="/orders" element={<ProtectedRoute><OrderHistoryPage /></ProtectedRoute>} /> : null}
         <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       </Route>
