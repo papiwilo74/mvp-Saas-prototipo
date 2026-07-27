@@ -1,6 +1,6 @@
 import { prisma } from '../config/prisma.js';
 
-const paymentLabels = { CASH: 'Efectivo', NEQUI: 'Nequi', CARD: 'Tarjeta' };
+const paymentLabels = { CASH: 'Efectivo', NEQUI: 'Nequi', CARD: 'Tarjeta', WOMPI: 'Pago en línea' };
 const statusLabels = { PENDING: 'Pendiente', PREPARING: 'Preparando', ON_THE_WAY: 'En camino', DELIVERED: 'Entregado', CANCELLED: 'Cancelado' };
 
 const csvEscape = (value) => {

@@ -107,7 +107,8 @@ export function CartPage() {
         const { data: paymentData } = await api.post('/payments/create-link', {
           amountInCents,
           reference: `Pedido-${Date.now()}`,
-          customerEmail: customer.email || undefined
+          customerEmail: customer.email || undefined,
+          restaurantSlug: env.restaurantSlug
         });
         payload.wompiTransactionId = paymentData.wompiId;
         const { data } = await api.post('/orders', payload);

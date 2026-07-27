@@ -19,7 +19,11 @@ const envSchema = z.object({
   EMAIL_FROM: z.string().default('FastFood SaaS <pedidos@example.com>'),
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
-  CLOUDINARY_API_SECRET: z.string().optional()
+  CLOUDINARY_API_SECRET: z.string().optional(),
+  WOMPI_ENV: z.enum(['sandbox', 'prod']).default('sandbox'),
+  WOMPI_PUBLIC_KEY: z.string().optional(),
+  WOMPI_PRIVATE_KEY: z.string().optional(),
+  WOMPI_EVENTS_SECRET: z.string().optional()
 });
 
 const rawEnv = { ...process.env };

@@ -11,7 +11,8 @@ const createPaymentLinkSchema = z.object({
   body: z.object({
     amountInCents: z.coerce.number().int().positive(),
     reference: z.string().min(1),
-    customerEmail: z.string().email().optional()
+    customerEmail: z.string().email().optional(),
+    restaurantSlug: z.string().optional()
   })
 });
 

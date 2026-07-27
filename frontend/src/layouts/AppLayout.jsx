@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useRestaurantConfig } from '../context/RestaurantConfigContext';
 import { DemoBanner } from '../components/ui/DemoBanner';
+import { InstallPrompt } from '../components/ui/InstallPrompt';
 
 const navItems = [
   { to: '/', label: 'Inicio', icon: Home, end: true },
@@ -73,6 +74,7 @@ export function AppLayout() {
           ))}
         </div>
       </nav>
+      <InstallPrompt />
     </div>
   );
 }

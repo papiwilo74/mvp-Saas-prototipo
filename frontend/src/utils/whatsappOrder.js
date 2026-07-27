@@ -3,7 +3,8 @@ import { formatCurrency } from './formatters';
 const paymentLabels = {
   CASH: 'Efectivo',
   NEQUI: 'Nequi',
-  CARD: 'Tarjeta'
+  CARD: 'Tarjeta',
+  WOMPI: 'Pago en línea'
 };
 
 export function buildWhatsAppOrderUrl({ order, config }) {

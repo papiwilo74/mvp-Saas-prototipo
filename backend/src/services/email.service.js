@@ -30,7 +30,7 @@ const buildOrderSummaryHtml = (order) => {
 };
 
 const buildOrderTemplate = ({ order, title, intro }) => {
-  const paymentLabels = { CASH: 'Efectivo', NEQUI: 'Nequi', CARD: 'Tarjeta' };
+  const paymentLabels = { CASH: 'Efectivo', NEQUI: 'Nequi', CARD: 'Tarjeta', WOMPI: 'Pago en línea' };
 
   return `
 <!DOCTYPE html>

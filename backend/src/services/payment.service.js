@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { prisma } from '../config/prisma.js';
 import { env } from '../config/env.js';
 
@@ -6,11 +7,21 @@ const WOMPI_API = env.WOMPI_ENV === 'prod'
   : 'https://sandbox.wompi.co/v1';
 
 const getWompiKeys = async (restaurantId) => {
+  if (!restaurantId) return { publicKey: env.WOMPI_PUBLIC_KEY, privateKey: env.WOMPI_PRIVATE_KEY };
   const config = await prisma.restaurantConfig.findUnique({ where: { restaurantId } });
   return {
     publicKey: config?.wompiPublicKey || env.WOMPI_PUBLIC_KEY,
-    privateKey: config?.wompiPrivateKey || env.WOMPI_PRIVATE_KEY || env.WOMPI_PRIVATE_KEY
+    privateKey: config?.wompiPrivateKey || env.WOMPI_PRIVATE_KEY
   };
+};
+
+export const verifyWompiSignature = (rawBody, signature) => {
+  const secret = env.WOMPI_EVENTS_SECRET;
+  if (!secret) return true;
+  if (!signature) return false;
+  const expected = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
+  if (expected.length !== signature.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
 };
 
 export const createPaymentLink = async ({ amountInCents, reference, restaurantId, customerEmail }) => {
@@ -81,11 +92,15 @@ export const verifyWompiTransaction = async (wompiId) => {
   return { ...existing, status: mappedStatus };
 };
 
-export const processWompiWebhook = async (body) => {
-  const { data } = body;
-  if (!data?.transaction?.id) return null;
+export const processWompiWebhook = async (body, signature) => {
+  if (!verifyWompiSignature(body, signature)) {
+    throw new Error('Firma de webhook Wompi invalida');
+  }
 
-  const { id, status, reference, amount_in_cents } = data.transaction;
+  const data = typeof body === 'string' ? JSON.parse(body) : body;
+  if (!data?.data?.transaction?.id) return null;
+
+  const { id, status, reference, amount_in_cents } = data.data.transaction;
 
   const mappedStatus = status === 'APPROVED' ? 'APPROVED'
     : status === 'DECLINED' ? 'DECLINED'

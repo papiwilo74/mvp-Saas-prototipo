@@ -1,19 +1,29 @@
 import * as paymentService from '../services/payment.service.js';
 import { ApiError } from '../utils/apiError.js';
+import { prisma } from '../config/prisma.js';
 
 export const createWompiLink = async (req, res) => {
-  const { amountInCents, reference, customerEmail } = req.validated.body;
+  const { amountInCents, reference, customerEmail, restaurantSlug } = req.validated.body;
+
+  let restaurantId = req.user?.restaurantId;
+  if (!restaurantId && restaurantSlug) {
+    const restaurant = await prisma.restaurant.findUnique({ where: { slug: restaurantSlug } });
+    if (restaurant) restaurantId = restaurant.id;
+  }
+
   const result = await paymentService.createPaymentLink({
     amountInCents,
     reference,
-    restaurantId: req.user.restaurantId,
+    restaurantId,
     customerEmail
   });
   res.json(result);
 };
 
 export const webhook = async (req, res) => {
-  const result = await paymentService.processWompiWebhook(req.body);
+  const signature = req.headers['x-signature'];
+  const rawBody = req.rawBody || JSON.stringify(req.body);
+  const result = await paymentService.processWompiWebhook(rawBody, signature);
   res.json({ success: true, transaction: result });
 };
 
