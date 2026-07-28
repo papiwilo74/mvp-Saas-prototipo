@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as mapsController from '../controllers/maps.controller.js';
-import { authenticate, optionalAuthenticate } from '../middlewares/auth.middleware.js';
+import { optionalAuthenticate } from '../middlewares/auth.middleware.js';
 import { validate } from '../middlewares/validate.middleware.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { z } from 'zod';

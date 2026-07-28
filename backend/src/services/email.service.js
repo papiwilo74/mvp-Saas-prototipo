@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import { env } from '../config/env.js';
+import { logger } from './logger.service.js';
 
 const resend = env.RESEND_API_KEY ? new Resend(env.RESEND_API_KEY) : null;
 
@@ -88,7 +89,7 @@ export const sendOrderConfirmationEmail = async ({ to, order }) => {
       })
     });
   } catch (error) {
-    console.error('Error al enviar correo de confirmacion de pedido:', error);
+    logger.error({ err: error }, 'Error al enviar correo de confirmacion de pedido');
   }
 };
 
@@ -108,7 +109,7 @@ export const sendWelcomeEmail = async ({ to, name }) => {
       `
     });
   } catch (error) {
-    console.error('Error al enviar correo de bienvenida:', error);
+    logger.error({ err: error }, 'Error al enviar correo de bienvenida');
   }
 };
 
@@ -130,7 +131,7 @@ export const sendPasswordResetEmail = async ({ to, name, resetUrl }) => {
       `
     });
   } catch (error) {
-    console.error('Error al enviar correo de restablecimiento:', error);
+    logger.error({ err: error }, 'Error al enviar correo de restablecimiento');
   }
 };
 
@@ -157,6 +158,6 @@ export const sendOrderStatusEmail = async ({ to, order }) => {
       })
     });
   } catch (error) {
-    console.error('Error al enviar correo de estado del pedido:', error);
+    logger.error({ err: error }, 'Error al enviar correo de estado del pedido');
   }
 };

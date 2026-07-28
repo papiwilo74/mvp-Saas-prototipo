@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 const CartContext = createContext(null);
 
@@ -23,7 +23,7 @@ export function CartProvider({ children }) {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
   }, [items]);
 
-  const addItem = (product) => {
+  const addItem = useCallback((product) => {
     setStockWarning('');
     setItems((current) => {
       const existing = current.find((item) => item.product.id === product.id);
@@ -43,9 +43,9 @@ export function CartProvider({ children }) {
 
       return [...current, { product, quantity: 1 }];
     });
-  };
+  }, []);
 
-  const updateQuantity = (productId, quantity) => {
+  const updateQuantity = useCallback((productId, quantity) => {
     setStockWarning('');
     setItems((current) =>
       current
@@ -59,16 +59,16 @@ export function CartProvider({ children }) {
         })
         .filter((item) => item.quantity > 0)
     );
-  };
+  }, []);
 
-  const clearCart = () => setItems([]);
+  const clearCart = useCallback(() => setItems([]), []);
 
   const total = items.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0);
   const count = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const value = useMemo(
     () => ({ items, total, count, addItem, updateQuantity, clearCart, stockWarning }),
-    [items, total, count, stockWarning]
+    [items, total, count, addItem, updateQuantity, clearCart, stockWarning]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

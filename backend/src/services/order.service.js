@@ -3,6 +3,7 @@ import { ApiError } from '../utils/apiError.js';
 import { sendOrderConfirmationEmail, sendOrderStatusEmail } from './email.service.js';
 import { DEFAULT_RESTAURANT_SLUG } from '../config/constants.js';
 import { findOrCreateCustomer } from './customer.service.js';
+import { logger } from './logger.service.js';
 import { emitNewOrder, emitOrderStatusChanged } from './socket.service.js';
 import { sendStatusUpdate } from './whatsapp.service.js';
 import {
@@ -99,9 +100,7 @@ export const createOrder = async ({
     }
 
     if (!detectedZone && geoStatus === 'geocode_failed') {
-      console.warn(
-        `[Geocerca] No se pudo verificar direccion para rest. ${restaurant.id}. Usando zona "${selectedZone?.name}" seleccionada por el cliente.`
-      );
+      logger.warn({ restaurantId: restaurant.id, zone: selectedZone?.name }, 'No se pudo verificar direccion. Usando zona seleccionada por el cliente.');
     }
   } else if (detectedZone) {
     selectedZone = detectedZone;

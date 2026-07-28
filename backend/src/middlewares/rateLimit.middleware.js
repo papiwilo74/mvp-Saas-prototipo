@@ -1,5 +1,4 @@
 import rateLimit from 'express-rate-limit';
-import { env } from '../config/env.js';
 
 const getClientKey = (req) => {
   const forwarded = req.headers['x-forwarded-for'];

@@ -10,7 +10,7 @@ import * as Sentry from '@sentry/node';
 import { env } from './config/env.js';
 import { errorHandler, notFound } from './middlewares/error.middleware.js';
 import { createRateLimit } from './middlewares/rateLimit.middleware.js';
-import { csrfProtection, setCsrfToken } from './middlewares/csrf.middleware.js';
+import { setCsrfToken } from './middlewares/csrf.middleware.js';
 import { apiRouter } from './routes/index.js';
 
 Sentry.init({

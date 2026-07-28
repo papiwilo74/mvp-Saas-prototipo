@@ -24,7 +24,7 @@ export const verifyWompiSignature = (rawBody, signature) => {
   return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
 };
 
-export const createPaymentLink = async ({ amountInCents, reference, restaurantId, customerEmail }) => {
+export const createPaymentLink = async ({ amountInCents, reference, restaurantId, customerEmail: _customerEmail }) => {
   const keys = await getWompiKeys(restaurantId);
   if (!keys.privateKey) throw new Error('WOMPI_PRIVATE_KEY no configurada');
 

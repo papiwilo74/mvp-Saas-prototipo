@@ -1,4 +1,5 @@
 import { prisma } from '../config/prisma.js';
+import { logger } from './logger.service.js';
 
 const WHATSAPP_API = 'https://graph.facebook.com/v21.0';
 
@@ -44,6 +45,6 @@ export const sendStatusUpdate = async (restaurantId, phone, orderNumber, status)
       })
     });
   } catch (error) {
-    console.error('Error al enviar mensaje de WhatsApp:', error);
+    logger.error({ err: error }, 'Error al enviar mensaje de WhatsApp');
   }
 };

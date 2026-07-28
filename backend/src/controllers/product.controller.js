@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import * as productService from '../services/product.service.js';
 import * as uploadService from '../services/upload.service.js';
 import { env } from '../config/env.js';
+import { logger } from '../services/logger.service.js';
 import { toProductResponse, toProductListResponse } from '../dto/product.dto.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -44,14 +45,14 @@ export const uploadImage = async (req, res) => {
       res.status(201).json({ imageUrl: result.secure_url, publicId: result.public_id });
       return;
     } catch (error) {
-      console.error('Error uploading to Cloudinary:', error);
+      logger.error({ err: error }, 'Error uploading to Cloudinary');
       res.status(500).json({ message: 'Error al subir la imagen' });
       return;
     }
   }
 
   if (env.NODE_ENV === 'production') {
-    console.warn('WARNING: Cloudinary no configurado. Usando almacenamiento local (efimero en produccion). Configura CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY y CLOUDINARY_API_SECRET.');
+    logger.warn('Cloudinary no configurado. Usando almacenamiento local (efimero en produccion). Configura CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY y CLOUDINARY_API_SECRET.');
   }
 
   const imageUrl = saveToDisk(req.file.buffer);
