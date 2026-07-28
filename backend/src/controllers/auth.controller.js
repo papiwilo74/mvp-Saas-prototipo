@@ -35,3 +35,13 @@ export const logout = async (_req, res) => {
 export const me = async (req, res) => {
   res.json({ user: toPublicUser(req.user) });
 };
+
+export const forgotPassword = async (req, res) => {
+  const result = await authService.forgotPassword(req.validated.body);
+  res.json(result);
+};
+
+export const resetPassword = async (req, res) => {
+  const result = await authService.resetPassword(req.validated.body);
+  res.json(result);
+};

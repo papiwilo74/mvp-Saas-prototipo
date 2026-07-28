@@ -1,19 +1,41 @@
 import { useEffect, useState } from 'react';
 import { EmptyState } from '../components/ui/EmptyState';
+import { Skeleton } from '../components/ui/Skeleton';
+import { SEOHead } from '../components/seo/SEOHead';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { api } from '../services/api';
 import { formatCurrency, formatDate } from '../utils/formatters';
 
 export function OrderHistoryPage() {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/orders/mine').then(({ data }) => setOrders(data.orders));
+    setLoading(true);
+    api.get('/orders/mine').then(({ data }) => setOrders(data.orders)).finally(() => setLoading(false));
   }, []);
+
+  if (loading) {
+    return (
+      <div className="container-page py-10">
+        <Skeleton className="h-8 w-56 mb-6" />
+        <div className="grid gap-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-md border border-stone-200 bg-white p-5">
+              <Skeleton className="h-5 w-32 mb-3" />
+              <Skeleton className="h-4 w-48 mb-2" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   if (orders.length === 0) {
     return (
       <div className="container-page py-10">
+        <SEOHead title="Mis pedidos" />
         <EmptyState title="Aun no tienes pedidos" description="Tus compras apareceran aqui cuando crees un pedido." />
       </div>
     );
@@ -21,6 +43,7 @@ export function OrderHistoryPage() {
 
   return (
     <div className="container-page py-10">
+      <SEOHead title="Mis pedidos" />
       <h1 className="text-2xl font-black">Historial de pedidos</h1>
       <div className="mt-6 grid gap-4">
         {orders.map((order) => (

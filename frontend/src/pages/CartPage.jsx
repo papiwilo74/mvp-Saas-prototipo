@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CartItem } from '../components/cart/CartItem';
 import { EmptyState } from '../components/ui/EmptyState';
+import { SEOHead } from '../components/seo/SEOHead';
 import { env } from '../config/env';
 import { useCart } from '../context/CartContext';
 import { useRestaurantConfig } from '../context/RestaurantConfigContext';
@@ -147,6 +148,7 @@ export function CartPage() {
 
   return (
     <div className="container-page grid gap-6 py-5 md:gap-8 md:py-10 lg:grid-cols-[1fr_420px]">
+      <SEOHead title="Carrito" description="Revisa tu pedido antes de confirmar." />
       <section className="glass-panel p-5 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>

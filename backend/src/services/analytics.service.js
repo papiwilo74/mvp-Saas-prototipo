@@ -61,6 +61,72 @@ export const getRevenueByDay = async (restaurantId, days = 30) => {
   return Object.values(dailyMap).reverse();
 };
 
+export const getDashboardSummary = async (restaurantId) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+
+  const [
+    totalOrders,
+    todayOrders,
+    monthOrders,
+    totalRevenue,
+    monthRevenue,
+    totalCustomers,
+    topProducts,
+    statusCounts
+  ] = await Promise.all([
+    prisma.order.count({ where: { restaurantId } }),
+    prisma.order.count({ where: { restaurantId, createdAt: { gte: today } } }),
+    prisma.order.count({ where: { restaurantId, createdAt: { gte: monthStart } } }),
+    prisma.order.aggregate({ where: { restaurantId, status: { not: 'CANCELLED' } }, _sum: { total: true } }),
+    prisma.order.aggregate({ where: { restaurantId, status: { not: 'CANCELLED' }, createdAt: { gte: monthStart } }, _sum: { total: true } }),
+    prisma.customer.count({ where: { restaurantId } }),
+    prisma.orderItem.groupBy({
+      by: ['productId'],
+      where: { order: { restaurantId, status: { not: 'CANCELLED' } } },
+      _sum: { quantity: true, subtotal: true },
+      orderBy: { _sum: { quantity: 'desc' } },
+      take: 5
+    }),
+    prisma.order.groupBy({
+      by: ['status'],
+      where: { restaurantId }
+    })
+  ]);
+
+  let topProductsWithNames = [];
+  if (topProducts.length > 0) {
+    const products = await prisma.product.findMany({
+      where: { id: { in: topProducts.map((p) => p.productId) } },
+      select: { id: true, name: true }
+    });
+    const productMap = new Map(products.map((p) => [p.id, p.name]));
+    topProductsWithNames = topProducts.map((p) => ({
+      productId: p.productId,
+      name: productMap.get(p.productId) || 'Desconocido',
+      quantity: p._sum.quantity || 0,
+      revenue: p._sum.subtotal || 0
+    }));
+  }
+
+  const totalRev = Number(totalRevenue._sum.total || 0);
+  const monthRev = Number(monthRevenue._sum.total || 0);
+
+  return {
+    totalOrders,
+    todayOrders,
+    monthOrders,
+    totalRevenue: totalRev,
+    monthRevenue: monthRev,
+    averageOrderValue: totalOrders > 0 ? Math.round(totalRev / totalOrders) : 0,
+    monthAverageOrderValue: monthOrders > 0 ? Math.round(monthRev / monthOrders) : 0,
+    totalCustomers,
+    topProducts: topProductsWithNames,
+    statusBreakdown: statusCounts.reduce((acc, s) => ({ ...acc, [s.status]: s._count }), {})
+  };
+};
+
 export const getFrequentCustomers = async (restaurantId, limit = 10) => {
   const customers = await prisma.customer.findMany({
     where: { restaurantId },

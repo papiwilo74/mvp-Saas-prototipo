@@ -1,4 +1,6 @@
-import { BarChart3, CookingPot, LayoutDashboard, Package, ReceiptText, Settings, UsersRound } from 'lucide-react';
+import { BarChart3, CookingPot, LayoutDashboard, Package, ReceiptText, Settings, UserCog, UsersRound } from 'lucide-react';
+import { SocketNotifier } from '../components/ui/SocketNotifier';
+import { OnboardingWizard } from '../components/ui/OnboardingWizard';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useRestaurantConfig } from '../context/RestaurantConfigContext';
 import { DemoBanner } from '../components/ui/DemoBanner';
@@ -9,6 +11,7 @@ const links = [
   { to: '/admin/orders', label: 'Pedidos', icon: ReceiptText },
   { to: '/admin/kitchen', label: 'Cocina', icon: CookingPot },
   { to: '/admin/analytics', label: 'Reportes', icon: BarChart3 },
+  { to: '/admin/staff', label: 'Empleados', icon: UserCog },
   { to: '/admin/customers', label: 'Clientes', icon: UsersRound },
   { to: '/admin/settings', label: 'Config', icon: Settings }
 ];
@@ -19,6 +22,7 @@ export function AdminLayout() {
   return (
     <div className="min-h-screen bg-stone-50">
       <DemoBanner />
+      <SocketNotifier />
       <header className="border-b border-stone-700" style={{ backgroundColor: 'var(--color-secondary, #18181b)' }}>
         <div className="h-1 w-full" style={{ backgroundColor: 'var(--color-primary)' }} />
         <div className="container-page flex min-h-16 flex-wrap items-center justify-between gap-3 py-3">
@@ -46,6 +50,7 @@ export function AdminLayout() {
         </div>
       </header>
       <main className="container-page py-6 md:py-8">
+        <OnboardingWizard />
         <Outlet />
       </main>
     </div>

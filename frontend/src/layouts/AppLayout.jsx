@@ -55,7 +55,14 @@ export function AppLayout() {
         <Outlet />
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-stone-200 bg-white md:hidden">
+      <footer className="border-t border-stone-200 bg-white py-6 text-center text-xs text-stone-500">
+        <div className="container-page flex flex-wrap items-center justify-center gap-4">
+          <Link to="/terms" className="font-semibold hover:text-stone-950 transition-colors">Terminos de Servicio</Link>
+          <Link to="/privacy" className="font-semibold hover:text-stone-950 transition-colors">Politica de Privacidad</Link>
+        </div>
+      </footer>
+
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-stone-200 bg-white md:hidden">
         <div className="grid h-16 grid-cols-2">
           {navItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink

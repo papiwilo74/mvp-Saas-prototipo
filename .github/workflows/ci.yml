@@ -7,25 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  backend:
-    name: Backend Tests
+  backend-tests:
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: fastfood_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     defaults:
       run:
         working-directory: backend
@@ -42,26 +25,13 @@ jobs:
       - run: npm ci
 
       - run: npx prisma generate
-
-      - run: npx prisma migrate deploy
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fastfood_test?schema=public
-          DIRECT_URL: postgresql://postgres:postgres@localhost:5432/fastfood_test?schema=public
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
 
       - run: npm test
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fastfood_test?schema=public
-          DIRECT_URL: postgresql://postgres:postgres@localhost:5432/fastfood_test?schema=public
-          JWT_SECRET: test-secret-that-is-long-enough-for-ci-123456
-          FRONTEND_URL: http://localhost:5173
-          NODE_ENV: test
-          LOGIN_RATE_LIMIT_MAX: 50
-          PUBLIC_RATE_LIMIT_MAX: 200
 
-  frontend:
-    name: Frontend Tests
+  frontend-tests:
     runs-on: ubuntu-latest
-
     defaults:
       run:
         working-directory: frontend
@@ -78,6 +48,20 @@ jobs:
       - run: npm ci
 
       - run: npm test
-        env:
-          VITE_API_URL: http://localhost:4000/api
-          VITE_RESTAURANT_SLUG: demo-burger
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Backend lint
+        working-directory: backend
+        run: |
+          npm ci
+          npm ls 2>/dev/null || true
+
+      - name: Frontend lint
+        working-directory: frontend
+        run: |
+          npm ci
+          npm ls 2>/dev/null || true

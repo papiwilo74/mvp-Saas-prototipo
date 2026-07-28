@@ -22,6 +22,13 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum StaffRole {
+  ADMIN
+  CASHIER
+  KITCHEN
+  DELIVERY
+}
+
 enum PaymentMethod {
   CASH
   NEQUI
@@ -59,6 +66,8 @@ model Restaurant {
   orders    Order[]
   customers Customer[]
   orderCounter OrderCounter?
+  staff        Staff[]
+  onboardingCompleted Boolean @default(false)
 }
 
 model RestaurantConfig {
@@ -95,16 +104,18 @@ model RestaurantConfig {
 }
 
 model User {
-  id           String     @id @default(cuid())
-  name         String
-  email        String     @unique
-  passwordHash String
-  role         UserRole   @default(CUSTOMER)
-  restaurantId String?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  restaurant   Restaurant? @relation(fields: [restaurantId], references: [id], onDelete: SetNull)
-  orders       Order[]
+  id                   String     @id @default(cuid())
+  name                 String
+  email                String     @unique
+  passwordHash         String
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
+  role                 UserRole   @default(CUSTOMER)
+  restaurantId         String?
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+  restaurant           Restaurant? @relation(fields: [restaurantId], references: [id], onDelete: SetNull)
+  orders               Order[]
 }
 
 model Category {
@@ -237,6 +248,23 @@ model OrderItem {
 
   @@index([orderId])
   @@index([productId])
+}
+
+model Staff {
+  id           String    @id @default(cuid())
+  name         String
+  email        String
+  phone        String?
+  pin          String
+  role         StaffRole @default(CASHIER)
+  isActive     Boolean   @default(true)
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([restaurantId, email])
+  @@index([restaurantId])
 }
 
 model PaymentTransaction {

@@ -1,5 +1,5 @@
-const CACHE_NAME = 'ff-cache-v2';
-const STATIC_ASSETS = ['/', '/menu', '/manifest.json', '/icons/icon-192.svg', '/icons/icon-512.svg'];
+const CACHE_NAME = 'ff-cache-v3';
+const STATIC_ASSETS = ['/', '/menu', '/offline', '/manifest.json', '/icons/icon-192.svg', '/icons/icon-512.svg'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -59,7 +59,9 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
         return response;
-      }).catch(() => cached);
+      }).catch(() => {
+        return caches.match('/offline');
+      });
       return cached || fetched;
     })
   );

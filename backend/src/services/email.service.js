@@ -112,6 +112,28 @@ export const sendWelcomeEmail = async ({ to, name }) => {
   }
 };
 
+export const sendPasswordResetEmail = async ({ to, name, resetUrl }) => {
+  if (!resend || !to) return;
+
+  try {
+    await resend.emails.send({
+      from: env.EMAIL_FROM,
+      to,
+      subject: 'Restablece tu contrasena',
+      html: `
+        <div style="max-width:480px;margin:20px auto;background:#fff;border-radius:24px;padding:32px;font-family:sans-serif;text-align:center">
+          <h1 style="font-size:24px">Hola ${name}</h1>
+          <p style="color:#6b7280">Recibimos una solicitud para restablecer tu contrasena.</p>
+          <a href="${resetUrl}" style="display:inline-block;margin-top:16px;padding:12px 28px;background:#ea580c;color:#fff;border-radius:12px;text-decoration:none;font-weight:700">Restablecer contrasena</a>
+          <p style="margin-top:16px;font-size:12px;color:#9ca3af">Este enlace expira en 1 hora. Si no solicitaste esto, ignora este correo.</p>
+        </div>
+      `
+    });
+  } catch (error) {
+    console.error('Error al enviar correo de restablecimiento:', error);
+  }
+};
+
 export const sendOrderStatusEmail = async ({ to, order }) => {
   if (!resend || !to) return;
 

@@ -95,6 +95,10 @@
     @apply border-amber-200 text-amber-800;
   }
 
+  .toast-info {
+    @apply border-sky-200 text-sky-800;
+  }
+
   .toast-close {
     @apply ml-auto grid h-6 w-6 shrink-0 place-items-center rounded-full text-base leading-none opacity-60 hover:opacity-100;
   }

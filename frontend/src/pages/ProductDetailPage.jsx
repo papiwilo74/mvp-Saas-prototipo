@@ -1,6 +1,7 @@
 import { Minus, Plus, ShoppingBag, Sparkles, Tag } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { SEOHead } from '../components/seo/SEOHead';
 import { CartSkeleton, ProductSkeleton } from '../components/ui/Skeleton';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
@@ -71,6 +72,7 @@ export function ProductDetailPage() {
 
   return (
     <div className="container-page pb-10 pt-5">
+      <SEOHead title={product.name} description={product.description} image={product.imageUrl} />
       <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
         <div className="relative overflow-hidden rounded-[32px] shadow-soft">
           <img src={product.imageUrl} alt={product.name} className="h-80 w-full object-cover md:h-[520px]" />

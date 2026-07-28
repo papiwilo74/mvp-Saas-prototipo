@@ -14,3 +14,8 @@ export const frequentCustomers = async (req, res) => {
   const data = await analyticsService.getFrequentCustomers(req.user.restaurantId);
   res.json(data);
 };
+
+export const dashboardSummary = async (req, res) => {
+  const data = await analyticsService.getDashboardSummary(req.user.restaurantId);
+  res.json(data);
+};

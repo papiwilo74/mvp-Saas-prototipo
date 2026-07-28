@@ -9,3 +9,4 @@ analyticsRouter.use(authenticate, requireAdmin);
 analyticsRouter.get('/peak-hours', asyncHandler(analyticsController.peakHours));
 analyticsRouter.get('/revenue-by-day', asyncHandler(analyticsController.revenueByDay));
 analyticsRouter.get('/frequent-customers', asyncHandler(analyticsController.frequentCustomers));
+analyticsRouter.get('/dashboard-summary', asyncHandler(analyticsController.dashboardSummary));

@@ -5,10 +5,18 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import * as Sentry from '@sentry/node';
 import { env } from './config/env.js';
 import { errorHandler, notFound } from './middlewares/error.middleware.js';
 import { createRateLimit } from './middlewares/rateLimit.middleware.js';
 import { apiRouter } from './routes/index.js';
+
+Sentry.init({
+  dsn: env.SENTRY_DSN,
+  environment: env.NODE_ENV,
+  enabled: !!env.SENTRY_DSN,
+  tracesSampleRate: env.NODE_ENV === 'production' ? 0.2 : 0.0,
+});
 
 export const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -65,4 +73,5 @@ app.use(
 
 app.use('/api', apiRouter);
 app.use(notFound);
+Sentry.setupExpressErrorHandler(app);
 app.use(errorHandler);

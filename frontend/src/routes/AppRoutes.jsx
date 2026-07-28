@@ -1,63 +1,93 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { Route, Routes } from 'react-router-dom';
 import { ProtectedRoute } from '../components/routing/ProtectedRoute';
 import { env } from '../config/env';
-import { AdminLayout } from '../layouts/AdminLayout';
-import { AppLayout } from '../layouts/AppLayout';
-import { SuperAdminLayout } from '../layouts/SuperAdminLayout';
-import { AdminAnalyticsPage } from '../pages/admin/AdminAnalyticsPage';
-import { AdminCustomersPage } from '../pages/admin/AdminCustomersPage';
-import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
-import { AdminKitchenPage } from '../pages/admin/AdminKitchenPage';
-import { AdminOrdersPage } from '../pages/admin/AdminOrdersPage';
-import { AdminProductsPage } from '../pages/admin/AdminProductsPage';
-import { AdminSettingsPage } from '../pages/admin/AdminSettingsPage';
-import { CartPage } from '../pages/CartPage';
-import { CheckoutSuccessPage } from '../pages/CheckoutSuccessPage';
-import { LandingPage } from '../pages/LandingPage';
-import { LoginPage } from '../pages/LoginPage';
-import { RegisterPage } from '../pages/RegisterPage';
-import { MenuPage } from '../pages/MenuPage';
-import { OrderHistoryPage } from '../pages/OrderHistoryPage';
-import { ProfilePage } from '../pages/ProfilePage';
-import { ProductDetailPage } from '../pages/ProductDetailPage';
-import { SuperAdminDashboardPage } from '../pages/superadmin/SuperAdminDashboardPage';
-import { SuperAdminNewRestaurantPage } from '../pages/superadmin/SuperAdminNewRestaurantPage';
-import { SuperAdminRestaurantDetailPage } from '../pages/superadmin/SuperAdminRestaurantDetailPage';
-import { SuperAdminRestaurantsPage } from '../pages/superadmin/SuperAdminRestaurantsPage';
+
+const load = (mod) => mod.then(m => ({ default: Object.values(m)[0] }));
+const loadPage = (name) => () => import(`../pages/${name}.jsx`).then(m => ({ default: m[name] }));
+const loadAdmin = (name) => () => import(`../pages/admin/${name}.jsx`).then(m => ({ default: m[name] }));
+const loadSuper = (name) => () => import(`../pages/superadmin/${name}.jsx`).then(m => ({ default: m[name] }));
+const loadLayout = (name) => () => import(`../layouts/${name}.jsx`).then(m => ({ default: m[name] }));
+
+const AppLayout = lazy(loadLayout('AppLayout'));
+const AdminLayout = lazy(loadLayout('AdminLayout'));
+const SuperAdminLayout = lazy(loadLayout('SuperAdminLayout'));
+
+const NotFoundPage = lazy(loadPage('NotFoundPage'));
+const LandingPage = lazy(loadPage('LandingPage'));
+const MenuPage = lazy(loadPage('MenuPage'));
+const ProductDetailPage = lazy(loadPage('ProductDetailPage'));
+const CartPage = lazy(loadPage('CartPage'));
+const CheckoutSuccessPage = lazy(loadPage('CheckoutSuccessPage'));
+const LoginPage = lazy(loadPage('LoginPage'));
+const RegisterPage = lazy(loadPage('RegisterPage'));
+const ForgotPasswordPage = lazy(loadPage('ForgotPasswordPage'));
+const ResetPasswordPage = lazy(loadPage('ResetPasswordPage'));
+const TermsPage = lazy(loadPage('TermsPage'));
+const PrivacyPage = lazy(loadPage('PrivacyPage'));
+const OrderHistoryPage = lazy(loadPage('OrderHistoryPage'));
+const ProfilePage = lazy(loadPage('ProfilePage'));
+
+const AdminDashboardPage = lazy(loadAdmin('AdminDashboardPage'));
+const AdminProductsPage = lazy(loadAdmin('AdminProductsPage'));
+const AdminOrdersPage = lazy(loadAdmin('AdminOrdersPage'));
+const AdminKitchenPage = lazy(loadAdmin('AdminKitchenPage'));
+const AdminAnalyticsPage = lazy(loadAdmin('AdminAnalyticsPage'));
+const AdminCustomersPage = lazy(loadAdmin('AdminCustomersPage'));
+const AdminStaffPage = lazy(loadAdmin('AdminStaffPage'));
+const AdminSettingsPage = lazy(loadAdmin('AdminSettingsPage'));
+
+const SuperAdminDashboardPage = lazy(loadSuper('SuperAdminDashboardPage'));
+const SuperAdminRestaurantsPage = lazy(loadSuper('SuperAdminRestaurantsPage'));
+const SuperAdminRestaurantDetailPage = lazy(loadSuper('SuperAdminRestaurantDetailPage'));
+const SuperAdminNewRestaurantPage = lazy(loadSuper('SuperAdminNewRestaurantPage'));
+
+function PageLoader() {
+  return (
+    <div className="flex min-h-[60dvh] items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-stone-300 border-t-stone-950" />
+    </div>
+  );
+}
 
 export function AppRoutes() {
   return (
     <Routes>
-      <Route element={<AppLayout />}>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/menu" element={<MenuPage />} />
-        <Route path="/products/:id" element={<ProductDetailPage />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        {env.enableOrderHistory ? <Route path="/orders" element={<ProtectedRoute><OrderHistoryPage /></ProtectedRoute>} /> : null}
-        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+      <Route element={<Suspense fallback={<PageLoader />}><AppLayout /></Suspense>}>
+        <Route path="/" element={<Suspense fallback={<PageLoader />}><LandingPage /></Suspense>} />
+        <Route path="/menu" element={<Suspense fallback={<PageLoader />}><MenuPage /></Suspense>} />
+        <Route path="/products/:id" element={<Suspense fallback={<PageLoader />}><ProductDetailPage /></Suspense>} />
+        <Route path="/cart" element={<Suspense fallback={<PageLoader />}><CartPage /></Suspense>} />
+        <Route path="/checkout/success" element={<Suspense fallback={<PageLoader />}><CheckoutSuccessPage /></Suspense>} />
+        <Route path="/login" element={<Suspense fallback={<PageLoader />}><LoginPage /></Suspense>} />
+        <Route path="/register" element={<Suspense fallback={<PageLoader />}><RegisterPage /></Suspense>} />
+        {env.enableOrderHistory ? <Route path="/orders" element={<Suspense fallback={<PageLoader />}><ProtectedRoute><OrderHistoryPage /></ProtectedRoute></Suspense>} /> : null}
+        <Route path="/profile" element={<Suspense fallback={<PageLoader />}><ProtectedRoute><ProfilePage /></ProtectedRoute></Suspense>} />
+        <Route path="/forgot-password" element={<Suspense fallback={<PageLoader />}><ForgotPasswordPage /></Suspense>} />
+        <Route path="/reset-password" element={<Suspense fallback={<PageLoader />}><ResetPasswordPage /></Suspense>} />
+        <Route path="/terms" element={<Suspense fallback={<PageLoader />}><TermsPage /></Suspense>} />
+        <Route path="/privacy" element={<Suspense fallback={<PageLoader />}><PrivacyPage /></Suspense>} />
       </Route>
 
-      <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminLayout /></ProtectedRoute>}>
-        <Route index element={<AdminDashboardPage />} />
-        <Route path="products" element={<AdminProductsPage />} />
-        <Route path="orders" element={<AdminOrdersPage />} />
-        <Route path="kitchen" element={<AdminKitchenPage />} />
-        <Route path="analytics" element={<AdminAnalyticsPage />} />
-        <Route path="customers" element={<AdminCustomersPage />} />
-        <Route path="settings" element={<AdminSettingsPage />} />
+      <Route path="/admin" element={<Suspense fallback={<PageLoader />}><ProtectedRoute requireAdmin><AdminLayout /></ProtectedRoute></Suspense>}>
+        <Route index element={<Suspense fallback={<PageLoader />}><AdminDashboardPage /></Suspense>} />
+        <Route path="products" element={<Suspense fallback={<PageLoader />}><AdminProductsPage /></Suspense>} />
+        <Route path="orders" element={<Suspense fallback={<PageLoader />}><AdminOrdersPage /></Suspense>} />
+        <Route path="kitchen" element={<Suspense fallback={<PageLoader />}><AdminKitchenPage /></Suspense>} />
+        <Route path="analytics" element={<Suspense fallback={<PageLoader />}><AdminAnalyticsPage /></Suspense>} />
+        <Route path="customers" element={<Suspense fallback={<PageLoader />}><AdminCustomersPage /></Suspense>} />
+        <Route path="staff" element={<Suspense fallback={<PageLoader />}><AdminStaffPage /></Suspense>} />
+        <Route path="settings" element={<Suspense fallback={<PageLoader />}><AdminSettingsPage /></Suspense>} />
       </Route>
 
-      <Route path="/superadmin" element={<ProtectedRoute requireSuperAdmin><SuperAdminLayout /></ProtectedRoute>}>
-        <Route index element={<SuperAdminDashboardPage />} />
-        <Route path="restaurants" element={<SuperAdminRestaurantsPage />} />
-        <Route path="restaurants/:id" element={<SuperAdminRestaurantDetailPage />} />
-        <Route path="new" element={<SuperAdminNewRestaurantPage />} />
+      <Route path="/superadmin" element={<Suspense fallback={<PageLoader />}><ProtectedRoute requireSuperAdmin><SuperAdminLayout /></ProtectedRoute></Suspense>}>
+        <Route index element={<Suspense fallback={<PageLoader />}><SuperAdminDashboardPage /></Suspense>} />
+        <Route path="restaurants" element={<Suspense fallback={<PageLoader />}><SuperAdminRestaurantsPage /></Suspense>} />
+        <Route path="restaurants/:id" element={<Suspense fallback={<PageLoader />}><SuperAdminRestaurantDetailPage /></Suspense>} />
+        <Route path="new" element={<Suspense fallback={<PageLoader />}><SuperAdminNewRestaurantPage /></Suspense>} />
       </Route>
 
-      <Route path="*" element={<LandingPage />} />
+      <Route path="*" element={<Suspense fallback={<PageLoader />}><NotFoundPage /></Suspense>} />
     </Routes>
   );
 }

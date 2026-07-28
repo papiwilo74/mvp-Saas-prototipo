@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { prisma } from '../config/prisma.js';
+import { createRateLimit } from '../middlewares/rateLimit.middleware.js';
+import { env } from '../config/env.js';
 import { authRouter } from './auth.routes.js';
 import { categoryRouter } from './category.routes.js';
 import { customerRouter } from './customer.routes.js';
@@ -13,8 +15,26 @@ import { restaurantConfigRouter } from './restaurantConfig.routes.js';
 import { superadminRouter } from './superadmin.routes.js';
 import { analyticsRouter } from './analytics.routes.js';
 import { mapsRouter } from './maps.routes.js';
+import { staffRouter } from './staff.routes.js';
+import { onboardingRouter } from './onboarding.routes.js';
 
 export const apiRouter = Router();
+
+const globalRateLimit = createRateLimit({
+  windowMs: env.GLOBAL_RATE_LIMIT_WINDOW_MS,
+  maxRequests: env.GLOBAL_RATE_LIMIT_MAX,
+  keyPrefix: 'global'
+});
+
+const adminRateLimit = createRateLimit({
+  windowMs: env.ADMIN_RATE_LIMIT_WINDOW_MS,
+  maxRequests: env.ADMIN_RATE_LIMIT_MAX,
+  keyPrefix: 'admin'
+});
+
+apiRouter.use(globalRateLimit);
+apiRouter.use('/admin', adminRateLimit);
+apiRouter.use('/superadmin', adminRateLimit);
 
 apiRouter.get('/health', async (_req, res) => {
   let database = 'ok';
@@ -38,3 +58,5 @@ apiRouter.use('/payments', paymentRouter);
 apiRouter.use('/superadmin', superadminRouter);
 apiRouter.use('/analytics', analyticsRouter);
 apiRouter.use('/maps', mapsRouter);
+apiRouter.use('/staff', staffRouter);
+apiRouter.use('/onboarding', onboardingRouter);

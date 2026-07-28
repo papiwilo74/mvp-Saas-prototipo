@@ -1,5 +1,6 @@
 import { ArrowRight, CheckCircle2, Clock, Flame, MapPinned, Percent, ShieldCheck, Smartphone, Star, Store, Users, WalletCards } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { SEOHead } from '../components/seo/SEOHead';
 import { ProductCard } from '../components/menu/ProductCard';
 import { ProductSkeleton } from '../components/ui/Skeleton';
 import { useCart } from '../context/CartContext';
@@ -19,6 +20,7 @@ export function LandingPage() {
 
   return (
     <div className="pb-8">
+      <SEOHead title={config.restaurantName} description={`Pide ${config.restaurantName} online. Retiro o domicilio.`} />
       <section className="container-page pt-5 md:pt-8">
         <div className="glass-panel relative overflow-hidden px-6 py-8 sm:px-8 md:px-10 md:py-12">
           <div className="absolute -right-24 -top-24 h-56 w-56 rounded-full bg-[color:var(--color-primary)]/20 blur-3xl" />

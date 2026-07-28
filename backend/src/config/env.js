@@ -23,7 +23,13 @@ const envSchema = z.object({
   WOMPI_ENV: z.enum(['sandbox', 'prod']).default('sandbox'),
   WOMPI_PUBLIC_KEY: z.string().optional(),
   WOMPI_PRIVATE_KEY: z.string().optional(),
-  WOMPI_EVENTS_SECRET: z.string().optional()
+  WOMPI_EVENTS_SECRET: z.string().optional(),
+  SENTRY_DSN: z.string().optional(),
+  JWT_RESET_SECRET: z.string().default('reset-secret-change-me'),
+  GLOBAL_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60000),
+  GLOBAL_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(100),
+  ADMIN_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60000),
+  ADMIN_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(200),
 });
 
 const rawEnv = { ...process.env };

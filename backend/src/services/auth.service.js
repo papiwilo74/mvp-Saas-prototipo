@@ -1,7 +1,9 @@
+import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../config/prisma.js';
 import { ApiError } from '../utils/apiError.js';
 import { signToken } from '../utils/token.js';
+import { env } from '../config/env.js';
 import { sendWelcomeEmail } from './email.service.js';
 
 const publicUser = (user) => ({
@@ -28,6 +30,54 @@ export const register = async ({ name, email, password }) => {
   await sendWelcomeEmail({ to: user.email, name: user.name });
 
   return { user: publicUser(user), token: signToken(user) };
+};
+
+export const forgotPassword = async ({ email }) => {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) return { message: 'Si el correo existe, recibiras instrucciones.' };
+
+  const token = crypto.randomBytes(32).toString('hex');
+  const resetToken = crypto.createHash('sha256').update(token).digest('hex');
+  const resetExpires = new Date(Date.now() + 60 * 60 * 1000);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordResetToken: resetToken, passwordResetExpires: resetExpires }
+  });
+
+  const resetUrl = `${env.FRONTEND_URL}/reset-password?token=${token}&email=${email}`;
+
+  try {
+    const { sendPasswordResetEmail } = await import('./email.service.js');
+    await sendPasswordResetEmail({ to: email, name: user.name, resetUrl });
+  } catch {
+    // Email sending is optional
+  }
+
+  return { message: 'Si el correo existe, recibiras instrucciones.' };
+};
+
+export const resetPassword = async ({ email, token, password }) => {
+  const resetToken = crypto.createHash('sha256').update(token).digest('hex');
+
+  const user = await prisma.user.findUnique({
+    where: { email, passwordResetToken: resetToken, passwordResetExpires: { gte: new Date() } }
+  });
+
+  if (!user) throw new ApiError(400, 'Token invalido o expirado');
+
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      passwordHash,
+      passwordResetToken: null,
+      passwordResetExpires: null
+    }
+  });
+
+  return { message: 'Contrasena actualizada exitosamente.' };
 };
 
 export const login = async ({ email, password }) => {

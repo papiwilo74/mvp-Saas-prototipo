@@ -24,7 +24,7 @@ export function ToastProvider({ children }) {
         {toasts.map((t) => (
           <div
             key={t.id}
-            className={`toast-item ${t.type === 'error' ? 'toast-error' : t.type === 'warning' ? 'toast-warning' : 'toast-success'}`}
+            className={`toast-item ${t.type === 'error' ? 'toast-error' : t.type === 'warning' ? 'toast-warning' : t.type === 'info' ? 'toast-info' : 'toast-success'}`}
             role="alert"
           >
             <span>{t.message}</span>

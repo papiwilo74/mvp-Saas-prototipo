@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { ProductCard } from '../components/menu/ProductCard';
 import { EmptyState } from '../components/ui/EmptyState';
 import { ProductSkeleton } from '../components/ui/Skeleton';
+import { SEOHead } from '../components/seo/SEOHead';
 import { useCart } from '../context/CartContext';
 import { useMenu } from '../hooks/useMenu';
 
@@ -58,6 +59,7 @@ export function MenuPage() {
 
   return (
     <section className="container-page py-5 md:py-8">
+      <SEOHead title="Menu" description="Explora nuestro menu y haz tu pedido online." />
       <div className="mb-5">
         <span className="badge-chip">Catalogo visual</span>
         <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Menu listo para convertir</h1>
