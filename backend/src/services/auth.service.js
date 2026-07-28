@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../config/prisma.js';
 import { ApiError } from '../utils/apiError.js';
-import { signToken } from '../utils/token.js';
+import { signToken, signRefreshToken, verifyRefreshToken } from '../utils/token.js';
 import { env } from '../config/env.js';
 import { sendWelcomeEmail } from './email.service.js';
 
@@ -29,7 +29,7 @@ export const register = async ({ name, email, password }) => {
 
   await sendWelcomeEmail({ to: user.email, name: user.name });
 
-  return { user: publicUser(user), token: signToken(user) };
+  return { user: publicUser(user), token: signToken(user), refreshToken: signRefreshToken(user) };
 };
 
 export const forgotPassword = async ({ email }) => {
@@ -93,5 +93,15 @@ export const login = async ({ email, password }) => {
     throw new ApiError(401, 'Credenciales invalidas');
   }
 
-  return { user: publicUser(user), token: signToken(user) };
+  return { user: publicUser(user), token: signToken(user), refreshToken: signRefreshToken(user) };
+};
+
+export const refresh = async (refreshToken) => {
+  if (!refreshToken) throw new ApiError(401, 'Refresh token requerido');
+
+  const decoded = verifyRefreshToken(refreshToken);
+  const user = await prisma.user.findUnique({ where: { id: decoded.sub } });
+  if (!user) throw new ApiError(401, 'Usuario no encontrado');
+
+  return { user: publicUser(user), token: signToken(user), refreshToken: signRefreshToken(user) };
 };

@@ -7,7 +7,6 @@ on:
 jobs:
   deploy-backend:
     runs-on: ubuntu-latest
-    if: false
     steps:
       - uses: actions/checkout@v4
 
@@ -20,7 +19,6 @@ jobs:
 
   deploy-frontend:
     runs-on: ubuntu-latest
-    if: false
     steps:
       - uses: actions/checkout@v4
 

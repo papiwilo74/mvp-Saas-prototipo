@@ -84,19 +84,19 @@ model RestaurantConfig {
   facebookUrl    String?
   instagramUrl   String?
   openingHours   String?
-  businessHours  Json?
+  businessHours  Json? @db.JsonB
   acceptsScheduledOrders Boolean @default(false)
   leadTimeMinutes Int      @default(30)
   deliveryFee    Decimal?   @db.Decimal(10, 2)
-  deliveryZones  Json?
-  coupons        Json?
+  deliveryZones  Json? @db.JsonB
+  coupons        Json? @db.JsonB
   paymentMethods String[]   @default([])
   wompiPublicKey String?
   wompiPrivateKey String?
   whatsappToken String?
   whatsappPhoneNumberId String?
   googleMapsApiKey String?
-  loyaltyProgram Json?
+  loyaltyProgram Json? @db.JsonB
   restaurantId   String     @unique
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
@@ -154,7 +154,7 @@ model Product {
   stock        Int?
   isCombo      Boolean        @default(false)
   comboItems   String[]       @default([])
-  variants     Json?
+  variants     Json? @db.JsonB
   isDeleted    Boolean        @default(false)
   restaurantId String
   categoryId   String
@@ -231,6 +231,8 @@ model Order {
 
   @@unique([restaurantId, orderNumber])
   @@index([restaurantId])
+  @@index([restaurantId, status])
+  @@index([restaurantId, createdAt])
   @@index([userId])
   @@index([customerId])
   @@index([scheduledFor])

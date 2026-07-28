@@ -1,3 +1,4 @@
+import compression from 'compression';
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
@@ -9,6 +10,7 @@ import * as Sentry from '@sentry/node';
 import { env } from './config/env.js';
 import { errorHandler, notFound } from './middlewares/error.middleware.js';
 import { createRateLimit } from './middlewares/rateLimit.middleware.js';
+import { csrfProtection, setCsrfToken } from './middlewares/csrf.middleware.js';
 import { apiRouter } from './routes/index.js';
 
 Sentry.init({
@@ -19,6 +21,7 @@ Sentry.init({
 });
 
 export const app = express();
+app.disable('x-powered-by');
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -27,9 +30,19 @@ const allowedOrigins = [
   ...(env.ALLOWED_ORIGINS ? env.ALLOWED_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean) : [])
 ];
 
+app.use(compression());
+
 app.use(
   helmet({
-    crossOriginResourcePolicy: { policy: 'cross-origin' }
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        connectSrc: ["'self'", env.FRONTEND_URL, env.ALLOWED_ORIGINS || ''].filter(Boolean),
+        frameSrc: ["'none'"],
+        objectSrc: ["'none'"],
+      }
+    }
   })
 );
 
@@ -37,11 +50,9 @@ app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
-
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-
       return callback(new Error('Bloqueado por CORS'));
     },
     credentials: true
@@ -52,6 +63,8 @@ app.use(express.json({ limit: '1mb', verify: (req, _res, buf) => { req.rawBody =
 app.use(cookieParser());
 app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
+
+app.use(setCsrfToken);
 
 app.use(
   '/api/auth/login',

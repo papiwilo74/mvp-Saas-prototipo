@@ -1,6 +1,5 @@
-import { ApiError } from '../utils/apiError.js';
-
-const buckets = new Map();
+import rateLimit from 'express-rate-limit';
+import { env } from '../config/env.js';
 
 const getClientKey = (req) => {
   const forwarded = req.headers['x-forwarded-for'];
@@ -10,34 +9,15 @@ const getClientKey = (req) => {
   return req.ip || req.socket?.remoteAddress || 'unknown';
 };
 
-const cleanupBucket = (bucket, now) => {
-  bucket.timestamps = bucket.timestamps.filter((timestamp) => now - timestamp < bucket.windowMs);
-};
-
-const cleanupExpiredBuckets = () => {
-  const now = Date.now();
-  for (const [key, bucket] of buckets.entries()) {
-    cleanupBucket(bucket, now);
-    if (bucket.timestamps.length === 0) {
-      buckets.delete(key);
-    }
-  }
-};
-
-setInterval(cleanupExpiredBuckets, 60_000);
-
-export const createRateLimit = ({ windowMs, maxRequests, keyPrefix }) => (req, _res, next) => {
-  const now = Date.now();
-  const bucketKey = `${keyPrefix}:${getClientKey(req)}`;
-  const bucket = buckets.get(bucketKey) || { timestamps: [], windowMs };
-  bucket.windowMs = windowMs;
-  cleanupBucket(bucket, now);
-
-  if (bucket.timestamps.length >= maxRequests) {
-    return next(new ApiError(429, 'Demasiadas solicitudes. Intenta de nuevo en unos minutos.'));
-  }
-
-  bucket.timestamps.push(now);
-  buckets.set(bucketKey, bucket);
-  return next();
-};
+export const createRateLimit = ({ windowMs, maxRequests, keyPrefix, message }) => rateLimit({
+  windowMs,
+  max: maxRequests,
+  keyGenerator: (req) => `${keyPrefix}:${getClientKey(req)}`,
+  handler: (_req, res) => {
+    res.status(429).json({
+      message: message || 'Demasiadas solicitudes. Intenta de nuevo en unos minutos.'
+    });
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});

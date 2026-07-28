@@ -25,6 +25,8 @@ const envSchema = z.object({
   WOMPI_PRIVATE_KEY: z.string().optional(),
   WOMPI_EVENTS_SECRET: z.string().optional(),
   SENTRY_DSN: z.string().optional(),
+  JWT_REFRESH_SECRET: z.string().min(24).default('refresh-secret-change-in-production'),
+  JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
   JWT_RESET_SECRET: z.string().default('reset-secret-change-me'),
   GLOBAL_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60000),
   GLOBAL_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(100),

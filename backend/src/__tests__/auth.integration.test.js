@@ -142,6 +142,13 @@ describe('Auth Integration', () => {
       mockBcrypt.compare.mockResolvedValue(true);
 
       const payload = { email: 'test@example.com', password: 'correct-password' };
+      const limit = process.env.LOGIN_RATE_LIMIT_MAX
+        ? Number(process.env.LOGIN_RATE_LIMIT_MAX)
+        : 10;
+
+      for (let i = 0; i < limit + 1; i++) {
+        await request(app).post('/api/auth/login').send(payload);
+      }
 
       const res = await request(app).post('/api/auth/login').send(payload);
 
