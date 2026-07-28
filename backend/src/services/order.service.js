@@ -1,6 +1,7 @@
 import { prisma } from '../config/prisma.js';
 import { ApiError } from '../utils/apiError.js';
 import { sendOrderConfirmationEmail, sendOrderStatusEmail } from './email.service.js';
+import { emailQueue } from '../queues/email.queue.js';
 import { DEFAULT_RESTAURANT_SLUG } from '../config/constants.js';
 import { findOrCreateCustomer } from './customer.service.js';
 import { logger } from './logger.service.js';
@@ -200,7 +201,9 @@ export const createOrder = async ({
   });
 
   emitNewOrder(restaurant.id, order);
-  await sendOrderConfirmationEmail({ to: customer.email, order });
+  emailQueue.add('order-confirmation', { type: 'ORDER_CONFIRMATION', payload: { to: customer.email, order } }).catch(() => {
+    sendOrderConfirmationEmail({ to: customer.email, order }).catch(() => {});
+  });
 
   return {
     order,
@@ -221,7 +224,9 @@ export const updateOrderStatus = async (restaurantId, orderId, status) => {
   });
 
   emitOrderStatusChanged(restaurantId, updatedOrder);
-  await sendOrderStatusEmail({ to: updatedOrder.customerEmail, order: updatedOrder });
+  emailQueue.add('order-status', { type: 'ORDER_STATUS_CHANGE', payload: { to: updatedOrder.customerEmail, order: updatedOrder } }).catch(() => {
+    sendOrderStatusEmail({ to: updatedOrder.customerEmail, order: updatedOrder }).catch(() => {});
+  });
   await sendStatusUpdate(restaurantId, updatedOrder.customerPhone, updatedOrder.orderNumber, status);
   notifyOrderStatus(updatedOrder).catch((err) => {
     logger.warn({ err }, 'Push notification fallo');
