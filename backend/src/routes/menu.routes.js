@@ -4,4 +4,9 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 
 export const menuRouter = Router();
 
-menuRouter.get('/', asyncHandler(menuController.getMenu));
+const CACHE_FIVE_MINUTES = 300;
+
+menuRouter.get('/', (_req, res, next) => {
+  res.set('Cache-Control', `public, max-age=${CACHE_FIVE_MINUTES}`);
+  next();
+}, asyncHandler(menuController.getMenu));

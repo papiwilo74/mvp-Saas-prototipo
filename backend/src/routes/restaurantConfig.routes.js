@@ -7,7 +7,12 @@ import { updateRestaurantConfigSchema } from '../validators/restaurantConfig.val
 
 export const restaurantConfigRouter = Router();
 
-restaurantConfigRouter.get('/', asyncHandler(restaurantConfigController.getPublic));
+const CACHE_FIVE_MINUTES = 300;
+
+restaurantConfigRouter.get('/', (_req, res, next) => {
+  res.set('Cache-Control', `public, max-age=${CACHE_FIVE_MINUTES}`);
+  next();
+}, asyncHandler(restaurantConfigController.getPublic));
 restaurantConfigRouter.put(
   '/',
   authenticate,

@@ -32,11 +32,11 @@ const adminRateLimit = createRateLimit({
   keyPrefix: 'admin'
 });
 
+apiRouter.use('/health', healthRouter);
+
 apiRouter.use(globalRateLimit);
 apiRouter.use('/admin', adminRateLimit);
 apiRouter.use('/superadmin', adminRateLimit);
-
-apiRouter.use('/health', healthRouter);
 apiRouter.use('/auth', authRouter);
 apiRouter.use('/menu', menuRouter);
 apiRouter.use('/categories', categoryRouter);
