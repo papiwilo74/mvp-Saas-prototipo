@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://fastfood-saas.vercel.app/sitemap.xml

@@ -17,6 +17,7 @@ import { analyticsRouter } from './analytics.routes.js';
 import { mapsRouter } from './maps.routes.js';
 import { staffRouter } from './staff.routes.js';
 import { onboardingRouter } from './onboarding.routes.js';
+import { sitemapRouter } from './sitemap.routes.js';
 
 export const apiRouter = Router();
 
@@ -33,6 +34,7 @@ const adminRateLimit = createRateLimit({
 });
 
 apiRouter.use('/health', healthRouter);
+apiRouter.use('/sitemap.xml', sitemapRouter);
 
 apiRouter.use(globalRateLimit);
 apiRouter.use('/admin', adminRateLimit);
