@@ -92,6 +92,13 @@ app.use(
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customCss: '.swagger-ui .topbar { display: none }', customSiteTitle: 'FastFood SaaS API Docs' }));
 app.get('/api-docs.json', (_req, res) => res.json(swaggerSpec));
+
+app.use('/api', createRateLimit({
+  windowMs: 60 * 1000,
+  maxRequests: 200,
+  keyPrefix: 'global'
+}));
+
 app.use('/api', apiRouter);
 app.use(notFound);
 Sentry.setupExpressErrorHandler(app);
