@@ -6,6 +6,7 @@ import { findOrCreateCustomer } from './customer.service.js';
 import { logger } from './logger.service.js';
 import { emitNewOrder, emitOrderStatusChanged } from './socket.service.js';
 import { sendStatusUpdate } from './whatsapp.service.js';
+import { notifyOrderStatus } from './push.service.js';
 import {
   normalizeCoupons,
   normalizeZones,
@@ -222,6 +223,9 @@ export const updateOrderStatus = async (restaurantId, orderId, status) => {
   emitOrderStatusChanged(restaurantId, updatedOrder);
   await sendOrderStatusEmail({ to: updatedOrder.customerEmail, order: updatedOrder });
   await sendStatusUpdate(restaurantId, updatedOrder.customerPhone, updatedOrder.orderNumber, status);
+  notifyOrderStatus(updatedOrder).catch((err) => {
+    logger.warn({ err }, 'Push notification fallo');
+  });
 
   return updatedOrder;
 };

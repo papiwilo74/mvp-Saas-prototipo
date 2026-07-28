@@ -12,7 +12,7 @@ export const verifyToken = (token) => jwt.verify(token, env.JWT_SECRET);
 
 export const signRefreshToken = (user) =>
   jwt.sign(
-    { sub: user.id },
+    { sub: user.id, version: user.refreshTokenVersion },
     env.JWT_REFRESH_SECRET,
     { expiresIn: env.JWT_REFRESH_EXPIRES_IN }
   );

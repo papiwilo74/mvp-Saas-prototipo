@@ -10,7 +10,7 @@ export const authRouter = Router();
 authRouter.post('/register', validate(registerSchema), asyncHandler(authController.register));
 authRouter.post('/login', validate(loginSchema), asyncHandler(authController.login));
 authRouter.get('/me', authenticate, asyncHandler(authController.me));
-authRouter.post('/logout', asyncHandler(authController.logout));
+authRouter.post('/logout', authenticate, asyncHandler(authController.logout));
 authRouter.post('/forgot-password', validate(forgotPasswordSchema), asyncHandler(authController.forgotPassword));
 authRouter.post('/reset-password', validate(resetPasswordSchema), asyncHandler(authController.resetPassword));
 authRouter.post('/refresh', asyncHandler(authController.refresh));

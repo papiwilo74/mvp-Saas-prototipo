@@ -4,6 +4,7 @@ import * as kitchenController from '../controllers/kitchen.controller.js';
 import { authenticate, optionalAuthenticate, requireAdmin } from '../middlewares/auth.middleware.js';
 import { validate } from '../middlewares/validate.middleware.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { audit } from '../middlewares/audit.middleware.js';
 import { createOrderSchema, listAdminOrdersSchema, updateOrderStatusSchema } from '../validators/order.validator.js';
 
 export const orderRouter = Router();
@@ -17,5 +18,6 @@ orderRouter.patch(
   authenticate,
   requireAdmin,
   validate(updateOrderStatusSchema),
+  audit({ action: 'UPDATE', entityType: 'Order', entityId: (req) => req.params.id, changes: (req) => ({ status: req.validated.body.status }) }),
   asyncHandler(orderController.updateStatus)
 );

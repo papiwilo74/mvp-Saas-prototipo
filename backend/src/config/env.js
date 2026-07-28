@@ -32,6 +32,8 @@ const envSchema = z.object({
   GLOBAL_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(100),
   ADMIN_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60000),
   ADMIN_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(200),
+  VAPID_PUBLIC_KEY: z.string().min(1).default('REQUIRED-set-VAPID_PUBLIC_KEY-in-production'),
+  VAPID_PRIVATE_KEY: z.string().min(1).default('REQUIRED-set-VAPID_PRIVATE_KEY-in-production'),
 });
 
 const rawEnv = { ...process.env };

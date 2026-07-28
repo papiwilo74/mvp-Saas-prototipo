@@ -109,5 +109,27 @@ export const refresh = async (refreshToken) => {
   const user = await prisma.user.findUnique({ where: { id: decoded.sub } });
   if (!user) throw new ApiError(401, 'Usuario no encontrado');
 
-  return { user: publicUser(user), token: signToken(user), refreshToken: signRefreshToken(user) };
+  if (decoded.version !== user.refreshTokenVersion) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { refreshTokenVersion: { increment: 1 } }
+    });
+    throw new ApiError(401, 'Refresh token invalido o reutilizado');
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { refreshTokenVersion: { increment: 1 } }
+  });
+
+  const updatedUser = { ...user, refreshTokenVersion: user.refreshTokenVersion + 1 };
+
+  return { user: publicUser(updatedUser), token: signToken(updatedUser), refreshToken: signRefreshToken(updatedUser) };
+};
+
+export const revokeRefreshTokens = async (userId) => {
+  await prisma.user.update({
+    where: { id: userId },
+    data: { refreshTokenVersion: { increment: 1 } }
+  });
 };

@@ -27,7 +27,10 @@ export const login = async (req, res) => {
   res.json({ user: toPublicUser(result.user) });
 };
 
-export const logout = async (_req, res) => {
+export const logout = async (req, res) => {
+  if (req.user) {
+    await authService.revokeRefreshTokens(req.user.id);
+  }
   res.clearCookie('ff_token', { path: '/' });
   res.clearCookie('ff_refresh', { path: '/' });
   res.json({ message: 'Sesion cerrada' });

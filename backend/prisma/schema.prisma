@@ -110,6 +110,7 @@ model User {
   passwordHash         String
   passwordResetToken   String?
   passwordResetExpires DateTime?
+  refreshTokenVersion  Int        @default(0)
   role                 UserRole   @default(CUSTOMER)
   restaurantId         String?
   createdAt            DateTime   @default(now())
@@ -267,6 +268,38 @@ model Staff {
 
   @@unique([restaurantId, email])
   @@index([restaurantId])
+}
+
+model PushSubscription {
+  id           String   @id @default(cuid())
+  endpoint     String   @unique
+  p256dh       String
+  auth         String
+  userId       String?
+  customerId   String?
+  restaurantId String?
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([customerId])
+  @@index([restaurantId])
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  userId       String?
+  action       String
+  entityType   String
+  entityId     String?
+  changes      Json?    @db.JsonB
+  ipAddress    String?
+  restaurantId String?
+  createdAt    DateTime @default(now())
+
+  @@index([restaurantId])
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
 }
 
 model PaymentTransaction {

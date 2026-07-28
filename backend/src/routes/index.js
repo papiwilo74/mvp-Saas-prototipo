@@ -18,6 +18,8 @@ import { mapsRouter } from './maps.routes.js';
 import { staffRouter } from './staff.routes.js';
 import { onboardingRouter } from './onboarding.routes.js';
 import { sitemapRouter } from './sitemap.routes.js';
+import { auditRouter } from './audit.routes.js';
+import { pushRouter } from './push.routes.js';
 
 export const apiRouter = Router();
 
@@ -54,3 +56,5 @@ apiRouter.use('/analytics', analyticsRouter);
 apiRouter.use('/maps', mapsRouter);
 apiRouter.use('/staff', staffRouter);
 apiRouter.use('/onboarding', onboardingRouter);
+apiRouter.use('/audit-logs', auditRouter);
+apiRouter.use('/push', pushRouter);
