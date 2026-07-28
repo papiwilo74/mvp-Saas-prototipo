@@ -89,6 +89,7 @@ export function AdminOrdersPage() {
   }, [loadOrders]);
 
   const updateStatus = async (orderId, status) => {
+    if (!window.confirm('Cambiar el estado del pedido?')) return;
     await api.patch(`/orders/${orderId}/status`, { status });
     loadOrders(pagination.page);
   };

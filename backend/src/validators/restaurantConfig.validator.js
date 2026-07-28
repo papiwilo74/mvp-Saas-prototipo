@@ -35,7 +35,15 @@ export const updateRestaurantConfigSchema = z.object({
     facebookUrl: optionalUrl,
     instagramUrl: optionalUrl,
     openingHours: z.string().optional(),
-    businessHours: z.any().optional(),
+    businessHours: z.object({
+      monday: z.tuple([z.string(), z.string()]).optional(),
+      tuesday: z.tuple([z.string(), z.string()]).optional(),
+      wednesday: z.tuple([z.string(), z.string()]).optional(),
+      thursday: z.tuple([z.string(), z.string()]).optional(),
+      friday: z.tuple([z.string(), z.string()]).optional(),
+      saturday: z.tuple([z.string(), z.string()]).optional(),
+      sunday: z.tuple([z.string(), z.string()]).optional()
+    }).optional(),
     acceptsScheduledOrders: z.boolean().optional(),
     leadTimeMinutes: z.coerce.number().int().min(0).optional(),
     deliveryFee: z.coerce.number().min(0).optional(),
@@ -47,7 +55,11 @@ export const updateRestaurantConfigSchema = z.object({
     whatsappToken: z.string().optional().or(z.literal('')),
     whatsappPhoneNumberId: z.string().optional().or(z.literal('')),
     googleMapsApiKey: z.string().optional().or(z.literal('')),
-    loyaltyProgram: z.any().optional()
+    loyaltyProgram: z.object({
+      enabled: z.boolean(),
+      pointsPerPeso: z.coerce.number().min(0).optional(),
+      pointsValue: z.coerce.number().min(0).optional()
+    }).optional()
   })
 });
 

@@ -163,15 +163,10 @@ export const createOrder = async ({
 
     const paymentStatus = paymentMethod === 'WOMPI' ? 'PENDING' : 'APPROVED';
 
-    await transaction.orderCounter.upsert({
+    const { lastOrderNumber: orderNumber } = await transaction.orderCounter.upsert({
       where: { restaurantId: restaurant.id },
-      create: { restaurantId: restaurant.id, lastOrderNumber: 0 },
-      update: {}
-    });
-
-    const { lastOrderNumber: orderNumber } = await transaction.orderCounter.update({
-      where: { restaurantId: restaurant.id },
-      data: { lastOrderNumber: { increment: 1 } }
+      create: { restaurantId: restaurant.id, lastOrderNumber: 1 },
+      update: { lastOrderNumber: { increment: 1 } }
     });
 
     return transaction.order.create({

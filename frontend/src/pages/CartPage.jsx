@@ -63,6 +63,20 @@ export function CartPage() {
     localStorage.setItem(CUSTOMER_STORAGE_KEY, JSON.stringify(updated));
   };
 
+  const validateField = (field, value) => {
+    const errs = { ...fieldErrors };
+    if (field === 'name') {
+      if (!value.trim() || value.trim().length < 2) errs.name = true; else delete errs.name;
+    }
+    if (field === 'phone') {
+      if (!value.trim()) { errs.phone = true; setPhoneError(''); } else if (!isValidColombianPhone(value)) { errs.phone = true; setPhoneError('Ingresa un numero colombiano valido (ej: 3001234567)'); } else { delete errs.phone; setPhoneError(''); }
+    }
+    if (field === 'address') {
+      if (!value.trim()) errs.address = true; else delete errs.address;
+    }
+    setFieldErrors(errs);
+  };
+
   const validateForm = () => {
     const errors = {};
     if (!customer.name.trim() || customer.name.trim().length < 2) errors.name = true;
@@ -178,16 +192,16 @@ export function CartPage() {
         <div className="mt-5 space-y-4">
           <label className="block space-y-1">
             <span className="label">Nombre {fieldErrors.name && <span className="text-red-500">*</span>}</span>
-            <input name="customerName" className={`input ${fieldErrors.name ? 'border-red-400 ring-2 ring-red-100' : ''}`} required value={customer.name} onChange={(event) => updateCustomer('name', event.target.value)} />
+            <input name="customerName" className={`input ${fieldErrors.name ? 'border-red-400 ring-2 ring-red-100' : ''}`} required value={customer.name} onChange={(event) => updateCustomer('name', event.target.value)} onBlur={(event) => validateField('name', event.target.value)} />
           </label>
           <label className="block space-y-1">
             <span className="label">Telefono / WhatsApp {fieldErrors.phone && <span className="text-red-500">*</span>}</span>
-            <input name="customerPhone" className={`input ${fieldErrors.phone || phoneError ? 'border-red-400 ring-2 ring-red-100' : ''}`} required value={customer.phone} onChange={(event) => updateCustomer('phone', event.target.value)} placeholder="3001234567" />
+            <input name="customerPhone" className={`input ${fieldErrors.phone || phoneError ? 'border-red-400 ring-2 ring-red-100' : ''}`} required value={customer.phone} onChange={(event) => updateCustomer('phone', event.target.value)} onBlur={(event) => validateField('phone', event.target.value)} placeholder="3001234567" />
             {phoneError && <p className="text-xs font-semibold text-red-600">{phoneError}</p>}
           </label>
           <label className="block space-y-1">
             <span className="label">Direccion de entrega {fieldErrors.address && <span className="text-red-500">*</span>}</span>
-            <input name="customerAddress" className={`input ${fieldErrors.address ? 'border-red-400 ring-2 ring-red-100' : ''}`} required value={customer.address} onChange={(event) => updateCustomer('address', event.target.value)} placeholder="Cra 1 #2-34" />
+            <input name="customerAddress" className={`input ${fieldErrors.address ? 'border-red-400 ring-2 ring-red-100' : ''}`} required value={customer.address} onChange={(event) => updateCustomer('address', event.target.value)} onBlur={(event) => validateField('address', event.target.value)} placeholder="Cra 1 #2-34" />
           </label>
           <label className="block space-y-1">
             <span className="label">Numero de mesa (opcional)</span>
