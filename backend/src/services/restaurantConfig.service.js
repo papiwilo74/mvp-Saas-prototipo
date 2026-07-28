@@ -1,3 +1,4 @@
+import { DEFAULT_RESTAURANT_SLUG } from '../config/constants.js';
 import { prisma } from '../config/prisma.js';
 
 const PUBLIC_CONFIG_FIELDS = [
@@ -8,7 +9,7 @@ const PUBLIC_CONFIG_FIELDS = [
   'loyaltyProgram',
 ];
 
-export const getPublicConfig = async (restaurantSlug = 'demo-burger') => {
+export const getPublicConfig = async (restaurantSlug = DEFAULT_RESTAURANT_SLUG) => {
   const restaurant = await prisma.restaurant.findUnique({
     where: { slug: restaurantSlug },
     select: {

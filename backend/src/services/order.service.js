@@ -1,6 +1,7 @@
 import { prisma } from '../config/prisma.js';
 import { ApiError } from '../utils/apiError.js';
 import { sendOrderConfirmationEmail, sendOrderStatusEmail } from './email.service.js';
+import { DEFAULT_RESTAURANT_SLUG } from '../config/constants.js';
 import { findOrCreateCustomer } from './customer.service.js';
 import { emitNewOrder, emitOrderStatusChanged } from './socket.service.js';
 import { sendStatusUpdate } from './whatsapp.service.js';
@@ -32,7 +33,7 @@ export {
 export { validateStock, deductStock } from './order.inventory.service.js';
 
 export const createOrder = async ({
-  restaurantSlug = 'demo-burger',
+  restaurantSlug = DEFAULT_RESTAURANT_SLUG,
   userId,
   customer,
   items,

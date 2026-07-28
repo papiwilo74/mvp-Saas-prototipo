@@ -1,6 +1,7 @@
+import { DEFAULT_RESTAURANT_SLUG } from '../config/constants.js';
 import { prisma } from '../config/prisma.js';
 
-export const getPublicMenu = async (restaurantSlug = 'demo-burger', search = '') => {
+export const getPublicMenu = async (restaurantSlug = DEFAULT_RESTAURANT_SLUG, search = '') => {
   const restaurant = await prisma.restaurant.findUnique({
     where: { slug: restaurantSlug },
     include: {
@@ -30,7 +31,7 @@ export const getPublicMenu = async (restaurantSlug = 'demo-burger', search = '')
   return restaurant;
 };
 
-export const searchProducts = async (restaurantSlug = 'demo-burger', search = '', pagination = {}) => {
+export const searchProducts = async (restaurantSlug = DEFAULT_RESTAURANT_SLUG, search = '', pagination = {}) => {
   const page = pagination.page || 1;
   const pageSize = pagination.pageSize || 20;
   const skip = (page - 1) * pageSize;

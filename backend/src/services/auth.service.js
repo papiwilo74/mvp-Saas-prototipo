@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
+import { DEFAULT_RESTAURANT_SLUG } from '../config/constants.js';
 import { prisma } from '../config/prisma.js';
 import { ApiError } from '../utils/apiError.js';
 import { signToken, signRefreshToken, verifyRefreshToken } from '../utils/token.js';
@@ -16,7 +17,7 @@ const publicUser = (user) => ({
 });
 
 export const register = async ({ name, email, password }) => {
-  const restaurant = await prisma.restaurant.findFirst({ where: { slug: 'demo-burger' } });
+  const restaurant = await prisma.restaurant.findFirst({ where: { slug: DEFAULT_RESTAURANT_SLUG } });
   const passwordHash = await bcrypt.hash(password, 10);
 
   const user = await prisma.user.create({

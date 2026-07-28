@@ -280,4 +280,7 @@ model PaymentTransaction {
   customer      Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+
+  @@index([reference])
+  @@index([status, createdAt])
 }
