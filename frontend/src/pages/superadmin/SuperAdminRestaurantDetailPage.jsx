@@ -1,4 +1,4 @@
-import { ArrowLeft, Building2, ExternalLink, Package, ReceiptText, UsersRound } from 'lucide-react';
+import { ArrowLeft, Building2, ExternalLink, Package, ReceiptText } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../services/api';

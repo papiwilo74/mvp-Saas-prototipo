@@ -3,7 +3,6 @@ import { Route, Routes } from 'react-router-dom';
 import { ProtectedRoute } from '../components/routing/ProtectedRoute';
 import { env } from '../config/env';
 
-const load = (mod) => mod.then(m => ({ default: Object.values(m)[0] }));
 const loadPage = (name) => () => import(`../pages/${name}.jsx`).then(m => ({ default: m[name] }));
 const loadAdmin = (name) => () => import(`../pages/admin/${name}.jsx`).then(m => ({ default: m[name] }));
 const loadSuper = (name) => () => import(`../pages/superadmin/${name}.jsx`).then(m => ({ default: m[name] }));

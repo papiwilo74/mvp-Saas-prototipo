@@ -4,7 +4,6 @@ import { useApiQuery, apiQueryKey } from '../../hooks/useApiQuery';
 import { useApiMutation } from '../../hooks/useApiMutation';
 import { api } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
-import { Skeleton } from './Skeleton';
 
 export function OnboardingWizard() {
   const { toast } = useToast();

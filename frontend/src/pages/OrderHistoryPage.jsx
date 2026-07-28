@@ -11,7 +11,6 @@ export function OrderHistoryPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
     api.get('/orders/mine').then(({ data }) => setOrders(data.orders)).finally(() => setLoading(false));
   }, []);
 

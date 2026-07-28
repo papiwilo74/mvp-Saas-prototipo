@@ -1,5 +1,5 @@
 import { QrCode, Save } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { QRCode } from '../../components/ui/QRCode';
 import { useRestaurantConfig } from '../../context/RestaurantConfigContext';
 import { api } from '../../services/api';
@@ -16,8 +16,6 @@ export function AdminSettingsPage() {
   const [form, setForm] = useState(config);
   const [saved, setSaved] = useState(false);
   const [showQR, setShowQR] = useState(false);
-
-  useEffect(() => setForm(config), [config]);
 
   const menuUrl = `${window.location.origin}/menu`;
 

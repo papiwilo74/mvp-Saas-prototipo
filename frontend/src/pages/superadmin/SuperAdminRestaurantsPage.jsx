@@ -1,8 +1,7 @@
-import { ArrowRight, Building2, ExternalLink, Package, ReceiptText } from 'lucide-react';
+import { ArrowRight, Building2, ExternalLink } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../services/api';
-import { formatCurrency } from '../../utils/formatters';
 
 export function SuperAdminRestaurantsPage() {
   const navigate = useNavigate();

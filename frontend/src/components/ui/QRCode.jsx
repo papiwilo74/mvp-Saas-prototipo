@@ -1,4 +1,4 @@
-import { Download, QrCode } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export function QRCode({ url, size = 200, downloadable = true }) {

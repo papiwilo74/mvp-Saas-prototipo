@@ -1,7 +1,7 @@
 import { Bell, Check, Clock3, Flame, MapPinned, Timer } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../services/api';
-import { formatCurrency, formatDate } from '../../utils/formatters';
+import { formatDate } from '../../utils/formatters';
 
 const playKitchenSound = () => {
   const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -22,13 +22,6 @@ const playKitchenSound = () => {
   osc.stop(context.currentTime + 0.55);
 };
 
-const statusLabels = {
-  PENDING: 'Pendiente',
-  PREPARING: 'Preparando',
-  ON_THE_WAY: 'Entregando',
-  DELIVERED: 'Entregado',
-  CANCELLED: 'Cancelado'
-};
 
 const statusColor = {
   PENDING: 'border-l-amber-400 bg-amber-50',

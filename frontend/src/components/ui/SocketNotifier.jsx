@@ -5,10 +5,11 @@ import { useAuth } from '../../context/AuthContext';
 
 export function SocketNotifier() {
   const { user } = useAuth();
-  const { socket } = useSocket(user?.restaurantId, user);
+  const { socketRef } = useSocket(user?.restaurantId, user);
   const { toast } = useToast();
 
   useEffect(() => {
+    const socket = socketRef.current;
     if (!socket) return;
 
     const handleNewOrder = (order) => {
@@ -30,7 +31,7 @@ export function SocketNotifier() {
       socket.off('new-order', handleNewOrder);
       socket.off('order-updated', handleOrderUpdated);
     };
-  }, [socket, toast]);
+  }, [socketRef, toast]);
 
   return null;
 }

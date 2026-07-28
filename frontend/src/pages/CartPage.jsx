@@ -1,4 +1,4 @@
-import { Clock3, CreditCard, MapPin, MapPinned, ShieldCheck, Star, Ticket, QrCode } from 'lucide-react';
+import { Clock3, CreditCard, MapPinned, ShieldCheck, Star, Ticket, QrCode } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CartItem } from '../components/cart/CartItem';
@@ -126,7 +126,7 @@ export function CartPage() {
           restaurantSlug: env.restaurantSlug
         });
         payload.wompiTransactionId = paymentData.wompiId;
-        const { data } = await api.post('/orders', payload);
+        await api.post('/orders', payload);
         clearCart();
         window.location.href = paymentData.paymentUrl;
         return;

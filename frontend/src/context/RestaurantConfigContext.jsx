@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { createContext, useContext, useEffect, useMemo } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo } from 'react';
 import { env } from '../config/env';
 import { api } from '../services/api';
 import { apiQueryKey } from '../hooks/useApiQuery';
@@ -43,9 +43,9 @@ export function RestaurantConfigProvider({ children }) {
 
   const config = data || fallbackConfig;
 
-  const setConfig = (newConfig) => {
+  const setConfig = useCallback((newConfig) => {
     queryClient.setQueryData(apiQueryKey('restaurantConfig', env.restaurantSlug), newConfig);
-  };
+  }, [queryClient]);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--color-primary', config.primaryColor);
@@ -57,7 +57,7 @@ export function RestaurantConfigProvider({ children }) {
     setConfig,
     loading: isLoading && !data,
     isError
-  }), [config, isLoading, isError, data]);
+  }), [config, setConfig, isLoading, isError, data]);
 
   return <RestaurantConfigContext.Provider value={value}>{children}</RestaurantConfigContext.Provider>;
 }

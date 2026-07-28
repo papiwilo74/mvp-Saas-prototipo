@@ -16,21 +16,12 @@ const loadCart = () => {
 };
 
 export function CartProvider({ children }) {
-  const [items, setItems] = useState([]);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [items, setItems] = useState(() => loadCart());
   const [stockWarning, setStockWarning] = useState('');
 
   useEffect(() => {
-    const stored = loadCart();
-    setItems(stored);
-    setIsHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (isHydrated) {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-    }
-  }, [items, isHydrated]);
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+  }, [items]);
 
   const addItem = (product) => {
     setStockWarning('');
@@ -76,8 +67,8 @@ export function CartProvider({ children }) {
   const count = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const value = useMemo(
-    () => ({ items, total, count, addItem, updateQuantity, clearCart, stockWarning, isHydrated }),
-    [items, total, count, stockWarning, isHydrated]
+    () => ({ items, total, count, addItem, updateQuantity, clearCart, stockWarning }),
+    [items, total, count, stockWarning]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

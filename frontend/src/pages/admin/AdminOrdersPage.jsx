@@ -14,14 +14,6 @@ const statuses = [
   ['CANCELLED', 'Cancelado']
 ];
 
-const statusTone = {
-  PENDING: 'bg-amber-100 text-amber-800 border-amber-200',
-  PREPARING: 'bg-blue-100 text-blue-800 border-blue-200',
-  ON_THE_WAY: 'bg-purple-100 text-purple-800 border-purple-200',
-  DELIVERED: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-  CANCELLED: 'bg-red-100 text-red-800 border-red-200'
-};
-
 const playNotification = () => {
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   if (!AudioContext) return;
@@ -210,9 +202,7 @@ export function AdminOrdersPage() {
                       <td className="p-3">{formatDate(order.createdAt)}</td>
                       <td className="p-3 font-bold">{formatCurrency(order.total)}</td>
                       <td className="p-3">
-                        <span className={`inline-flex min-h-8 items-center rounded-md border px-2 text-xs font-black ${statusTone[order.status] || ''}`}>
-                          <StatusBadge status={order.status} />
-                        </span>
+                        <StatusBadge status={order.status} />
                       </td>
                       <td className="p-3">
                         <select className="input min-h-10" value={order.status} onChange={(event) => updateStatus(order.id, event.target.value)}>

@@ -1,5 +1,8 @@
 import { ArrowRight, CheckCircle2, Clock3, CookingPot, MapPinned, MessageSquare, ShoppingBag, Star, Ticket } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { io } from 'socket.io-client';
+import { env } from '../config/env';
 import { useRestaurantConfig } from '../context/RestaurantConfigContext';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import { buildWhatsAppOrderUrl, paymentLabels } from '../utils/whatsappOrder';
@@ -14,11 +17,23 @@ const statusSteps = [
 export function CheckoutSuccessPage() {
   const { state } = useLocation();
   const order = state?.order;
+  const [currentStatus, setCurrentStatus] = useState(order?.status || 'PENDING');
   const pointsEarned = state?.pointsEarned || 0;
   const { config } = useRestaurantConfig();
   const whatsappUrl = state?.whatsappUrl || buildWhatsAppOrderUrl({ order, config });
   const scheduledText = order?.scheduledFor ? formatDate(order.scheduledFor) : '';
-  const currentStep = statusSteps.findIndex((s) => s.status === order?.status) || 0;
+  const currentStep = statusSteps.findIndex((s) => s.status === currentStatus);
+
+  useEffect(() => {
+    if (!order?.id) return;
+    const socket = io(env.apiUrl?.replace('/api', '') || 'http://localhost:4000', {
+      query: { restaurantId: config.id || '' }
+    });
+    socket.on('order-status-changed', (updated) => {
+      if (updated.id === order.id) setCurrentStatus(updated.status);
+    });
+    return () => { socket.disconnect(); };
+  }, [order?.id, config.id]);
 
   return (
     <div className="container-page py-8">

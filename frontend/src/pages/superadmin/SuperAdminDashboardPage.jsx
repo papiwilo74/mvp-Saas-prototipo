@@ -1,5 +1,4 @@
-import { Building2, Package, ReceiptText, TrendingUp, UsersRound } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Building2, Package, ReceiptText, TrendingUp } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../services/api';
 import { formatCurrency, formatDate } from '../../utils/formatters';

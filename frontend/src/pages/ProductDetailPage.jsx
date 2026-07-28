@@ -2,7 +2,7 @@ import { Minus, Plus, ShoppingBag, Sparkles, Tag } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { SEOHead } from '../components/seo/SEOHead';
-import { CartSkeleton, ProductSkeleton } from '../components/ui/Skeleton';
+import { ProductSkeleton } from '../components/ui/Skeleton';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { useMenu } from '../hooks/useMenu';
