@@ -11,6 +11,8 @@ import { env } from './config/env.js';
 import { errorHandler, notFound } from './middlewares/error.middleware.js';
 import { createRateLimit } from './middlewares/rateLimit.middleware.js';
 import { setCsrfToken } from './middlewares/csrf.middleware.js';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger.js';
 import { apiRouter } from './routes/index.js';
 
 Sentry.init({
@@ -32,6 +34,7 @@ const allowedOrigins = [
 
 app.use(compression());
 
+const isDev = env.NODE_ENV !== 'production';
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
@@ -39,6 +42,9 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
         connectSrc: ["'self'", env.FRONTEND_URL, env.ALLOWED_ORIGINS || ''].filter(Boolean),
+        styleSrc: ["'self'", ...(isDev ? ["'unsafe-inline'"] : [])],
+        scriptSrc: ["'self'", ...(isDev ? ["'unsafe-inline'"] : [])],
+        imgSrc: ["'self'", 'data:'],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"],
       }
@@ -84,6 +90,8 @@ app.use(
   })
 );
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customCss: '.swagger-ui .topbar { display: none }', customSiteTitle: 'FastFood SaaS API Docs' }));
+app.get('/api-docs.json', (_req, res) => res.json(swaggerSpec));
 app.use('/api', apiRouter);
 app.use(notFound);
 Sentry.setupExpressErrorHandler(app);
