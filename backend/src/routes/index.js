@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { prisma } from '../config/prisma.js';
 import { createRateLimit } from '../middlewares/rateLimit.middleware.js';
 import { env } from '../config/env.js';
+import { healthRouter } from './health.routes.js';
 import { authRouter } from './auth.routes.js';
 import { categoryRouter } from './category.routes.js';
 import { customerRouter } from './customer.routes.js';
@@ -36,15 +36,7 @@ apiRouter.use(globalRateLimit);
 apiRouter.use('/admin', adminRateLimit);
 apiRouter.use('/superadmin', adminRateLimit);
 
-apiRouter.get('/health', async (_req, res) => {
-  let database = 'ok';
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-  } catch {
-    database = 'error';
-  }
-  res.status(database === 'ok' ? 200 : 503).json({ status: database === 'ok' ? 'ok' : 'degraded', database });
-});
+apiRouter.use('/health', healthRouter);
 apiRouter.use('/auth', authRouter);
 apiRouter.use('/menu', menuRouter);
 apiRouter.use('/categories', categoryRouter);
