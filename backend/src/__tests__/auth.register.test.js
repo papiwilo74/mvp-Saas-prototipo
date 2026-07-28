@@ -17,7 +17,7 @@ vi.mock('../config/prisma.js', () => {
   return { prisma: mockPrisma };
 });
 
-vi.mock('../services/email.service.js', () => ({ sendWelcomeEmail: vi.fn() }));
+vi.mock('../services/email.service.js', () => ({ sendWelcomeEmail: vi.fn().mockResolvedValue(true) }));
 vi.mock('../services/socket.service.js', () => ({ emitToRestaurant: vi.fn() }));
 
 const mockPrisma = (await import('../config/prisma.js')).prisma;

@@ -5,6 +5,7 @@ import { ApiError } from '../utils/apiError.js';
 import { signToken, signRefreshToken, verifyRefreshToken } from '../utils/token.js';
 import { env } from '../config/env.js';
 import { sendWelcomeEmail } from './email.service.js';
+import { logger } from './logger.service.js';
 
 const publicUser = (user) => ({
   id: user.id,
@@ -27,7 +28,9 @@ export const register = async ({ name, email, password }) => {
     }
   });
 
-  await sendWelcomeEmail({ to: user.email, name: user.name });
+  sendWelcomeEmail({ to: user.email, name: user.name }).catch((err) => {
+    logger.warn({ err, email: user.email }, 'Welcome email failed to send');
+  });
 
   return { user: publicUser(user), token: signToken(user), refreshToken: signRefreshToken(user) };
 };
@@ -84,12 +87,14 @@ export const login = async ({ email, password }) => {
   const user = await prisma.user.findUnique({ where: { email } });
 
   if (!user) {
+    logger.warn({ email }, 'Failed login attempt: user not found');
     throw new ApiError(401, 'Credenciales invalidas');
   }
 
   const isValid = await bcrypt.compare(password, user.passwordHash);
 
   if (!isValid) {
+    logger.warn({ email }, 'Failed login attempt: wrong password');
     throw new ApiError(401, 'Credenciales invalidas');
   }
 

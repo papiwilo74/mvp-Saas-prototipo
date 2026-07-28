@@ -4,6 +4,7 @@ import { Pagination } from '../../components/ui/Pagination';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { api } from '../../services/api';
 import { formatCurrency, formatDate } from '../../utils/formatters';
+import { paymentLabels } from '../../utils/whatsappOrder';
 
 const statuses = [
   ['PENDING', 'Pendiente'],
@@ -76,6 +77,8 @@ export function AdminOrdersPage() {
       initialized.current = true;
       setOrders(data.orders);
       setPagination(data.pagination);
+    }).catch(() => {
+      /* polling errors are expected (network blips) */
     });
   }, [filters, pagination.page, pagination.pageSize, soundEnabled]);
 
@@ -268,7 +271,7 @@ export function AdminOrdersPage() {
                               <div className="space-y-2 text-sm">
                                 <div className="flex justify-between">
                                   <span className="text-stone-600">Metodo de pago</span>
-                                  <span className="font-bold">{statuses.find(([v]) => v === order.paymentMethod)?.[1] || order.paymentMethod}</span>
+                                  <span className="font-bold">{paymentLabels[order.paymentMethod] || order.paymentMethod}</span>
                                 </div>
                                 {order.couponCode && (
                                   <div className="flex justify-between">
