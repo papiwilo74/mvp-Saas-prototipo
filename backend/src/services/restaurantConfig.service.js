@@ -1,7 +1,15 @@
 import { prisma } from '../config/prisma.js';
 
-export const getPublicConfig = async (restaurantSlug = 'demo-burger') =>
-  prisma.restaurant.findUnique({
+const PUBLIC_CONFIG_FIELDS = [
+  'id', 'restaurantName', 'logoUrl', 'heroImageUrl', 'primaryColor', 'secondaryColor',
+  'phone', 'whatsapp', 'address', 'email', 'facebookUrl', 'instagramUrl',
+  'openingHours', 'businessHours', 'acceptsScheduledOrders', 'leadTimeMinutes',
+  'deliveryFee', 'deliveryZones', 'coupons', 'paymentMethods', 'wompiPublicKey',
+  'loyaltyProgram',
+];
+
+export const getPublicConfig = async (restaurantSlug = 'demo-burger') => {
+  const restaurant = await prisma.restaurant.findUnique({
     where: { slug: restaurantSlug },
     select: {
       id: true,
@@ -9,6 +17,18 @@ export const getPublicConfig = async (restaurantSlug = 'demo-burger') =>
       config: true
     }
   });
+
+  if (!restaurant?.config) return restaurant;
+
+  const sanitized = {};
+  for (const key of PUBLIC_CONFIG_FIELDS) {
+    if (key in restaurant.config) {
+      sanitized[key] = restaurant.config[key];
+    }
+  }
+
+  return { ...restaurant, config: sanitized };
+};
 
 export const updateConfig = async (restaurantId, data) =>
   prisma.restaurantConfig.upsert({

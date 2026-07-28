@@ -18,4 +18,4 @@ const createPaymentLinkSchema = z.object({
 
 paymentRouter.post('/create-link', optionalAuthenticate, validate(createPaymentLinkSchema), asyncHandler(paymentController.createWompiLink));
 paymentRouter.post('/webhook', asyncHandler(paymentController.webhook));
-paymentRouter.get('/verify/:wompiId', asyncHandler(paymentController.verifyTransaction));
+paymentRouter.get('/verify/:wompiId', authenticate, asyncHandler(paymentController.verifyTransaction));

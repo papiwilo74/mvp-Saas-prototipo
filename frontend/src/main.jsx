@@ -8,6 +8,7 @@ import { AuthProvider } from './context/AuthContext.jsx';
 import { CartProvider } from './context/CartContext.jsx';
 import { RestaurantConfigProvider } from './context/RestaurantConfigContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
+import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import './styles/theme.css';
 import './styles/index.css';
 
@@ -22,20 +23,22 @@ const queryClient = new QueryClient({
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <HelmetProvider>
-      <BrowserRouter>
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <RestaurantConfigProvider>
-              <ToastProvider>
-                <CartProvider>
-                  <App />
-                </CartProvider>
-              </ToastProvider>
-            </RestaurantConfigProvider>
-          </AuthProvider>
-        </QueryClientProvider>
-      </BrowserRouter>
-    </HelmetProvider>
+    <ErrorBoundary>
+      <HelmetProvider>
+        <BrowserRouter>
+          <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+              <RestaurantConfigProvider>
+                <ToastProvider>
+                  <CartProvider>
+                    <App />
+                  </CartProvider>
+                </ToastProvider>
+              </RestaurantConfigProvider>
+            </AuthProvider>
+          </QueryClientProvider>
+        </BrowserRouter>
+      </HelmetProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );

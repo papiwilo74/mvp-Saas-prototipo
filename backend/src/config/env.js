@@ -25,9 +25,9 @@ const envSchema = z.object({
   WOMPI_PRIVATE_KEY: z.string().optional(),
   WOMPI_EVENTS_SECRET: z.string().optional(),
   SENTRY_DSN: z.string().optional(),
-  JWT_REFRESH_SECRET: z.string().min(24).default('refresh-secret-change-in-production'),
+  JWT_REFRESH_SECRET: z.string().min(32).default('REQUIRED-set-JWT_REFRESH_SECRET-in-production'),
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
-  JWT_RESET_SECRET: z.string().default('reset-secret-change-me'),
+  JWT_RESET_SECRET: z.string().min(32).default('REQUIRED-set-JWT_RESET_SECRET-in-production'),
   GLOBAL_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60000),
   GLOBAL_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(100),
   ADMIN_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60000),
@@ -74,5 +74,13 @@ if (validatedEnv.NODE_ENV === 'production') {
   }
   if (validatedEnv.JWT_SECRET.length < 32) {
     console.warn('⚠️  WARNING: Using a short JWT_SECRET in production. Use at least 32 chars.');
+  }
+  if (validatedEnv.JWT_REFRESH_SECRET === 'REQUIRED-set-JWT_REFRESH_SECRET-in-production') {
+    console.error('❌ JWT_REFRESH_SECRET must be set in production.');
+    process.exit(1);
+  }
+  if (validatedEnv.JWT_RESET_SECRET === 'REQUIRED-set-JWT_RESET_SECRET-in-production') {
+    console.error('❌ JWT_RESET_SECRET must be set in production.');
+    process.exit(1);
   }
 }
