@@ -1,5 +1,7 @@
 import * as orderService from '../services/order.service.js';
 import { toOrderResponse, toOrderListResponse } from '../dto/order.dto.js';
+import crypto from 'crypto';
+import { env } from '../config/env.js';
 
 export const create = async (req, res) => {
   const result = await orderService.createOrder({
@@ -7,6 +9,43 @@ export const create = async (req, res) => {
     userId: req.user?.id
   });
   res.status(201).json({ order: toOrderResponse(result.order), earnedPoints: result.earnedPoints, warnings: result.warnings });
+};
+
+export const wompiWebhook = async (req, res) => {
+  const { event, data, timestamp, signature } = req.body;
+
+  if (event === 'transaction.updated' && data?.transaction) {
+    const { id, reference, status, amount_in_cents } = data.transaction;
+
+    if (env.WOMPI_EVENTS_SECRET) {
+      const properties = signature?.properties || [];
+      const concatenatedValues = properties
+        .map((prop) => {
+          const keys = prop.split('.');
+          let val = data;
+          for (const key of keys) {
+            val = val?.[key];
+          }
+          return val;
+        })
+        .join('');
+
+      const checksum = crypto
+        .createHash('sha256')
+        .update(`${concatenatedValues}${timestamp}${env.WOMPI_EVENTS_SECRET}`)
+        .digest('hex');
+
+      if (checksum !== signature?.checksum) {
+        return res.status(400).json({ error: 'Firma de webhook inválida' });
+      }
+    }
+
+    if (status === 'APPROVED') {
+      await orderService.handlePaymentSuccess(reference, id, amount_in_cents);
+    }
+  }
+
+  res.json({ received: true });
 };
 
 export const myOrders = async (req, res) => {
@@ -27,4 +66,3 @@ export const updateStatus = async (req, res) => {
   );
   res.json({ order: toOrderResponse(order) });
 };
-

@@ -4,33 +4,37 @@ import request from 'supertest';
 
 const JWT_SECRET = 'test-jwt-secret-key-at-least-24-chars!!';
 
-const mockUser = {
-  id: 'user-1',
-  name: 'Test User',
-  email: 'test@example.com',
-  passwordHash: '$2a$10$hashedpassword',
-  role: 'ADMIN',
-  restaurantId: 'rest-1'
-};
-
-const mockBcrypt = vi.hoisted(() => ({
-  compare: vi.fn(),
-  hash: vi.fn()
-}));
-
-const mockPrisma = vi.hoisted(() => ({
-  user: {
-    findUnique: vi.fn(),
-    create: vi.fn(),
-    findFirst: vi.fn()
-  },
-  restaurant: {
-    findFirst: vi.fn(),
-    findUnique: vi.fn()
-  },
-  $queryRaw: vi.fn().mockResolvedValue([{ 1: 1 }]),
-  $transaction: vi.fn()
-}));
+const { mockUser, mockBcrypt, mockPrisma } = vi.hoisted(() => {
+  const userObj = {
+    id: 'user-1',
+    name: 'Test User',
+    email: 'test@example.com',
+    passwordHash: '$2a$10$hashedpassword',
+    role: 'ADMIN',
+    restaurantId: 'rest-1'
+  };
+  return {
+    mockUser: userObj,
+    mockBcrypt: {
+      compare: vi.fn(),
+      hash: vi.fn()
+    },
+    mockPrisma: {
+      user: {
+        findUnique: vi.fn(),
+        create: vi.fn(),
+        findFirst: vi.fn(),
+        update: vi.fn().mockResolvedValue(userObj)
+      },
+      restaurant: {
+        findFirst: vi.fn(),
+        findUnique: vi.fn()
+      },
+      $queryRaw: vi.fn().mockResolvedValue([{ 1: 1 }]),
+      $transaction: vi.fn()
+    }
+  };
+});
 
 vi.mock('bcryptjs', () => ({
   default: mockBcrypt
@@ -123,7 +127,15 @@ describe('Auth Integration', () => {
 
   describe('POST /api/auth/logout', () => {
     it('clears the token cookie', async () => {
-      const res = await request(app).post('/api/auth/logout');
+      const token = jwt.sign(
+        { sub: mockUser.id, role: mockUser.role, restaurantId: mockUser.restaurantId },
+        JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+
+      const res = await request(app)
+        .post('/api/auth/logout')
+        .set('Cookie', `ff_token=${token}`);
 
       expect(res.status).toBe(200);
       expect(res.body.message).toBe('Sesion cerrada');

@@ -1,7 +1,7 @@
 import { Server } from 'socket.io';
 import { env } from '../config/env.js';
 import { verifyToken } from '../utils/token.js';
-import cookie from 'cookie';
+import { parseCookie } from 'cookie';
 
 let io = null;
 
@@ -13,7 +13,7 @@ const verifySocketToken = (handshake) => {
 
   const cookies = handshake.headers?.cookie;
   if (cookies) {
-    const parsed = cookie.parse(cookies);
+    const parsed = parseCookie(cookies);
     const token = parsed.ff_token;
     if (token) {
       try { return verifyToken(token); } catch { return null; }

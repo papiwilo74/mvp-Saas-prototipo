@@ -3,11 +3,17 @@ import { prisma } from '../config/prisma.js';
 import { env } from '../config/env.js';
 import { logger } from './logger.service.js';
 
-webpush.setVapidDetails(
-  'mailto:notifications@fastfoodsaas.com',
-  env.VAPID_PUBLIC_KEY,
-  env.VAPID_PRIVATE_KEY
-);
+try {
+  if (env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY && !env.VAPID_PUBLIC_KEY.startsWith('REQUIRED')) {
+    webpush.setVapidDetails(
+      'mailto:notifications@fastfoodsaas.com',
+      env.VAPID_PUBLIC_KEY,
+      env.VAPID_PRIVATE_KEY
+    );
+  }
+} catch (error) {
+  logger.warn({ err: error }, 'VAPID keys no validas o no configuradas para Web Push');
+}
 
 export const getVapidPublicKey = () => env.VAPID_PUBLIC_KEY;
 

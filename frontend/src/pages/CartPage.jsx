@@ -1,4 +1,4 @@
-import { Clock3, CreditCard, MapPinned, ShieldCheck, Star, Ticket, QrCode } from 'lucide-react';
+import { Clock3, CreditCard, MapPinned, ShieldCheck, Star, Ticket, QrCode, Smartphone, Banknote } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CartItem } from '../components/cart/CartItem';
@@ -265,24 +265,94 @@ export function CartPage() {
             <textarea className="input min-h-24" value={notes} onChange={(event) => setNotes(event.target.value)} />
           </label>
           <div>
-            <p className="label mb-2">Metodo de pago</p>
-            <div className="grid grid-cols-2 gap-2">
-              {paymentMethods.map(([value, label]) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setPaymentMethod(value)}
-                  className={`min-h-11 rounded-full border px-2 text-sm font-black ${
-                    paymentMethod === value
-                      ? 'border-stone-950 bg-stone-950 text-white'
-                      : 'border-stone-300 bg-white text-stone-800'
-                  } ${value === 'WOMPI' ? 'col-span-2' : ''}`}
-                >
-                  {value === 'WOMPI' && <CreditCard size={16} />}
-                  {label}
-                </button>
-              ))}
+            <p className="label mb-2">Método de pago</p>
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+              {paymentMethods.map(([value, label]) => {
+                const isSelected = paymentMethod === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setPaymentMethod(value)}
+                    className={`flex items-start gap-3 rounded-2xl border p-3.5 text-left transition-all ${
+                      isSelected
+                        ? 'border-stone-950 bg-stone-950 text-white shadow-md ring-2 ring-stone-950/20'
+                        : 'border-stone-200 bg-white text-stone-800 hover:border-stone-400'
+                    } ${value === 'WOMPI' ? 'sm:col-span-2' : ''}`}
+                  >
+                    <div
+                      className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl transition-colors ${
+                        isSelected 
+                          ? value === 'NEQUI' ? 'bg-purple-600 text-white' : value === 'CASH' ? 'bg-emerald-600 text-white' : 'bg-white/20 text-white'
+                          : value === 'NEQUI' ? 'bg-purple-50 text-purple-600 border border-purple-200' : value === 'CASH' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-stone-100 text-stone-700'
+                      }`}
+                    >
+                      {value === 'NEQUI' && <Smartphone size={20} className={isSelected ? 'text-white' : 'text-purple-600'} />}
+                      {value === 'CASH' && <Banknote size={20} className={isSelected ? 'text-white' : 'text-emerald-600'} />}
+                      {value === 'CARD' && <CreditCard size={20} className={isSelected ? 'text-white' : 'text-blue-600'} />}
+                      {value === 'WOMPI' && <CreditCard size={20} className={isSelected ? 'text-white' : 'text-amber-500'} />}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <p className="text-sm font-black">{label}</p>
+                        {value === 'NEQUI' && (
+                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                            isSelected ? 'bg-purple-500/30 text-purple-200' : 'bg-purple-100 text-purple-700'
+                          }`}>
+                            Transferencia / QR
+                          </span>
+                        )}
+                        {value === 'CASH' && (
+                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                            isSelected ? 'bg-emerald-500/30 text-emerald-200' : 'bg-emerald-100 text-emerald-700'
+                          }`}>
+                            Contra entrega
+                          </span>
+                        )}
+                        {value === 'WOMPI' && (
+                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                            isSelected ? 'bg-amber-500/30 text-amber-200' : 'bg-amber-100 text-amber-800'
+                          }`}>
+                            Nequi / PSE / Tarjeta
+                          </span>
+                        )}
+                      </div>
+                      <p className={`mt-0.5 text-xs ${isSelected ? 'text-stone-300' : 'text-stone-500'}`}>
+                        {value === 'NEQUI' && 'Paga transfiriendo al número Nequi del restaurante.'}
+                        {value === 'CASH' && 'Pagas en efectivo al recibir tu pedido o en caja.'}
+                        {value === 'CARD' && 'Datáfono o tarjeta al momento de la entrega.'}
+                        {value === 'WOMPI' && 'Pago automático en línea con confirmación inmediata.'}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
+
+            {/* Aviso informativo segun metodo seleccionado */}
+            {paymentMethod === 'NEQUI' && (
+              <div className="mt-3 rounded-xl border border-purple-200 bg-purple-50/70 p-3.5 text-xs text-purple-900">
+                <p className="font-bold flex items-center gap-1.5">
+                  <Smartphone size={14} className="text-purple-600" />
+                  Instrucciones de pago por Nequi:
+                </p>
+                <p className="mt-1 text-purple-800">
+                  Al confirmar tu pedido, podrás transferir directamente al Nequi del restaurante o enviar el comprobante por WhatsApp.
+                </p>
+              </div>
+            )}
+            {paymentMethod === 'CASH' && (
+              <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50/70 p-3.5 text-xs text-emerald-900">
+                <p className="font-bold flex items-center gap-1.5">
+                  <Banknote size={14} className="text-emerald-600" />
+                  Pago en Efectivo:
+                </p>
+                <p className="mt-1 text-emerald-800">
+                  Ten el dinero listo al recibir tu pedido. Si necesitas cambio o billetes grandes, puedes especificarlo en las notas.
+                </p>
+              </div>
+            )}
           </div>
         </div>
         <div className="mt-5 grid gap-3">

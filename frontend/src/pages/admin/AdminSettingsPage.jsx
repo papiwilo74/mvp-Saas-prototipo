@@ -15,16 +15,27 @@ export function AdminSettingsPage() {
   const { config, setConfig } = useRestaurantConfig();
   const [form, setForm] = useState(config);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [showQR, setShowQR] = useState(false);
 
   const menuUrl = `${window.location.origin}/menu`;
 
   const onSubmit = async (event) => {
     event.preventDefault();
-    const { data } = await api.put('/restaurant-config', form);
-    setConfig(data.config);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 1800);
+    setErrorMessage('');
+    setSaving(true);
+    try {
+      const { data } = await api.put('/restaurant-config', form);
+      setConfig(data.config);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (err) {
+      const msg = err.response?.data?.message || err.response?.data?.details?.message || 'Error al guardar la configuración';
+      setErrorMessage(typeof msg === 'string' ? msg : JSON.stringify(msg));
+    } finally {
+      setSaving(false);
+    }
   };
 
   const update = (field, value) => setForm((current) => ({ ...current, [field]: value }));
@@ -132,6 +143,28 @@ export function AdminSettingsPage() {
         </label>
 
         <div className="border-t border-stone-200 pt-4 sm:col-span-2">
+          <span className="label text-purple-950 font-black flex items-center gap-2">
+            <span className="grid h-5 w-5 place-items-center rounded-md bg-purple-600 text-white text-xs">N</span>
+            Configuración de Nequi / Transferencia Directa
+          </span>
+          <p className="text-xs text-stone-500 mb-3">Datos bancarios que verá el cliente al seleccionar pagar por Nequi o transferencia.</p>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div>
+              <span className="text-xs font-bold text-stone-600 mb-1 block">Número de Nequi / Celular</span>
+              <input className="input" placeholder="Ej: 3001234567" value={form.nequiNumber || ''} onChange={(event) => update('nequiNumber', event.target.value)} />
+            </div>
+            <div>
+              <span className="text-xs font-bold text-stone-600 mb-1 block">Llave Bre-B (Opcional)</span>
+              <input className="input" placeholder="Ej: @mirestaurante o ID" value={form.nequiBreB || ''} onChange={(event) => update('nequiBreB', event.target.value)} />
+            </div>
+            <div>
+              <span className="text-xs font-bold text-stone-600 mb-1 block">URL de Imagen QR Nequi (Opcional)</span>
+              <input className="input" placeholder="https://.../qr-nequi.jpg" value={form.nequiQrUrl || ''} onChange={(event) => update('nequiQrUrl', event.target.value)} />
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-stone-200 pt-4 sm:col-span-2">
           <span className="label">Wompi (Pagos en linea)</span>
           <p className="text-xs text-stone-500 mb-3">Configura las llaves de Wompi para aceptar pagos con tarjeta, Nequi, etc.</p>
           <div className="grid gap-2 sm:grid-cols-2">
@@ -150,9 +183,9 @@ export function AdminSettingsPage() {
         </div>
 
         <div className="border-t border-stone-200 pt-4 sm:col-span-2">
-          <span className="label">Google Maps API Key</span>
-          <p className="text-xs text-stone-500 mb-3">Validacion de direcciones en zonas de cobertura.</p>
-          <input className="input" placeholder="AIzaSy..." type="password" value={form.googleMapsApiKey || ''} onChange={(event) => update('googleMapsApiKey', event.target.value)} />
+          <span className="label">API Key de Mapas (Mapbox / Google Maps)</span>
+          <p className="text-xs text-stone-500 mb-3">Validación automática de direcciones y cálculo de distancia en zonas de cobertura.</p>
+          <input className="input" placeholder="pk.eyJ1... o AIzaSy..." type="password" value={form.googleMapsApiKey || ''} onChange={(event) => update('googleMapsApiKey', event.target.value)} />
         </div>
 
         <div className="border-t border-stone-200 pt-4 sm:col-span-2">
@@ -233,10 +266,25 @@ export function AdminSettingsPage() {
         </div>
       )}
 
-      {saved ? <p className="mt-4 rounded-md bg-emerald-50 p-3 text-sm font-bold text-emerald-700">Configuracion guardada</p> : null}
-      <button type="submit" className="btn-primary mt-5 w-full sm:w-auto">
+      {saved && (
+        <p className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-bold text-emerald-800">
+          ✓ Configuración guardada exitosamente
+        </p>
+      )}
+
+      {errorMessage && (
+        <p className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-bold text-red-800">
+          ⚠️ {errorMessage}
+        </p>
+      )}
+
+      <button
+        type="submit"
+        disabled={saving}
+        className={`btn-primary mt-5 w-full sm:w-auto ${saving ? 'opacity-70 cursor-not-allowed' : ''}`}
+      >
         <Save size={18} />
-        Guardar configuracion
+        {saving ? 'Guardando cambios...' : 'Guardar configuración'}
       </button>
     </form>
   );

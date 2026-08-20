@@ -1,6 +1,16 @@
 node_modules/
 dist/
 .env
+.env.production
 .DS_Store
 *.log
 coverage/
+.aider*
+uploads/
+*.bat
+backend/check-*.cjs
+backend/create-*.cjs
+backend/init-*.cjs
+backend/insert-*.cjs
+backend/run-*.cjs
+backend/test-*.cjs

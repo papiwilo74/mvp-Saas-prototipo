@@ -13,9 +13,9 @@ COPY . .
 
 EXPOSE 4000
 
-FROM base AS production
-CMD ["npm", "start"]
-
 FROM base AS development
 RUN npm install --dev
 CMD ["npm", "run", "dev"]
+
+FROM base AS production
+CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]

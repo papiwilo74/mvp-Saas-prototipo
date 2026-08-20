@@ -202,7 +202,7 @@ export const createOrder = async ({
 
   emitNewOrder(restaurant.id, order);
   emailQueue.add('order-confirmation', { type: 'ORDER_CONFIRMATION', payload: { to: customer.email, order } }).catch(() => {
-    sendOrderConfirmationEmail({ to: customer.email, order }).catch(() => {});
+    Promise.resolve(sendOrderConfirmationEmail({ to: customer.email, order })).catch(() => {});
   });
 
   return {
@@ -225,7 +225,7 @@ export const updateOrderStatus = async (restaurantId, orderId, status) => {
 
   emitOrderStatusChanged(restaurantId, updatedOrder);
   emailQueue.add('order-status', { type: 'ORDER_STATUS_CHANGE', payload: { to: updatedOrder.customerEmail, order: updatedOrder } }).catch(() => {
-    sendOrderStatusEmail({ to: updatedOrder.customerEmail, order: updatedOrder }).catch(() => {});
+    Promise.resolve(sendOrderStatusEmail({ to: updatedOrder.customerEmail, order: updatedOrder })).catch(() => {});
   });
   await sendStatusUpdate(restaurantId, updatedOrder.customerPhone, updatedOrder.orderNumber, status);
   notifyOrderStatus(updatedOrder).catch((err) => {

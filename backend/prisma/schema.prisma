@@ -97,6 +97,9 @@ model RestaurantConfig {
   whatsappPhoneNumberId String?
   googleMapsApiKey String?
   loyaltyProgram Json? @db.JsonB
+  nequiNumber    String?
+  nequiQrUrl     String?
+  nequiBreB      String?
   restaurantId   String     @unique
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt

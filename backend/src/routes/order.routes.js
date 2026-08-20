@@ -10,6 +10,7 @@ import { createOrderSchema, listAdminOrdersSchema, updateOrderStatusSchema } fro
 export const orderRouter = Router();
 
 orderRouter.post('/', optionalAuthenticate, validate(createOrderSchema), asyncHandler(orderController.create));
+orderRouter.post('/wompi-webhook', asyncHandler(orderController.wompiWebhook));
 orderRouter.get('/mine', authenticate, asyncHandler(orderController.myOrders));
 orderRouter.get('/admin', authenticate, requireAdmin, validate(listAdminOrdersSchema), asyncHandler(orderController.adminOrders));
 orderRouter.get('/kitchen', authenticate, requireAdmin, asyncHandler(kitchenController.kitchenOrders));

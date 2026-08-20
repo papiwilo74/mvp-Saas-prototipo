@@ -10,7 +10,7 @@ const getClientKey = (req) => {
 
 export const createRateLimit = ({ windowMs, maxRequests, keyPrefix, message }) => rateLimit({
   windowMs,
-  max: maxRequests,
+  max: maxRequests === undefined ? 10000 : maxRequests,
   keyGenerator: (req) => `${keyPrefix}:${getClientKey(req)}`,
   handler: (_req, res) => {
     res.status(429).json({

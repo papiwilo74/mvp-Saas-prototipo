@@ -56,9 +56,21 @@ export function CheckoutSuccessPage() {
                   <span className="text-stone-600">Total</span>
                   <span className="font-black">{formatCurrency(order.total)}</span>
                 </div>
-                <div className="mt-3 flex justify-between gap-3">
+                <div className="mt-3 flex justify-between items-center gap-3">
                   <span className="text-stone-600">Pago</span>
-                  <span className="font-black">{paymentLabels[order.paymentMethod] || 'Simulado'}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-black">{paymentLabels[order.paymentMethod] || 'Simulado'}</span>
+                    {order.paymentMethod === 'NEQUI' && (
+                      <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[11px] font-bold text-purple-700">
+                        Transferencia / QR
+                      </span>
+                    )}
+                    {order.paymentMethod === 'CASH' && (
+                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-700">
+                        Contra entrega
+                      </span>
+                    )}
+                  </div>
                 </div>
                 {order.deliveryFeeApplied > 0 ? (
                   <div className="mt-3 flex justify-between gap-3">
@@ -110,6 +122,92 @@ export function CheckoutSuccessPage() {
                 ) : null}
               </div>
             </div>
+
+            {/* Tarjeta destacada de instrucciones si el pago es NEQUI */}
+            {order.paymentMethod === 'NEQUI' && (
+              <div className="mt-6 rounded-3xl border-2 border-purple-300 bg-purple-50/90 p-5 sm:p-6 text-left shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-purple-600 text-white font-black text-lg shadow-sm">
+                    N
+                  </div>
+                  <div>
+                    <h3 className="text-base font-black text-purple-950">Paga con Nequi / Llave Bre-B o QR</h3>
+                    <p className="text-xs text-purple-700">Monto total a transferir: <strong className="text-purple-950 text-sm">{formatCurrency(order.total)}</strong></p>
+                  </div>
+                </div>
+
+                {/* Mostrar QR si el restaurante lo subio */}
+                {config?.nequiQrUrl && (
+                  <div className="mt-4 flex flex-col items-center justify-center rounded-2xl bg-white p-4 border border-purple-200 text-center">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-purple-900 mb-2">Escanea el código QR de Nequi</span>
+                    <img src={config.nequiQrUrl} alt="QR Nequi" className="h-44 w-44 rounded-xl object-contain border border-purple-100 shadow-sm" />
+                    <span className="mt-2 text-xs text-stone-500">Abre tu app de Nequi y escanea este código</span>
+                  </div>
+                )}
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  {/* Número de Nequi */}
+                  <div className="rounded-2xl bg-white p-3.5 border border-purple-200 flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Número de Nequi:</span>
+                      <p className="text-base font-black text-stone-900">{config?.nequiNumber || config?.phone || config?.whatsapp || 'Consultar'}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const num = (config?.nequiNumber || config?.phone || config?.whatsapp || '').replace(/\s+/g, '');
+                        if (num) navigator.clipboard?.writeText(num);
+                      }}
+                      className="mt-2 inline-flex items-center justify-center rounded-lg bg-purple-100 hover:bg-purple-200 px-3 py-1.5 text-xs font-black text-purple-800 transition-colors"
+                    >
+                      Copiar número
+                    </button>
+                  </div>
+
+                  {/* Llave Bre-B si existe */}
+                  {config?.nequiBreB ? (
+                    <div className="rounded-2xl bg-white p-3.5 border border-purple-200 flex flex-col justify-between">
+                      <div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Llave Bre-B:</span>
+                        <p className="text-base font-black text-purple-900">{config.nequiBreB}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (config.nequiBreB) navigator.clipboard?.writeText(config.nequiBreB.trim());
+                        }}
+                        className="mt-2 inline-flex items-center justify-center rounded-lg bg-purple-100 hover:bg-purple-200 px-3 py-1.5 text-xs font-black text-purple-800 transition-colors"
+                      >
+                        Copiar llave Bre-B
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl bg-white p-3.5 border border-purple-200 flex items-center gap-2 text-xs text-purple-800">
+                      <span>✓ Transferencia inmediata sin comisión desde cualquier cuenta Nequi o Bancolombia.</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Boton para enviar comprobante por WhatsApp */}
+                <div className="mt-4 rounded-2xl bg-purple-950 p-4 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-black">¿Ya realizaste la transferencia?</p>
+                    <p className="text-[11px] text-purple-200">Envía el comprobante para que la cocina inicie tu pedido al instante.</p>
+                  </div>
+                  {whatsappUrl && (
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 px-4 py-2 text-xs font-black text-white shadow-sm transition-all shrink-0"
+                    >
+                      <MessageSquare size={15} />
+                      Enviar Comprobante
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="mt-6">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400 mb-3">Estado del pedido en tiempo real</p>

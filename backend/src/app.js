@@ -23,6 +23,7 @@ Sentry.init({
 });
 
 export const app = express();
+app.set('trust proxy', 1);
 app.disable('x-powered-by');
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,11 +42,22 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        connectSrc: ["'self'", env.FRONTEND_URL, env.ALLOWED_ORIGINS || ''].filter(Boolean),
-        styleSrc: ["'self'", ...(isDev ? ["'unsafe-inline'"] : [])],
-        scriptSrc: ["'self'", ...(isDev ? ["'unsafe-inline'"] : [])],
-        imgSrc: ["'self'", 'data:'],
-        frameSrc: ["'none'"],
+        connectSrc: [
+          "'self'",
+          env.FRONTEND_URL,
+          ...(env.ALLOWED_ORIGINS ? env.ALLOWED_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean) : []),
+          'https://*.wompi.co',
+          'https://maps.googleapis.com',
+          'https://*.mapbox.com',
+          'https://api.mapbox.com'
+        ].filter(Boolean),
+        styleSrc: ["'self'", 'https://fonts.googleapis.com', 'https://api.mapbox.com', ...(isDev ? ["'unsafe-inline'"] : [])],
+        scriptSrc: ["'self'", 'https://checkout.wompi.co', 'https://maps.googleapis.com', 'https://api.mapbox.com', ...(isDev ? ["'unsafe-inline'"] : [])],
+        imgSrc: ["'self'", 'data:', 'blob:', 'https://*.googleapis.com', 'https://*.gstatic.com', 'https://*.wompi.co', 'https://*.mapbox.com', 'https://api.mapbox.com'],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+        frameSrc: ["'self'", 'https://checkout.wompi.co'],
+        workerSrc: ["'self'", 'blob:'],
+        childSrc: ["'self'", 'blob:'],
         objectSrc: ["'none'"],
       }
     }

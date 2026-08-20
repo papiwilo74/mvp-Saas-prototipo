@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext';
 import { useRestaurantConfig } from '../context/RestaurantConfigContext';
 import { DemoBanner } from '../components/ui/DemoBanner';
 import { InstallPrompt } from '../components/ui/InstallPrompt';
+import { CookieBanner } from '../components/ui/CookieBanner';
 
 const navItems = [
   { to: '/', label: 'Inicio', icon: Home, end: true },
@@ -57,8 +58,9 @@ export function AppLayout() {
 
       <footer className="border-t border-stone-200 bg-white py-6 text-center text-xs text-stone-500">
         <div className="container-page flex flex-wrap items-center justify-center gap-4">
-          <Link to="/terms" className="font-semibold hover:text-stone-950 transition-colors">Terminos de Servicio</Link>
-          <Link to="/privacy" className="font-semibold hover:text-stone-950 transition-colors">Politica de Privacidad</Link>
+          <Link to="/terms" className="font-semibold hover:text-stone-950 transition-colors">Términos de Servicio</Link>
+          <span className="text-stone-300">•</span>
+          <Link to="/privacy" className="font-semibold hover:text-stone-950 transition-colors">Política de Privacidad</Link>
         </div>
       </footer>
 
@@ -82,6 +84,7 @@ export function AppLayout() {
         </div>
       </nav>
       <InstallPrompt />
+      <CookieBanner />
     </div>
   );
 }
