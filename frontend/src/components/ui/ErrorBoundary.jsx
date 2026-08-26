@@ -32,7 +32,7 @@ export class ErrorBoundary extends Component {
                 <a href="/" className="btn-secondary">Volver al inicio</a>
               </div>
             )}
-            {this.state.error && (
+            {this.state.error && import.meta.env.DEV && (
               <details className="mt-4 text-left">
                 <summary className="cursor-pointer text-xs font-semibold text-stone-400">Detalles tecnicos</summary>
                 <pre className="mt-2 overflow-auto rounded bg-stone-100 p-3 text-xs text-stone-600">{this.state.error.message}</pre>

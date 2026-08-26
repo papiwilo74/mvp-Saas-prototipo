@@ -40,10 +40,12 @@ function SentryFallback({ error }) {
         <div className="mt-6 flex justify-center gap-3">
           <button onClick={() => window.location.reload()} className="btn-primary">Recargar pagina</button>
         </div>
-        <details className="mt-4 text-left">
-          <summary className="cursor-pointer text-xs font-semibold text-stone-400">Detalles tecnicos</summary>
-          <pre className="mt-2 overflow-auto rounded bg-stone-100 p-3 text-xs text-stone-600">{error.message}</pre>
-        </details>
+        {import.meta.env.DEV && (
+          <details className="mt-4 text-left">
+            <summary className="cursor-pointer text-xs font-semibold text-stone-400">Detalles tecnicos</summary>
+            <pre className="mt-2 overflow-auto rounded bg-stone-100 p-3 text-xs text-stone-600">{error.message}</pre>
+          </details>
+        )}
       </div>
     </div>
   );
@@ -70,5 +72,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       </HelmetProvider>
       </ErrorBoundary>
     </Sentry.ErrorBoundary>
-    </React.StrictMode>
+  </React.StrictMode>
 );

@@ -26,6 +26,17 @@ const pizzaProducts = [
   { name: 'Jugo Natural de Maracuya', description: 'Sin azucar. 500ml.', price: 7000, category: 'Bebidas' },
 ];
 
+const storeProducts = [
+  { name: 'Bolso tejido artesanal', description: 'Bolso mediano hecho a mano, ideal para uso diario.', price: 45000, category: 'Accesorios', imageUrl: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7', trackStock: true, stock: 12 },
+  { name: 'Aretes dorados minimalistas', description: 'Aretes livianos para combinar con cualquier outfit.', price: 18000, category: 'Accesorios', imageUrl: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908', trackStock: true, stock: 20 },
+  { name: 'Set de libretas decoradas', description: 'Paquete de 3 libretas pequeñas con diseños variados.', price: 22000, category: 'Papeleria', imageUrl: 'https://images.unsplash.com/photo-1517842645767-c639042777db', trackStock: true, stock: 18 },
+  { name: 'Vela aromatica vainilla', description: 'Vela en vaso de vidrio con aroma suave a vainilla.', price: 25000, category: 'Hogar', imageUrl: 'https://images.unsplash.com/photo-1603006905003-be475563bc59', trackStock: true, stock: 15 },
+  { name: 'Organizador multiusos', description: 'Organizador plastico para escritorio, maquillaje o accesorios.', price: 30000, category: 'Hogar', trackStock: true, stock: 10 },
+  { name: 'Crema corporal hidratante', description: 'Crema de uso diario para manos y cuerpo.', price: 28000, category: 'Belleza', imageUrl: 'https://images.unsplash.com/photo-1556228578-8c89e6adf883', trackStock: true, stock: 16 },
+  { name: 'Kit regalo especial', description: 'Incluye vela aromatica, libreta decorada y empaque de regalo.', price: 62000, category: 'Promociones', isCombo: true, comboItems: ['Vela aromatica vainilla', 'Set de libretas decoradas', 'Empaque de regalo'], trackStock: true, stock: 8 },
+  { name: 'Moña scrunchie satinada', description: 'Moña suave para el cabello disponible en colores surtidos.', price: 12000, category: 'Belleza', trackStock: true, stock: 30 }
+];
+
 async function createRestaurant({ name, slug, email, phone, address, adminEmail, adminPassword, products, config }) {
   console.log(`Creando ${name}...`);
 
@@ -45,6 +56,14 @@ async function createRestaurant({ name, slug, email, phone, address, adminEmail,
     address,
     email,
     openingHours: 'Lunes a domingo: 11:00 a.m. - 10:00 p.m.',
+    businessType: 'restaurant',
+    businessLabel: 'restaurante',
+    catalogLabel: 'Menú',
+    orderLabel: 'pedido',
+    productLabel: 'producto',
+    fulfillmentLabel: 'domicilio',
+    showTableNumber: true,
+    showKitchenPanel: true,
     acceptsScheduledOrders: true,
     leadTimeMinutes: 30,
     deliveryFee: 5000,
@@ -116,7 +135,7 @@ async function createRestaurant({ name, slug, email, phone, address, adminEmail,
 }
 
 async function main() {
-  console.log('Creando restaurantes de ejemplo...\n');
+  console.log('Creando negocios de ejemplo...\n');
 
   await createRestaurant({
     name: 'Burger House',
@@ -131,6 +150,14 @@ async function main() {
       restaurantName: 'Burger House',
       primaryColor: '#dc2626',
       secondaryColor: '#1c1917',
+      businessType: 'restaurant',
+      businessLabel: 'restaurante',
+      catalogLabel: 'Menú',
+      orderLabel: 'pedido',
+      productLabel: 'producto',
+      fulfillmentLabel: 'domicilio',
+      showTableNumber: true,
+      showKitchenPanel: true,
       openingHours: 'Martes a domingo: 12:00 p.m. - 11:00 p.m.'
     }
   });
@@ -148,14 +175,63 @@ async function main() {
       restaurantName: 'Pizza Roma',
       primaryColor: '#7c3aed',
       secondaryColor: '#1c1917',
+      businessType: 'restaurant',
+      businessLabel: 'restaurante',
+      catalogLabel: 'Menú',
+      orderLabel: 'pedido',
+      productLabel: 'producto',
+      fulfillmentLabel: 'domicilio',
+      showTableNumber: true,
+      showKitchenPanel: true,
       openingHours: 'Lunes a domingo: 11:00 a.m. - 10:00 p.m.',
       deliveryFee: 4000
     }
   });
 
-  console.log('Listo. Ambos restaurantes creados.');
+  await createRestaurant({
+    name: 'Variedades Martha',
+    slug: 'variedades-martha',
+    email: 'ventas@variedadesmartha.com',
+    phone: '+57 301 555 7788',
+    address: 'Barrio El Prado, Barranquilla',
+    adminEmail: 'admin@variedadesmartha.com',
+    adminPassword: 'Martha123!',
+    products: storeProducts,
+    config: {
+      restaurantName: 'Variedades Martha',
+      logoUrl: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc',
+      primaryColor: '#db2777',
+      secondaryColor: '#312e81',
+      businessType: 'store',
+      businessLabel: 'tienda',
+      catalogLabel: 'Catálogo',
+      orderLabel: 'compra',
+      productLabel: 'producto',
+      fulfillmentLabel: 'entrega',
+      showTableNumber: false,
+      showKitchenPanel: false,
+      openingHours: 'Lunes a sábado: 9:00 a.m. - 7:00 p.m.',
+      acceptsScheduledOrders: false,
+      leadTimeMinutes: 60,
+      deliveryFee: 6000,
+      deliveryZones: [
+        { name: 'Cerca a la tienda', fee: 4000, minOrder: 20000, estimatedMinutes: 35, isActive: true },
+        { name: 'Ciudad', fee: 8000, minOrder: 35000, estimatedMinutes: 60, isActive: true },
+        { name: 'Recoger en tienda', fee: 0, minOrder: 0, estimatedMinutes: 20, isActive: true }
+      ],
+      coupons: [
+        { code: 'MARTHA10', description: '10% en tu primera compra', discountType: 'PERCENTAGE', discountValue: 10, minimumOrder: 25000, isActive: true },
+        { code: 'ENVIOGRATIS', description: 'Descuento fijo para ayudarte con el envio', discountType: 'FIXED', discountValue: 6000, minimumOrder: 60000, isActive: true }
+      ],
+      paymentMethods: ['CASH', 'NEQUI', 'CARD'],
+      loyaltyProgram: { enabled: true, pointsPerPeso: 0.01, pointsValue: 10 }
+    }
+  });
+
+  console.log('Listo. Negocios de ejemplo creados.');
   console.log('\nSuperadmin: superadmin@demo.com / SuperAdmin123!');
   console.log('Demo original: admin@demo.com / Admin123!');
+  console.log('Tienda demo: admin@variedadesmartha.com / Martha123!');
 }
 
 main()

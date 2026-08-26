@@ -11,6 +11,7 @@ import { env } from './config/env.js';
 import { errorHandler, notFound } from './middlewares/error.middleware.js';
 import { createRateLimit } from './middlewares/rateLimit.middleware.js';
 import { setCsrfToken } from './middlewares/csrf.middleware.js';
+import { requestLogger } from './services/logger.service.js';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger.js';
 import { apiRouter } from './routes/index.js';
@@ -80,6 +81,7 @@ app.use(
 app.use(express.json({ limit: '1mb', verify: (req, _res, buf) => { req.rawBody = buf.toString(); } }));
 app.use(cookieParser());
 app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+app.use(requestLogger());
 app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
 
 app.use(setCsrfToken);

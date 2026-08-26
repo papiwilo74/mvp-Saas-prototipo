@@ -1,5 +1,5 @@
 import { ArrowRight, CheckCircle2, Clock3, CookingPot, MapPinned, MessageSquare, ShoppingBag, Star, Ticket } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { env } from '../config/env';
@@ -7,21 +7,24 @@ import { useRestaurantConfig } from '../context/RestaurantConfigContext';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import { buildWhatsAppOrderUrl, paymentLabels } from '../utils/whatsappOrder';
 
-const statusSteps = [
-  { status: 'PENDING', label: 'Recibido', icon: CheckCircle2, color: 'text-emerald-600' },
-  { status: 'PREPARING', label: 'Preparando', icon: CookingPot, color: 'text-blue-600' },
-  { status: 'ON_THE_WAY', label: 'En camino', icon: ShoppingBag, color: 'text-purple-600' },
-  { status: 'DELIVERED', label: 'Entregado', icon: CheckCircle2, color: 'text-emerald-600' }
-];
+function getStatusSteps(labels) {
+  return [
+    { status: 'PENDING', label: 'Recibido', icon: CheckCircle2, color: 'text-emerald-600' },
+    { status: 'PREPARING', label: labels.statusPreparingLabel, icon: CookingPot, color: 'text-blue-600' },
+    { status: 'ON_THE_WAY', label: 'En camino', icon: ShoppingBag, color: 'text-purple-600' },
+    { status: 'DELIVERED', label: 'Entregado', icon: CheckCircle2, color: 'text-emerald-600' }
+  ];
+}
 
 export function CheckoutSuccessPage() {
   const { state } = useLocation();
   const order = state?.order;
   const [currentStatus, setCurrentStatus] = useState(order?.status || 'PENDING');
   const pointsEarned = state?.pointsEarned || 0;
-  const { config } = useRestaurantConfig();
+  const { config, labels } = useRestaurantConfig();
   const whatsappUrl = state?.whatsappUrl || buildWhatsAppOrderUrl({ order, config });
   const scheduledText = order?.scheduledFor ? formatDate(order.scheduledFor) : '';
+  const statusSteps = useMemo(() => getStatusSteps(labels), [labels]);
   const currentStep = statusSteps.findIndex((s) => s.status === currentStatus);
 
   useEffect(() => {
@@ -38,18 +41,18 @@ export function CheckoutSuccessPage() {
   return (
     <div className="container-page py-8">
       <div className="glass-panel mx-auto max-w-2xl p-6 text-center sm:p-8">
-        <span className="badge-chip text-emerald-700">Pedido confirmado</span>
+        <span className="badge-chip text-emerald-700">{labels.orderLabel} confirmado</span>
         <CheckCircle2 className="mx-auto mt-5 text-emerald-600" size={60} />
-        <h1 className="mt-4 text-3xl font-black tracking-tight">Pedido enviado al restaurante</h1>
+        <h1 className="mt-4 text-3xl font-black tracking-tight">Tu {labels.orderLabel} fue enviado a la {labels.businessLabel}</h1>
         <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-stone-600">
-          Tu pedido fue registrado en el sistema y el restaurante ya lo recibio en su panel.{pointsEarned > 0 ? ` Ganaste ${pointsEarned} puntos por esta compra.` : ''}
+          Tu {labels.orderLabel} fue registrado en el sistema y la {labels.businessLabel} ya lo recibió en su panel.{pointsEarned > 0 ? ` Ganaste ${pointsEarned} puntos por esta compra.` : ''}
         </p>
         {order ? (
           <>
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <div className="safe-panel p-5 text-left text-sm">
                 <div className="flex justify-between gap-3">
-                  <span className="text-stone-600">Pedido</span>
+                  <span className="text-stone-600">{labels.orderLabel}</span>
                   <span className="font-black">#{order.orderNumber}</span>
                 </div>
                 <div className="mt-3 flex justify-between gap-3">
@@ -74,7 +77,7 @@ export function CheckoutSuccessPage() {
                 </div>
                 {order.deliveryFeeApplied > 0 ? (
                   <div className="mt-3 flex justify-between gap-3">
-                    <span className="text-stone-600">Domicilio</span>
+                    <span className="text-stone-600">{labels.fulfillmentLabel}</span>
                     <span className="font-black">{formatCurrency(order.deliveryFeeApplied)}</span>
                   </div>
                 ) : null}
@@ -89,15 +92,15 @@ export function CheckoutSuccessPage() {
                 <div className="flex items-start gap-3">
                   <ShoppingBag className="mt-0.5 text-emerald-600" size={18} />
                   <div>
-                    <p className="font-black">El restaurante ya tiene tu pedido</p>
-                    <p className="mt-1 text-stone-600">Recibiras actualizaciones del estado en tu correo.</p>
+                    <p className="font-black">La {labels.businessLabel} ya tiene tu {labels.orderLabel}</p>
+                    <p className="mt-1 text-stone-600">Recibirás actualizaciones del estado cuando estén disponibles.</p>
                   </div>
                 </div>
                 {order.deliveryZoneName ? (
                   <div className="mt-4 flex items-start gap-3">
                     <MapPinned className="mt-0.5 text-[color:var(--color-primary)]" size={18} />
                     <div>
-                      <p className="font-black">Zona de entrega</p>
+                      <p className="font-black">Zona de {labels.fulfillmentLabel}</p>
                       <p className="mt-1 text-stone-600">{order.deliveryZoneName}</p>
                     </div>
                   </div>
@@ -106,7 +109,7 @@ export function CheckoutSuccessPage() {
                   <div className="mt-4 flex items-start gap-3">
                     <Clock3 className="mt-0.5 text-[color:var(--color-primary)]" size={18} />
                     <div>
-                      <p className="font-black">Pedido programado</p>
+                      <p className="font-black">{labels.orderLabel} programado</p>
                       <p className="mt-1 text-stone-600">{scheduledText}</p>
                     </div>
                   </div>
@@ -116,38 +119,35 @@ export function CheckoutSuccessPage() {
                     <Star className="mt-0.5 text-amber-500" size={18} />
                     <div>
                       <p className="font-black">+{pointsEarned} puntos ganados</p>
-                      <p className="mt-1 text-stone-600">Sigue acumulando para tu proximo descuento.</p>
+                      <p className="mt-1 text-stone-600">Sigue acumulando para tu próximo descuento.</p>
                     </div>
                   </div>
                 ) : null}
               </div>
             </div>
 
-            {/* Tarjeta destacada de instrucciones si el pago es NEQUI */}
             {order.paymentMethod === 'NEQUI' && (
-              <div className="mt-6 rounded-3xl border-2 border-purple-300 bg-purple-50/90 p-5 sm:p-6 text-left shadow-sm">
+              <div className="mt-6 rounded-3xl border-2 border-purple-300 bg-purple-50/90 p-5 text-left shadow-sm sm:p-6">
                 <div className="flex items-center gap-3">
-                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-purple-600 text-white font-black text-lg shadow-sm">
+                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-purple-600 text-lg font-black text-white shadow-sm">
                     N
                   </div>
                   <div>
                     <h3 className="text-base font-black text-purple-950">Paga con Nequi / Llave Bre-B o QR</h3>
-                    <p className="text-xs text-purple-700">Monto total a transferir: <strong className="text-purple-950 text-sm">{formatCurrency(order.total)}</strong></p>
+                    <p className="text-xs text-purple-700">Monto total a transferir: <strong className="text-sm text-purple-950">{formatCurrency(order.total)}</strong></p>
                   </div>
                 </div>
 
-                {/* Mostrar QR si el restaurante lo subio */}
                 {config?.nequiQrUrl && (
-                  <div className="mt-4 flex flex-col items-center justify-center rounded-2xl bg-white p-4 border border-purple-200 text-center">
-                    <span className="text-[11px] font-black uppercase tracking-wider text-purple-900 mb-2">Escanea el código QR de Nequi</span>
-                    <img src={config.nequiQrUrl} alt="QR Nequi" className="h-44 w-44 rounded-xl object-contain border border-purple-100 shadow-sm" />
+                  <div className="mt-4 flex flex-col items-center justify-center rounded-2xl border border-purple-200 bg-white p-4 text-center">
+                    <span className="mb-2 text-[11px] font-black uppercase tracking-wider text-purple-900">Escanea el código QR de Nequi</span>
+                    <img src={config.nequiQrUrl} alt="QR Nequi" className="h-44 w-44 rounded-xl border border-purple-100 object-contain shadow-sm" />
                     <span className="mt-2 text-xs text-stone-500">Abre tu app de Nequi y escanea este código</span>
                   </div>
                 )}
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {/* Número de Nequi */}
-                  <div className="rounded-2xl bg-white p-3.5 border border-purple-200 flex flex-col justify-between">
+                  <div className="flex flex-col justify-between rounded-2xl border border-purple-200 bg-white p-3.5">
                     <div>
                       <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Número de Nequi:</span>
                       <p className="text-base font-black text-stone-900">{config?.nequiNumber || config?.phone || config?.whatsapp || 'Consultar'}</p>
@@ -158,15 +158,14 @@ export function CheckoutSuccessPage() {
                         const num = (config?.nequiNumber || config?.phone || config?.whatsapp || '').replace(/\s+/g, '');
                         if (num) navigator.clipboard?.writeText(num);
                       }}
-                      className="mt-2 inline-flex items-center justify-center rounded-lg bg-purple-100 hover:bg-purple-200 px-3 py-1.5 text-xs font-black text-purple-800 transition-colors"
+                      className="mt-2 inline-flex items-center justify-center rounded-lg bg-purple-100 px-3 py-1.5 text-xs font-black text-purple-800 transition-colors hover:bg-purple-200"
                     >
                       Copiar número
                     </button>
                   </div>
 
-                  {/* Llave Bre-B si existe */}
                   {config?.nequiBreB ? (
-                    <div className="rounded-2xl bg-white p-3.5 border border-purple-200 flex flex-col justify-between">
+                    <div className="flex flex-col justify-between rounded-2xl border border-purple-200 bg-white p-3.5">
                       <div>
                         <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Llave Bre-B:</span>
                         <p className="text-base font-black text-purple-900">{config.nequiBreB}</p>
@@ -176,30 +175,31 @@ export function CheckoutSuccessPage() {
                         onClick={() => {
                           if (config.nequiBreB) navigator.clipboard?.writeText(config.nequiBreB.trim());
                         }}
-                        className="mt-2 inline-flex items-center justify-center rounded-lg bg-purple-100 hover:bg-purple-200 px-3 py-1.5 text-xs font-black text-purple-800 transition-colors"
+                        className="mt-2 inline-flex items-center justify-center rounded-lg bg-purple-100 px-3 py-1.5 text-xs font-black text-purple-800 transition-colors hover:bg-purple-200"
                       >
                         Copiar llave Bre-B
                       </button>
                     </div>
                   ) : (
-                    <div className="rounded-2xl bg-white p-3.5 border border-purple-200 flex items-center gap-2 text-xs text-purple-800">
+                    <div className="flex items-center gap-2 rounded-2xl border border-purple-200 bg-white p-3.5 text-xs text-purple-800">
                       <span>✓ Transferencia inmediata sin comisión desde cualquier cuenta Nequi o Bancolombia.</span>
                     </div>
                   )}
                 </div>
 
-                {/* Boton para enviar comprobante por WhatsApp */}
-                <div className="mt-4 rounded-2xl bg-purple-950 p-4 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="mt-4 flex flex-col justify-between gap-3 rounded-2xl bg-purple-950 p-4 text-white sm:flex-row sm:items-center">
                   <div>
                     <p className="text-xs font-black">¿Ya realizaste la transferencia?</p>
-                    <p className="text-[11px] text-purple-200">Envía el comprobante para que la cocina inicie tu pedido al instante.</p>
+                    <p className="text-[11px] text-purple-200">
+                      Envía el comprobante para que {labels.showKitchenPanel ? `la ${labels.prepAreaLabel}` : `el ${labels.prepAreaLabel}`} pueda {labels.readyActionLabel} tu {labels.orderLabel} más rápido.
+                    </p>
                   </div>
                   {whatsappUrl && (
                     <a
                       href={whatsappUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 px-4 py-2 text-xs font-black text-white shadow-sm transition-all shrink-0"
+                      className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-black text-white shadow-sm transition-all hover:bg-emerald-600"
                     >
                       <MessageSquare size={15} />
                       Enviar Comprobante
@@ -210,14 +210,14 @@ export function CheckoutSuccessPage() {
             )}
 
             <div className="mt-6">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400 mb-3">Estado del pedido en tiempo real</p>
+              <p className="mb-3 text-xs font-black uppercase tracking-[0.18em] text-stone-400">Estado de tu {labels.orderLabel} en tiempo real</p>
               <div className="flex items-center justify-center gap-1">
                 {statusSteps.map((step, i) => {
                   const isActive = i <= currentStep;
                   const isCurrent = i === currentStep;
                   const Icon = step.icon;
                   return (
-                    <div key={i} className="flex items-center">
+                    <div key={step.status} className="flex items-center">
                       <div className={`flex flex-col items-center ${isActive ? '' : 'opacity-30'}`}>
                         <div className={`grid h-10 w-10 place-items-center rounded-full ${isActive ? 'bg-stone-950 text-white' : 'bg-stone-200 text-stone-500'}`}>
                           <Icon size={16} />
@@ -235,7 +235,7 @@ export function CheckoutSuccessPage() {
 
             {whatsappUrl && (
               <div className="mt-5 border-t border-stone-200 pt-4">
-                <p className="text-xs text-stone-400 mb-2">Opcion secundaria</p>
+                <p className="mb-2 text-xs text-stone-400">Opción secundaria</p>
                 <a
                   href={whatsappUrl}
                   target="_blank"
@@ -243,7 +243,7 @@ export function CheckoutSuccessPage() {
                   className="inline-flex items-center gap-2 text-xs font-semibold text-stone-500 hover:text-stone-800"
                 >
                   <MessageSquare size={14} />
-                  Tambien puedes enviar el pedido por WhatsApp
+                  También puedes enviar tu {labels.orderLabel} por WhatsApp
                 </a>
               </div>
             )}

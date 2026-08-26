@@ -5,6 +5,7 @@ import { EmptyState } from '../components/ui/EmptyState';
 import { ProductSkeleton } from '../components/ui/Skeleton';
 import { SEOHead } from '../components/seo/SEOHead';
 import { useCart } from '../context/CartContext';
+import { useRestaurantConfig } from '../context/RestaurantConfigContext';
 import { useMenu } from '../hooks/useMenu';
 
 export function MenuPage() {
@@ -12,6 +13,7 @@ export function MenuPage() {
   const [query, setQuery] = useState('');
   const [onlyAvailable, setOnlyAvailable] = useState(true);
   const { addItem } = useCart();
+  const { labels } = useRestaurantConfig();
   const { categories, products, loading, error } = useMenu();
 
   const filteredProducts = useMemo(
@@ -30,9 +32,9 @@ export function MenuPage() {
     return (
       <section className="container-page py-5 md:py-8">
         <div className="mb-5">
-          <span className="badge-chip">Catalogo visual</span>
-          <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Menu listo para convertir</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">Elige tus favoritos, filtra por categorias y arma el pedido en segundos con una presentacion mas premium.</p>
+          <span className="badge-chip">{labels.catalogLabel} visual</span>
+          <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">{labels.catalogHeadline}</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">{labels.catalogDescription}</p>
         </div>
         <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => <ProductSkeleton key={i} />)}
@@ -44,7 +46,7 @@ export function MenuPage() {
   if (error) {
     return (
       <div className="container-page py-10">
-        <EmptyState title="No pudimos cargar el menu" isLoading={false} isError errorMessage={error} />
+        <EmptyState title={`No pudimos cargar el ${labels.catalogLabel.toLowerCase()}`} isLoading={false} isError errorMessage={error} />
       </div>
     );
   }
@@ -52,18 +54,21 @@ export function MenuPage() {
   if (!products.length && !loading) {
     return (
       <div className="container-page py-10">
-        <EmptyState title="No hay productos disponibles" description="El restaurante aun no ha agregado productos al menu." />
+        <EmptyState
+          title="No hay productos disponibles"
+          description={`La ${labels.businessLabel} aún no ha agregado productos al ${labels.catalogLabel.toLowerCase()}.`}
+        />
       </div>
     );
   }
 
   return (
     <section className="container-page py-5 md:py-8">
-      <SEOHead title="Menu" description="Explora nuestro menu y haz tu pedido online." />
+      <SEOHead title={labels.catalogLabel} description={`Explora nuestro ${labels.catalogLabel.toLowerCase()} y haz tu ${labels.orderLabel} online.`} />
       <div className="mb-5">
-        <span className="badge-chip">Catalogo visual</span>
-        <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Menu listo para convertir</h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">Elige tus favoritos, filtra por categorias y arma el pedido en segundos con una presentacion mas premium.</p>
+        <span className="badge-chip">{labels.catalogLabel} visual</span>
+        <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">{labels.catalogHeadline}</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">{labels.catalogDescription}</p>
       </div>
 
       <div className="glass-panel sticky top-20 z-20 -mx-4 px-4 py-4 sm:mx-0 sm:px-5">
@@ -71,7 +76,7 @@ export function MenuPage() {
           <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
           <input
             className="input pl-10"
-            placeholder="Buscar hamburguesas, papas, bebidas..."
+            placeholder={labels.searchPlaceholder}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />

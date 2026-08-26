@@ -3,6 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo } from 'reac
 import { env } from '../config/env';
 import { api } from '../services/api';
 import { apiQueryKey } from '../hooks/useApiQuery';
+import { getBusinessLabels } from '../utils/businessLabels';
 
 const fallbackConfig = {
   restaurantName: 'Demo Burger',
@@ -16,6 +17,14 @@ const fallbackConfig = {
   facebookUrl: '',
   instagramUrl: '',
   openingHours: 'Lunes a domingo: 11:00 a.m. - 10:00 p.m.',
+  businessType: 'restaurant',
+  businessLabel: 'restaurante',
+  catalogLabel: 'Menú',
+  orderLabel: 'pedido',
+  productLabel: 'producto',
+  fulfillmentLabel: 'domicilio',
+  showTableNumber: true,
+  showKitchenPanel: true,
   businessHours: null,
   acceptsScheduledOrders: false,
   leadTimeMinutes: 30,
@@ -27,6 +36,13 @@ const fallbackConfig = {
 
 const RestaurantConfigContext = createContext(null);
 
+function normalizeConfig(config) {
+  return {
+    ...fallbackConfig,
+    ...(config || {})
+  };
+}
+
 export function RestaurantConfigProvider({ children }) {
   const queryClient = useQueryClient();
 
@@ -34,17 +50,18 @@ export function RestaurantConfigProvider({ children }) {
     queryKey: apiQueryKey('restaurantConfig', env.restaurantSlug),
     queryFn: async () => {
       const { data } = await api.get('/restaurant-config', { params: { restaurant: env.restaurantSlug } });
-      return data.restaurant.config || fallbackConfig;
+      return normalizeConfig(data.restaurant.config);
     },
     staleTime: 10 * 60 * 1000,
     retry: 2,
     placeholderData: fallbackConfig,
   });
 
-  const config = data || fallbackConfig;
+  const config = normalizeConfig(data);
+  const labels = useMemo(() => getBusinessLabels(config), [config]);
 
   const setConfig = useCallback((newConfig) => {
-    queryClient.setQueryData(apiQueryKey('restaurantConfig', env.restaurantSlug), newConfig);
+    queryClient.setQueryData(apiQueryKey('restaurantConfig', env.restaurantSlug), normalizeConfig(newConfig));
   }, [queryClient]);
 
   useEffect(() => {
@@ -54,13 +71,13 @@ export function RestaurantConfigProvider({ children }) {
 
   const value = useMemo(() => ({
     config,
+    labels,
     setConfig,
     loading: isLoading && !data,
     isError
-  }), [config, setConfig, isLoading, isError, data]);
+  }), [config, labels, setConfig, isLoading, isError, data]);
 
   return <RestaurantConfigContext.Provider value={value}>{children}</RestaurantConfigContext.Provider>;
 }
 
 export const useRestaurantConfig = () => useContext(RestaurantConfigContext);
-

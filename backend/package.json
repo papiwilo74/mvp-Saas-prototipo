@@ -15,7 +15,7 @@
     "bootstrap": "node scripts/bootstrap.js",
     "db:setup": "npx prisma migrate dev && npx prisma db seed",
     "db:reset": "npx prisma migrate reset --force",
-    "env:validate": "node -e \"require('./src/config/env.js')\"",
+    "env:validate": "node ./src/config/env.js",
     "verify:deploy": "node scripts/deploy-verify.js",
     "verify:local": "node scripts/deploy-verify.js --url=http://localhost:4000/api",
     "lint": "eslint src/",

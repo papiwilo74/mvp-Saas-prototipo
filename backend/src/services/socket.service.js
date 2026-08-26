@@ -35,30 +35,38 @@ export function initSocket(httpServer) {
     const payload = verifySocketToken(socket.handshake);
     if (payload) {
       socket.data.user = payload;
-      return next();
     }
-    return next(new Error('Autenticacion requerida para conexion WebSocket'));
+    // Permitimos conexión para clientes (guests) para seguir estado de pedidos
+    return next();
   });
 
   io.on('connection', (socket) => {
     const { restaurantId } = socket.handshake.query;
 
     if (restaurantId) {
-      const userRestaurantId = socket.data.user?.restaurantId;
-      if (userRestaurantId && userRestaurantId !== restaurantId) {
-        socket.disconnect();
-        return;
-      }
+      // Sala pública para el restaurante (clientes y administradores ven esto)
       socket.join(`restaurant:${restaurantId}`);
-      socket.join(`kitchen:${restaurantId}`);
+      
+      // Solo el personal del restaurante y superadmins se unen a la cocina
+      const role = socket.data.user?.role;
+      if (role === 'ADMIN' || role === 'SUPERADMIN' || role === 'KITCHEN') {
+        socket.join(`kitchen:${restaurantId}`);
+      }
     }
 
     socket.on('join-admin', (rid) => {
+      // Este evento explícito requiere autenticación
+      if (!socket.data.user) {
+        socket.emit('error', 'Autenticacion requerida');
+        return;
+      }
+
       const userRestaurantId = socket.data.user?.restaurantId;
-      if (userRestaurantId && userRestaurantId !== rid) {
+      if (userRestaurantId && userRestaurantId !== rid && socket.data.user.role !== 'SUPERADMIN') {
         socket.emit('error', 'No autorizado para este restaurante');
         return;
       }
+      
       socket.join(`restaurant:${rid}`);
       socket.join(`kitchen:${rid}`);
     });

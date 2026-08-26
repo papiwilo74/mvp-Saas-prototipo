@@ -12,7 +12,7 @@ import { formatCurrency, formatDate } from '../utils/formatters';
 import { isValidColombianPhone } from '../utils/validators';
 import { buildWhatsAppOrderUrl } from '../utils/whatsappOrder';
 
-const CUSTOMER_STORAGE_KEY = 'ff_customer';
+const CUSTOMER_STORAGE_KEY = `ff_customer:${env.restaurantSlug}`;
 
 const loadCustomer = () => {
   try {
@@ -26,7 +26,7 @@ const loadCustomer = () => {
 export function CartPage() {
   const navigate = useNavigate();
   const { items, total, updateQuantity, clearCart, stockWarning } = useCart();
-  const { config } = useRestaurantConfig();
+  const { config, labels } = useRestaurantConfig();
   const [customer, setCustomer] = useState(loadCustomer);
   const [notes, setNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState(config.paymentMethods?.includes('WOMPI') ? 'WOMPI' : (config.paymentMethods?.[0] || 'CASH'));
@@ -89,7 +89,7 @@ export function CartPage() {
     }
     if (!customer.address.trim()) errors.address = true;
     if (items.some((item) => item.product.trackStock && item.quantity > (item.product.stock || 0))) {
-      setError('Algunos productos exceden el stock disponible. Revisa las cantidades.');
+      setError(`Algunos productos exceden el stock disponible. Revisa las cantidades.`);
       return false;
     }
     setFieldErrors(errors);
@@ -113,7 +113,7 @@ export function CartPage() {
         deliveryZoneName: deliveryZoneName || undefined,
         scheduledFor: scheduledFor || undefined,
         pointsRedeemed: loyaltyEnabled ? pointsToRedeem : 0,
-        tableNumber: tableNumber ? Number(tableNumber) : undefined,
+        tableNumber: labels.showTableNumber && tableNumber ? Number(tableNumber) : undefined,
         items: items.map((item) => ({ productId: item.product.id, quantity: item.quantity }))
       };
 
@@ -121,7 +121,7 @@ export function CartPage() {
         const amountInCents = Math.round(totalWithExtras * 100);
         const { data: paymentData } = await api.post('/payments/create-link', {
           amountInCents,
-          reference: `Pedido-${Date.now()}`,
+          reference: `${labels.orderLabel}-${Date.now()}`,
           customerEmail: customer.email || undefined,
           restaurantSlug: env.restaurantSlug
         });
@@ -142,7 +142,7 @@ export function CartPage() {
       clearCart();
       navigate('/checkout/success', { state: { order: data.order, whatsappUrl, pointsEarned: data.earnedPoints } });
     } catch (requestError) {
-      setError(requestError.response?.data?.message || 'No pudimos crear el pedido. Intenta nuevamente.');
+      setError(requestError.response?.data?.message || `No pudimos crear tu ${labels.orderLabel}. Intenta nuevamente.`);
     } finally {
       setSubmitting(false);
     }
@@ -153,8 +153,8 @@ export function CartPage() {
       <div className="container-page py-10">
         <EmptyState
           title="Tu carrito esta vacio"
-          description="Agrega productos del menu para crear tu pedido. No necesitas crear cuenta."
-          action={<Link to="/" className="btn-primary">Ver menu</Link>}
+          description={`Agrega productos del ${labels.catalogLabel.toLowerCase()} para crear tu ${labels.orderLabel}. No necesitas crear cuenta.`}
+          action={<Link to="/" className="btn-primary">Ver {labels.catalogLabel.toLowerCase()}</Link>}
         />
       </div>
     );
@@ -162,13 +162,13 @@ export function CartPage() {
 
   return (
     <div className="container-page grid gap-6 py-5 md:gap-8 md:py-10 lg:grid-cols-[1fr_420px]">
-      <SEOHead title="Carrito" description="Revisa tu pedido antes de confirmar." />
+      <SEOHead title="Carrito" description={`Revisa tu ${labels.orderLabel} antes de confirmar.`} />
       <section className="glass-panel p-5 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <span className="badge-chip">Checkout directo</span>
-            <h1 className="mt-3 text-3xl font-black tracking-tight">Tu pedido esta casi listo</h1>
-            <p className="mt-2 text-sm leading-6 text-stone-600">Completa tus datos y confirma el pedido. El restaurante lo recibe al instante en su panel.</p>
+            <h1 className="mt-3 text-3xl font-black tracking-tight">Tu {labels.orderLabel} esta casi listo</h1>
+            <p className="mt-2 text-sm leading-6 text-stone-600">Completa tus datos y confirma. La {labels.businessLabel} recibe tu {labels.orderLabel} al instante en su panel.</p>
           </div>
           <div className="grid gap-2 sm:max-w-[220px]">
             <div className="safe-panel p-3">
@@ -188,7 +188,7 @@ export function CartPage() {
       </section>
 
       <form onSubmit={submitOrder} className="glass-panel h-fit p-5 sm:p-6">
-        <h2 className="text-2xl font-black tracking-tight">Datos del pedido</h2>
+        <h2 className="text-2xl font-black tracking-tight">Datos de tu {labels.orderLabel}</h2>
         <div className="mt-5 space-y-4">
           <label className="block space-y-1">
             <span className="label">Nombre {fieldErrors.name && <span className="text-red-500">*</span>}</span>
@@ -200,23 +200,25 @@ export function CartPage() {
             {phoneError && <p className="text-xs font-semibold text-red-600">{phoneError}</p>}
           </label>
           <label className="block space-y-1">
-            <span className="label">Direccion de entrega {fieldErrors.address && <span className="text-red-500">*</span>}</span>
+            <span className="label">Direccion de {labels.fulfillmentLabel} {fieldErrors.address && <span className="text-red-500">*</span>}</span>
             <input name="customerAddress" className={`input ${fieldErrors.address ? 'border-red-400 ring-2 ring-red-100' : ''}`} required value={customer.address} onChange={(event) => updateCustomer('address', event.target.value)} onBlur={(event) => validateField('address', event.target.value)} placeholder="Cra 1 #2-34" />
           </label>
-          <label className="block space-y-1">
-            <span className="label">Numero de mesa (opcional)</span>
-            <div className="relative">
-              <QrCode className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={16} />
-              <input className="input pl-10" type="number" min="1" value={tableNumber} onChange={(e) => setTableNumber(e.target.value)} placeholder="Ej: 5" />
-            </div>
-          </label>
+          {labels.showTableNumber ? (
+            <label className="block space-y-1">
+              <span className="label">Numero de mesa (opcional)</span>
+              <div className="relative">
+                <QrCode className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={16} />
+                <input className="input pl-10" type="number" min="1" value={tableNumber} onChange={(e) => setTableNumber(e.target.value)} placeholder="Ej: 5" />
+              </div>
+            </label>
+          ) : null}
           <label className="block space-y-1">
             <span className="label">Email</span>
             <input className="input" type="email" value={customer.email} onChange={(event) => updateCustomer('email', event.target.value)} />
           </label>
           {activeZones.length ? (
             <label className="block space-y-1">
-              <span className="label">Zona de entrega</span>
+              <span className="label">Zona de {labels.fulfillmentLabel}</span>
               <select className="input" value={deliveryZoneName} onChange={(event) => setDeliveryZoneName(event.target.value)}>
                 {activeZones.map((zone) => (
                   <option key={zone.name} value={zone.name}>
@@ -228,7 +230,7 @@ export function CartPage() {
           ) : null}
           {config.acceptsScheduledOrders ? (
             <label className="block space-y-1">
-              <span className="label">Programar pedido</span>
+              <span className="label">Programar {labels.orderLabel}</span>
               <input className="input" type="datetime-local" value={scheduledFor} onChange={(event) => setScheduledFor(event.target.value)} />
             </label>
           ) : null}
@@ -238,7 +240,7 @@ export function CartPage() {
                 <Star className="mt-0.5 text-amber-500" size={18} />
                 <div>
                   <p className="text-sm font-black">Puntos disponibles: {loyalty.estimatedPoints || 0}</p>
-                  <p className="mt-1 text-sm text-stone-600">Cada punto vale {formatCurrency(loyalty.pointsValue || 10)}. Ganas {Math.floor(total * (loyalty.pointsPerPeso || 0.01))} puntos en este pedido.</p>
+                  <p className="mt-1 text-sm text-stone-600">Cada punto vale {formatCurrency(loyalty.pointsValue || 10)}. Ganas {Math.floor(total * (loyalty.pointsPerPeso || 0.01))} puntos en esta {labels.orderLabel}.</p>
                   <div className="mt-3 flex items-center gap-3">
                     <input
                       type="range"
@@ -319,8 +321,8 @@ export function CartPage() {
                         )}
                       </div>
                       <p className={`mt-0.5 text-xs ${isSelected ? 'text-stone-300' : 'text-stone-500'}`}>
-                        {value === 'NEQUI' && 'Paga transfiriendo al número Nequi del restaurante.'}
-                        {value === 'CASH' && 'Pagas en efectivo al recibir tu pedido o en caja.'}
+                        {value === 'NEQUI' && `Paga transfiriendo al número Nequi de la ${labels.businessLabel}.`}
+                        {value === 'CASH' && `Pagas en efectivo al recibir tu ${labels.orderLabel} o en caja.`}
                         {value === 'CARD' && 'Datáfono o tarjeta al momento de la entrega.'}
                         {value === 'WOMPI' && 'Pago automático en línea con confirmación inmediata.'}
                       </p>
@@ -330,7 +332,6 @@ export function CartPage() {
               })}
             </div>
 
-            {/* Aviso informativo segun metodo seleccionado */}
             {paymentMethod === 'NEQUI' && (
               <div className="mt-3 rounded-xl border border-purple-200 bg-purple-50/70 p-3.5 text-xs text-purple-900">
                 <p className="font-bold flex items-center gap-1.5">
@@ -338,7 +339,7 @@ export function CartPage() {
                   Instrucciones de pago por Nequi:
                 </p>
                 <p className="mt-1 text-purple-800">
-                  Al confirmar tu pedido, podrás transferir directamente al Nequi del restaurante o enviar el comprobante por WhatsApp.
+                  Al confirmar tu {labels.orderLabel}, podrás transferir directamente al Nequi de la {labels.businessLabel} o enviar el comprobante por WhatsApp.
                 </p>
               </div>
             )}
@@ -349,7 +350,7 @@ export function CartPage() {
                   Pago en Efectivo:
                 </p>
                 <p className="mt-1 text-emerald-800">
-                  Ten el dinero listo al recibir tu pedido. Si necesitas cambio o billetes grandes, puedes especificarlo en las notas.
+                  Ten el dinero listo al recibir tu {labels.orderLabel}. Si necesitas cambio o billetes grandes, puedes especificarlo en las notas.
                 </p>
               </div>
             )}
@@ -372,7 +373,7 @@ export function CartPage() {
               <div className="flex items-start gap-3">
                 <Clock3 className="mt-0.5 text-[color:var(--color-primary)]" size={18} />
                 <div>
-                  <p className="text-sm font-black">Pedido programado</p>
+                  <p className="text-sm font-black">{labels.orderLabel} programado</p>
                   <p className="mt-1 text-sm text-stone-600">{scheduledPreview}</p>
                 </div>
               </div>
@@ -414,7 +415,7 @@ export function CartPage() {
             </div>
             {deliveryFee > 0 && (
               <div className="flex items-center justify-between">
-                <span className="text-stone-300">Domicilio</span>
+                <span className="text-stone-300">{labels.fulfillmentLabel.charAt(0).toUpperCase() + labels.fulfillmentLabel.slice(1)}</span>
                 <span className="font-black">{formatCurrency(deliveryFee)}</span>
               </div>
             )}
@@ -437,7 +438,7 @@ export function CartPage() {
           </div>
         </div>
         <button type="submit" disabled={submitting} className="btn-primary mt-5 w-full">
-          {submitting ? 'Procesando...' : paymentMethod === 'WOMPI' ? 'Pagar en linea' : 'Confirmar pedido'}
+          {submitting ? 'Procesando...' : paymentMethod === 'WOMPI' ? 'Pagar en linea' : `Confirmar ${labels.orderLabel}`}
         </button>
       </form>
     </div>

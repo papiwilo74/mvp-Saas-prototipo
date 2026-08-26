@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 import { env } from '../config/env.js';
 import { ApiError } from '../utils/apiError.js';
 import { ErrorCodes } from '../shared/errors.js';
+import { logger } from '../services/logger.service.js';
 
 const statusToErrorCode = {
   400: ErrorCodes.VALIDATION_ERROR,
@@ -18,23 +19,37 @@ export const notFound = (req, res, next) => {
 };
 
 export const errorHandler = (error, req, res, _next) => {
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    const statusCode = error.code === 'P2002' ? 409 : 400;
+  const isPrismaKnown = error instanceof Prisma.PrismaClientKnownRequestError;
+  const statusCode = error.statusCode || (isPrismaKnown && error.code === 'P2002' ? 409 : isPrismaKnown ? 400 : 500);
+  
+  if (statusCode >= 500) {
+    logger.error({
+      err: error,
+      requestId: req.id,
+      path: req.originalUrl,
+      method: req.method,
+      userId: req.user?.id
+    }, 'Error interno no manejado en la aplicación');
+  }
+
+  if (isPrismaKnown) {
     return res.status(statusCode).json({
+      success: false,
       message: 'Error de base de datos',
       code: error.code,
-      errorCode: statusToErrorCode[statusCode] || ErrorCodes.INTERNAL_ERROR
+      errorCode: statusToErrorCode[statusCode] || ErrorCodes.INTERNAL_ERROR,
+      requestId: req.id
     });
   }
 
-  const statusCode = error.statusCode || 500;
   const errorCode = error.errorCode || statusToErrorCode[statusCode] || ErrorCodes.INTERNAL_ERROR;
 
   return res.status(statusCode).json({
+    success: false,
     message: error.message || 'Error interno del servidor',
     errorCode,
     details: error.details,
+    requestId: req.id,
     stack: env.NODE_ENV === 'development' ? error.stack : undefined
   });
 };
-

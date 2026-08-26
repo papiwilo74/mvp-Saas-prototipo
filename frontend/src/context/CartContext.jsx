@@ -1,8 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { env } from '../config/env';
 
 const CartContext = createContext(null);
 
-const CART_STORAGE_KEY = 'ff_cart';
+const CART_STORAGE_KEY = `ff_cart:${env.restaurantSlug}`;
 
 const loadCart = () => {
   try {

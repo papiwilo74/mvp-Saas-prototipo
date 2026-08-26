@@ -84,6 +84,14 @@ model RestaurantConfig {
   facebookUrl    String?
   instagramUrl   String?
   openingHours   String?
+  businessType   String     @default("restaurant")
+  businessLabel  String     @default("restaurante")
+  catalogLabel   String     @default("Menú")
+  orderLabel     String     @default("pedido")
+  productLabel   String     @default("producto")
+  fulfillmentLabel String   @default("domicilio")
+  showTableNumber Boolean   @default(true)
+  showKitchenPanel Boolean  @default(true)
   businessHours  Json? @db.JsonB
   acceptsScheduledOrders Boolean @default(false)
   leadTimeMinutes Int      @default(30)
