@@ -1,5 +1,5 @@
 import { Clock3, Home, ShoppingBag, Store } from 'lucide-react';
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useRestaurantConfig } from '../context/RestaurantConfigContext';
 import { DemoBanner } from '../components/ui/DemoBanner';
@@ -14,6 +14,8 @@ const navItems = [
 export function AppLayout() {
   const { count } = useCart();
   const { config } = useRestaurantConfig();
+  const location = useLocation();
+  const tenantQuery = location.search;
   const activeDeliveryZoneCount = (config.deliveryZones || []).filter((zone) => zone.isActive !== false).length;
 
   return (
@@ -21,7 +23,7 @@ export function AppLayout() {
       <header className="sticky top-0 z-30 border-b border-white/60 bg-[#f7f1e8]/90 backdrop-blur">
         <DemoBanner />
         <div className="container-page flex flex-col gap-3 py-3 md:flex-row md:items-center md:justify-between">
-          <Link to="/" className="flex min-w-0 items-center gap-2">
+          <Link to={`/${tenantQuery}`} className="flex min-w-0 items-center gap-2">
             {config.logoUrl ? <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-2xl object-cover shadow-soft" /> : null}
             <div className="min-w-0">
               <span className="block truncate text-base font-black">{config.restaurantName}</span>
@@ -39,8 +41,8 @@ export function AppLayout() {
             </div>
           </div>
           <div className="flex items-center gap-2 self-end md:self-auto">
-            <Link to="/login" className="btn-secondary min-h-10 px-3 text-sm">Admin</Link>
-            <Link to="/cart" className="btn-primary relative min-h-10 px-3" aria-label="Carrito">
+            <Link to={`/login${tenantQuery}`} className="btn-secondary min-h-10 px-3 text-sm">Admin</Link>
+            <Link to={`/cart${tenantQuery}`} className="btn-primary relative min-h-10 px-3" aria-label="Carrito">
               <ShoppingBag size={18} />
               {count > 0 && (
                 <span className="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-stone-950 px-1 text-xs text-white">
@@ -69,7 +71,7 @@ export function AppLayout() {
           {navItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
-              to={to}
+              to={`${to}${tenantQuery}`}
               end={end}
               className={({ isActive }) =>
                 `flex flex-col items-center justify-center gap-1 text-xs font-bold ${
