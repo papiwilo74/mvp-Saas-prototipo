@@ -49,12 +49,16 @@ export const createOrder = async ({
   wompiTransactionId,
   tableNumber
 }) => {
+  if (!items || !Array.isArray(items) || items.length === 0) {
+    throw new ApiError(400, 'El pedido debe contener al menos un producto');
+  }
+
   const restaurant = await prisma.restaurant.findUnique({
     where: { slug: restaurantSlug },
     include: { config: true }
   });
 
-  if (!restaurant) throw new ApiError(404, 'Restaurante no encontrado');
+  if (!restaurant) throw new ApiError(404, 'Tienda o negocio no encontrado');
 
   const productIds = items.map((item) => item.productId);
   const products = await prisma.product.findMany({
@@ -62,7 +66,7 @@ export const createOrder = async ({
   });
 
   if (products.length !== productIds.length) {
-    throw new ApiError(400, 'Uno o mas productos no estan disponibles');
+    throw new ApiError(400, 'Uno o más productos no están disponibles o no pertenecen a esta tienda');
   }
 
   const productsById = new Map(products.map((product) => [product.id, product]));
@@ -72,12 +76,12 @@ export const createOrder = async ({
   const orderItems = items.map((item) => {
     const product = productsById.get(item.productId);
     const unitPrice = Number(product.price);
-    const subtotal = unitPrice * item.quantity;
+    const subtotal = Math.round(unitPrice * item.quantity);
 
     return { productId: item.productId, quantity: item.quantity, unitPrice, subtotal };
   });
 
-  const subtotal = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
+  const subtotal = Math.round(orderItems.reduce((sum, item) => sum + item.subtotal, 0));
   const deliveryZones = normalizeZones(restaurant.config);
 
   const { zone: detectedZone, geoStatus } = await detectZoneFromAddress(restaurant.id, customer.address, deliveryZones);
@@ -91,18 +95,18 @@ export const createOrder = async ({
     if (detectedZone && selectedZone && detectedZone.id !== selectedZone.id) {
       if (wompiTransactionId) {
         warnings.push(
-          `La direccion ingresada corresponde a la zona "${detectedZone.name}", no a "${selectedZone.name}". El pedido se proceso con "${selectedZone.name}" porque el cobro por Wompi ya fue realizado.`
+          `La dirección ingresada corresponde a la zona "${detectedZone.name}", no a "${selectedZone.name}". El pedido se procesó con "${selectedZone.name}" porque el cobro por Wompi ya fue realizado.`
         );
       } else {
         warnings.push(
-          `La direccion ingresada corresponde a la zona "${detectedZone.name}", no a "${selectedZone.name}". Se usara "${detectedZone.name}" como zona de entrega.`
+          `La dirección ingresada corresponde a la zona "${detectedZone.name}", no a "${selectedZone.name}". Se usará "${detectedZone.name}" como zona de entrega.`
         );
         selectedZone = detectedZone;
       }
     }
 
     if (!detectedZone && geoStatus === 'geocode_failed') {
-      logger.warn({ restaurantId: restaurant.id, zone: selectedZone?.name }, 'No se pudo verificar direccion. Usando zona seleccionada por el cliente.');
+      logger.warn({ restaurantId: restaurant.id, zone: selectedZone?.name }, 'No se pudo verificar la dirección. Usando la zona seleccionada.');
     }
   } else if (detectedZone) {
     selectedZone = detectedZone;
@@ -110,25 +114,25 @@ export const createOrder = async ({
 
   if (geoStatus === 'outside_all_zones' && selectedZone) {
     warnings.push(
-      `La direccion ingresada no coincide con ninguna zona de entrega. Se usara "${selectedZone.name}" segun tu seleccion.`
+      `La dirección ingresada no coincide con ninguna zona registrada. Se usará "${selectedZone.name}" según tu selección.`
     );
   }
 
-  const deliveryFee = Number(selectedZone?.fee ?? restaurant.config?.deliveryFee ?? 0);
+  const deliveryFee = Math.round(Number(selectedZone?.fee ?? restaurant.config?.deliveryFee ?? 0));
   const coupons = normalizeCoupons(restaurant.config);
   const selectedCoupon = couponCode
     ? coupons.find((coupon) => coupon.code?.toLowerCase() === couponCode.toLowerCase())
     : null;
-  const discountAmount = calculateCouponDiscount({ subtotal, coupon: selectedCoupon });
+  const discountAmount = Math.round(calculateCouponDiscount({ subtotal, coupon: selectedCoupon }));
   const loyalty = normalizeLoyalty(restaurant.config);
-  const pointsDiscount = calculatePointsDiscount({ loyalty, pointsRedeemed });
-  const total = Math.max(0, subtotal + deliveryFee - discountAmount - pointsDiscount);
+  const pointsDiscount = Math.round(calculatePointsDiscount({ loyalty, pointsRedeemed }));
+  const total = Math.max(0, Math.round(subtotal + deliveryFee - discountAmount - pointsDiscount));
 
   if (scheduledFor && restaurant.config?.acceptsScheduledOrders) {
     const scheduledDate = new Date(scheduledFor);
     const minimumDate = new Date(Date.now() + Number(restaurant.config?.leadTimeMinutes || 30) * 60000);
     if (Number.isNaN(scheduledDate.getTime()) || scheduledDate < minimumDate) {
-      throw new ApiError(400, 'La programacion del pedido no cumple con el tiempo minimo requerido');
+      throw new ApiError(400, 'La programación del pedido no cumple con el tiempo mínimo requerido');
     }
   }
 
@@ -215,7 +219,7 @@ export const createOrder = async ({
 export const updateOrderStatus = async (restaurantId, orderId, status) => {
   const order = await prisma.order.findFirst({ where: { id: orderId, restaurantId } });
 
-  if (!order) throw new ApiError(404, 'Pedido no encontrado');
+  if (!order) throw new ApiError(404, 'Pedido no encontrado en esta tienda');
 
   const updatedOrder = await prisma.order.update({
     where: { id: orderId },
@@ -229,7 +233,7 @@ export const updateOrderStatus = async (restaurantId, orderId, status) => {
   });
   await sendStatusUpdate(restaurantId, updatedOrder.customerPhone, updatedOrder.orderNumber, status);
   notifyOrderStatus(updatedOrder).catch((err) => {
-    logger.warn({ err }, 'Push notification fallo');
+    logger.warn({ err }, 'Notificación push falló');
   });
 
   return updatedOrder;

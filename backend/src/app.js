@@ -12,6 +12,7 @@ import { errorHandler, notFound } from './middlewares/error.middleware.js';
 import { createRateLimit } from './middlewares/rateLimit.middleware.js';
 import { setCsrfToken } from './middlewares/csrf.middleware.js';
 import { requestLogger } from './services/logger.service.js';
+import { ApiError } from './utils/apiError.js';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger.js';
 import { apiRouter } from './routes/index.js';
@@ -29,10 +30,15 @@ app.disable('x-powered-by');
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const allowedOrigins = [
+// Normalización de orígenes permitidos (elimina slashes al final)
+const normalizeOrigin = (url) => (typeof url === 'string' ? url.trim().replace(/\/+$/, '') : '');
+
+const rawOrigins = [
   env.FRONTEND_URL,
-  ...(env.ALLOWED_ORIGINS ? env.ALLOWED_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean) : [])
+  ...(env.ALLOWED_ORIGINS ? env.ALLOWED_ORIGINS.split(',') : [])
 ];
+
+const allowedOrigins = Array.from(new Set(rawOrigins.map(normalizeOrigin).filter(Boolean)));
 
 app.use(compression());
 
@@ -45,8 +51,7 @@ app.use(
         defaultSrc: ["'self'"],
         connectSrc: [
           "'self'",
-          env.FRONTEND_URL,
-          ...(env.ALLOWED_ORIGINS ? env.ALLOWED_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean) : []),
+          ...allowedOrigins,
           'https://*.wompi.co',
           'https://maps.googleapis.com',
           'https://*.mapbox.com',
@@ -69,16 +74,18 @@ app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
+      const cleanOrigin = normalizeOrigin(origin);
+      if (allowedOrigins.includes(cleanOrigin)) {
         return callback(null, true);
       }
-      return callback(new Error('Bloqueado por CORS'));
+      return callback(new ApiError(403, 'Origen no permitido por Políticas CORS'));
     },
     credentials: true
   })
 );
 
 app.use(express.json({ limit: '1mb', verify: (req, _res, buf) => { req.rawBody = buf.toString(); } }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(cookieParser());
 app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(requestLogger());
@@ -104,7 +111,7 @@ app.use(
   })
 );
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customCss: '.swagger-ui .topbar { display: none }', customSiteTitle: 'FastFood SaaS API Docs' }));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customCss: '.swagger-ui .topbar { display: none }', customSiteTitle: 'TuTienda SaaS API Docs' }));
 app.get('/api-docs.json', (_req, res) => res.json(swaggerSpec));
 app.use('/api', apiRouter);
 app.use(notFound);

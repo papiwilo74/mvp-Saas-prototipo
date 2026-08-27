@@ -88,13 +88,123 @@ const businessDefaults = {
     searchPlaceholder: 'Buscar útiles, cuadernos, materiales...',
     catalogHeadline: 'Catálogo listo para vender',
     catalogDescription: 'Encuentra productos por categoría y confirma tu compra de forma rápida.'
+  },
+  pharmacy: {
+    businessLabel: 'farmacia',
+    businessLabelPlural: 'farmacias',
+    catalogLabel: 'Catálogo',
+    orderLabel: 'pedido',
+    orderLabelPlural: 'pedidos',
+    productLabel: 'producto',
+    productLabelPlural: 'productos',
+    fulfillmentLabel: 'entrega',
+    prepAreaLabel: 'botica',
+    statusPreparingLabel: 'Preparando',
+    readyActionLabel: 'preparar',
+    showTableNumber: false,
+    showKitchenPanel: false,
+    searchPlaceholder: 'Buscar medicamentos, vitaminas, higiene...',
+    catalogHeadline: 'Catálogo de salud listo para servir',
+    catalogDescription: 'Encuentra tus medicamentos y productos de salud, filtra por categorías y realiza tu pedido rápido.'
+  },
+  cosmetics: {
+    businessLabel: 'tienda de belleza',
+    businessLabelPlural: 'tiendas de belleza',
+    catalogLabel: 'Catálogo',
+    orderLabel: 'compra',
+    orderLabelPlural: 'compras',
+    productLabel: 'producto',
+    productLabelPlural: 'productos',
+    fulfillmentLabel: 'entrega',
+    prepAreaLabel: 'equipo',
+    statusPreparingLabel: 'Alistando',
+    readyActionLabel: 'alistar',
+    showTableNumber: false,
+    showKitchenPanel: false,
+    searchPlaceholder: 'Buscar maquillaje, cremas, perfumes...',
+    catalogHeadline: 'Catálogo de belleza listo para lucir',
+    catalogDescription: 'Explora productos de maquillaje, cuidado personal y fragancias. Filtra y compra fácil.'
+  },
+  petshop: {
+    businessLabel: 'petshop',
+    businessLabelPlural: 'petshops',
+    catalogLabel: 'Catálogo',
+    orderLabel: 'compra',
+    orderLabelPlural: 'compras',
+    productLabel: 'producto',
+    productLabelPlural: 'productos',
+    fulfillmentLabel: 'entrega',
+    prepAreaLabel: 'equipo',
+    statusPreparingLabel: 'Alistando',
+    readyActionLabel: 'alistar',
+    showTableNumber: false,
+    showKitchenPanel: false,
+    searchPlaceholder: 'Buscar alimento, juguetes, accesorios mascotas...',
+    catalogHeadline: 'Todo para tu mascota',
+    catalogDescription: 'Encuentra alimentos, juguetes y accesorios para tu mascota. Compra fácil y rápido.'
+  },
+  bookstore: {
+    businessLabel: 'librería',
+    businessLabelPlural: 'librerías',
+    catalogLabel: 'Catálogo',
+    orderLabel: 'compra',
+    orderLabelPlural: 'compras',
+    productLabel: 'libro',
+    productLabelPlural: 'libros',
+    fulfillmentLabel: 'entrega',
+    prepAreaLabel: 'equipo',
+    statusPreparingLabel: 'Alistando',
+    readyActionLabel: 'alistar',
+    showTableNumber: false,
+    showKitchenPanel: false,
+    searchPlaceholder: 'Buscar libros, revistas, papelería...',
+    catalogHeadline: 'Catálogo de lectura',
+    catalogDescription: 'Explora libros, best sellers y novedades literarias. Filtra por género y compra fácil.'
+  },
+  grocery: {
+    businessLabel: 'supermercado',
+    businessLabelPlural: 'supermercados',
+    catalogLabel: 'Catálogo',
+    orderLabel: 'compra',
+    orderLabelPlural: 'compras',
+    productLabel: 'producto',
+    productLabelPlural: 'productos',
+    fulfillmentLabel: 'entrega',
+    prepAreaLabel: 'bodega',
+    statusPreparingLabel: 'Alistando',
+    readyActionLabel: 'alistar',
+    showTableNumber: false,
+    showKitchenPanel: false,
+    searchPlaceholder: 'Buscar frutas, verduras, lácteos...',
+    catalogHeadline: 'Despensa virtual',
+    catalogDescription: 'Compra tus víveres y productos del hogar en línea. Rápido, fresco y a domicilio.'
   }
 };
 
-const supportedTypes = Object.keys(businessDefaults);
+const supportedTypes = Object.freeze(Object.keys(businessDefaults));
+
+const ALLOWED_STRING_KEYS = [
+  'businessLabel',
+  'catalogLabel',
+  'orderLabel',
+  'productLabel',
+  'fulfillmentLabel'
+];
+
+const MAX_STRING_LENGTH = 50;
+
+function sanitizeString(value) {
+  if (typeof value !== 'string') return '';
+  return value
+    .trim()
+    .replace(/[<>]/g, '')
+    .slice(0, MAX_STRING_LENGTH);
+}
 
 function normalizeBusinessType(value) {
-  const type = String(value || 'restaurant').toLowerCase().trim();
+  if (typeof value !== 'string') return 'store';
+  const type = value.toLowerCase().trim();
+  if (type.length > 30) return 'store';
   return supportedTypes.includes(type) ? type : 'store';
 }
 
@@ -106,32 +216,55 @@ function pluralize(label) {
 }
 
 export function capitalizeLabel(label) {
-  if (!label) return '';
-  return `${label.charAt(0).toUpperCase()}${label.slice(1)}`;
+  if (typeof label !== 'string' || !label) return '';
+  const sanitized = label.trim().slice(0, 50);
+  return `${sanitized.charAt(0).toUpperCase()}${sanitized.slice(1)}`;
 }
 
 export function getBusinessLabels(config = {}) {
+  if (!config || typeof config !== 'object') {
+    return {
+      ...businessDefaults.store,
+      businessType: 'store'
+    };
+  }
+
   const businessType = normalizeBusinessType(config.businessType);
   const defaults = businessDefaults[businessType] || businessDefaults.store;
 
-  const businessLabel = config.businessLabel || defaults.businessLabel;
-  const catalogLabel = config.catalogLabel || defaults.catalogLabel;
-  const orderLabel = config.orderLabel || defaults.orderLabel;
-  const productLabel = config.productLabel || defaults.productLabel;
-  const fulfillmentLabel = config.fulfillmentLabel || defaults.fulfillmentLabel;
+  const sanitizedConfig = {};
+  for (const key of ALLOWED_STRING_KEYS) {
+    if (config[key] !== undefined) {
+      sanitizedConfig[key] = sanitizeString(config[key]);
+    }
+  }
+
+  const businessLabel = sanitizedConfig.businessLabel || defaults.businessLabel;
+  const catalogLabel = sanitizedConfig.catalogLabel || defaults.catalogLabel;
+  const orderLabel = sanitizedConfig.orderLabel || defaults.orderLabel;
+  const productLabel = sanitizedConfig.productLabel || defaults.productLabel;
+  const fulfillmentLabel = sanitizedConfig.fulfillmentLabel || defaults.fulfillmentLabel;
+
+  const showTableNumber = typeof config.showTableNumber === 'boolean'
+    ? config.showTableNumber
+    : defaults.showTableNumber;
+
+  const showKitchenPanel = typeof config.showKitchenPanel === 'boolean'
+    ? config.showKitchenPanel
+    : defaults.showKitchenPanel;
 
   return {
     ...defaults,
     businessType,
     businessLabel,
-    businessLabelPlural: defaults.businessLabelPlural || pluralize(businessLabel),
+    businessLabelPlural: pluralize(businessLabel),
     catalogLabel,
     orderLabel,
-    orderLabelPlural: defaults.orderLabelPlural || pluralize(orderLabel),
+    orderLabelPlural: pluralize(orderLabel),
     productLabel,
-    productLabelPlural: defaults.productLabelPlural || pluralize(productLabel),
+    productLabelPlural: pluralize(productLabel),
     fulfillmentLabel,
-    showTableNumber: typeof config.showTableNumber === 'boolean' ? config.showTableNumber : defaults.showTableNumber,
-    showKitchenPanel: typeof config.showKitchenPanel === 'boolean' ? config.showKitchenPanel : defaults.showKitchenPanel
+    showTableNumber,
+    showKitchenPanel
   };
 }

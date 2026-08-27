@@ -16,8 +16,9 @@ const publicUser = (user) => ({
   restaurantId: user.restaurantId
 });
 
-export const register = async ({ name, email, password }) => {
-  const restaurant = await prisma.restaurant.findFirst({ where: { slug: DEFAULT_RESTAURANT_SLUG } });
+export const register = async ({ name, email, password, storeSlug, restaurantSlug }) => {
+  const slugToSearch = storeSlug || restaurantSlug || DEFAULT_RESTAURANT_SLUG;
+  const restaurant = await prisma.restaurant.findFirst({ where: { slug: slugToSearch } });
   const passwordHash = await bcrypt.hash(password, 10);
 
   const user = await prisma.user.create({

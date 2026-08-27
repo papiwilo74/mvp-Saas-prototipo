@@ -10,20 +10,27 @@ cloudinary.config({
 
 export const uploadImage = async (buffer, options = {}) => {
   const folder = options.folder || 'products';
+  const storePrefix = options.storeId ? `store-${options.storeId}` : 'global';
 
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
-        folder: `fastfood-saas/${folder}`,
+        folder: `tutienda-saas/${storePrefix}/${folder}`,
         resource_type: 'image',
+        allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'avif'],
+        format: 'auto',
         transformation: [
-          { width: 800, height: 800, crop: 'limit', quality: 'auto', fetch_format: 'auto' }
+          { width: 800, height: 800, crop: 'limit', quality: 'auto' }
         ],
         ...options,
       },
       (error, result) => {
-        if (error) reject(error);
-        else resolve(result);
+        if (error) {
+          logger.error({ err: error, storeId: options.storeId }, 'Error al subir imagen a Cloudinary');
+          reject(error);
+        } else {
+          resolve(result);
+        }
       }
     );
     uploadStream.end(buffer);
@@ -35,7 +42,7 @@ export const deleteImage = async (publicId) => {
   try {
     await cloudinary.uploader.destroy(publicId);
   } catch (error) {
-    logger.error({ err: error }, 'Error deleting image from Cloudinary');
+    logger.error({ err: error, publicId }, 'Error deleting image from Cloudinary');
   }
 };
 

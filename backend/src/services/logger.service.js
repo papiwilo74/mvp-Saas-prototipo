@@ -16,6 +16,7 @@ const reqSerializer = (req) => ({
   ip: req.ip,
   userAgent: req.get('user-agent'),
   userId: req.user?.id,
+  storeId: req.user?.storeId || req.user?.restaurantId,
   restaurantId: req.user?.restaurantId,
   requestId: req.id,
   query: Object.keys(req.query).length ? req.query : undefined,
@@ -81,7 +82,7 @@ export const logger = pino({
   timestamp: () => `,"time":"${new Date().toISOString()}"`,
   // Formato base para todos los logs
   base: {
-    service: 'bcaxen-api',
+    service: 'tutienda-saas-api',
     environment: env.NODE_ENV,
     version: process.env.npm_package_version || 'unknown'
   }

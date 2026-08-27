@@ -40,12 +40,12 @@ export function InstallPrompt() {
     <div className="fixed bottom-0 left-0 right-0 z-50 p-4 animate-slide-up">
       <div className="mx-auto max-w-md rounded-2xl border border-stone-200 bg-white p-4 shadow-2xl">
         <div className="flex items-start gap-3">
-          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-orange-500 to-orange-700 text-white text-xs font-black">
-            FF
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-700 text-white text-xs font-black">
+            TT
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-black">Instala la app</p>
-            <p className="mt-0.5 text-xs text-stone-500">Agrégala a tu pantalla de inicio para pedir más rápido.</p>
+            <p className="mt-0.5 text-xs text-stone-500">Agrégala a tu pantalla de inicio para comprar o pedir más rápido.</p>
           </div>
           <button onClick={handleDismiss} className="shrink-0 rounded-full p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600">
             <X size={16} />
