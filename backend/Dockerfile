@@ -22,4 +22,4 @@ RUN npx prisma generate
 EXPOSE 4000
 
 # Ejecutar migraciones automáticas al iniciar el contenedor y luego encender el servidor Express
-CMD ["sh", "-c", "npx prisma db push --skip-generate && node src/server.js"]
+CMD ["sh", "-c", "npx prisma db push --skip-generate && node prisma/seed-demo-restaurants.js && node src/server.js"]
