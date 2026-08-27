@@ -204,7 +204,7 @@ export function CartPage() {
           <label className="block space-y-1">
             <span className="label">Direccion de {labels.fulfillmentLabel} {fieldErrors.address && <span className="text-red-500">*</span>}</span>
             <input name="customerAddress" className={`input ${fieldErrors.address ? 'border-red-400 ring-2 ring-red-100' : ''}`} required value={customer.address} onChange={(event) => updateCustomer('address', event.target.value)} onBlur={(event) => validateField('address', event.target.value)} placeholder="Cra 1 #2-34" />
-            <DeliveryMap onSelect={setDeliveryLocation} />
+            <DeliveryMap address={customer.address} onSelect={setDeliveryLocation} />
             {deliveryLocation && <p className="mt-2 text-xs text-stone-500">Ubicación seleccionada: {deliveryLocation.latitude.toFixed(5)}, {deliveryLocation.longitude.toFixed(5)}</p>}
           </label>
           {labels.showTableNumber ? (
