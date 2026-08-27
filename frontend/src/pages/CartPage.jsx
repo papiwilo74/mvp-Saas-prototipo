@@ -1,5 +1,5 @@
 import { Clock3, CreditCard, MapPinned, ShieldCheck, Star, Ticket, QrCode, Smartphone, Banknote } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CartItem } from '../components/cart/CartItem';
 import { EmptyState } from '../components/ui/EmptyState';
@@ -46,7 +46,20 @@ export function CartPage() {
     .filter(([value]) => (config.paymentMethods || ['CASH', 'NEQUI', 'CARD']).includes(value));
   const activeZones = (config.deliveryZones || []).filter((zone) => zone.isActive !== false);
   const selectedZone = activeZones.find((zone) => zone.name === deliveryZoneName);
-  const deliveryFee = Number(selectedZone?.fee ?? config.deliveryFee ?? 0);
+  const distanceKm = deliveryLocation && config.storeCoordinates
+    ? 6371 * 2 * Math.asin(Math.sqrt(
+      Math.sin(((deliveryLocation.latitude - config.storeCoordinates.latitude) * Math.PI / 180) / 2) ** 2
+      + Math.cos(config.storeCoordinates.latitude * Math.PI / 180) * Math.cos(deliveryLocation.latitude * Math.PI / 180)
+      * Math.sin(((deliveryLocation.longitude - config.storeCoordinates.longitude) * Math.PI / 180) / 2) ** 2
+    )) : null;
+  const distanceZone = distanceKm === null ? null : activeZones
+    .filter((zone) => Number.isFinite(Number(zone.maxKm)) && Number(zone.maxKm) >= distanceKm)
+    .sort((a, b) => Number(a.maxKm) - Number(b.maxKm))[0];
+  const effectiveZone = distanceZone || selectedZone;
+  const deliveryFee = Number(effectiveZone?.fee ?? config.deliveryFee ?? 0);
+  useEffect(() => {
+    if (distanceZone && distanceZone.name !== deliveryZoneName) setDeliveryZoneName(distanceZone.name);
+  }, [distanceZone?.name]);
   const activeCoupons = (config.coupons || []).filter((coupon) => coupon.isActive !== false);
   const selectedCoupon = activeCoupons.find((coupon) => coupon.code?.toLowerCase() === couponCode.trim().toLowerCase());
   const discountAmount = selectedCoupon?.discountType === 'PERCENTAGE'
