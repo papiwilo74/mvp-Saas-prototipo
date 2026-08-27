@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import { SEOHead } from '../components/seo/SEOHead';
 import { useAuth } from '../context/AuthContext';
@@ -6,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 export function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -17,7 +19,8 @@ export function LoginPage() {
     try {
       setSubmitting(true);
       const user = await login(form);
-      navigate(user.role === 'SUPERADMIN' ? '/superadmin' : user.role === 'ADMIN' ? '/admin' : '/');
+      const restaurantQuery = location.search || '';
+      navigate(user.role === 'SUPERADMIN' ? '/superadmin' : user.role === 'ADMIN' ? `/admin${restaurantQuery}` : `/${restaurantQuery}`);
     } catch (requestError) {
       setError(requestError.response?.data?.message || 'Credenciales invalidas');
     } finally {
@@ -53,4 +56,3 @@ export function LoginPage() {
     </div>
   );
 }
-

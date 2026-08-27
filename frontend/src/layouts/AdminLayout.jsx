@@ -18,6 +18,7 @@ const links = [
 
 export function AdminLayout() {
   const { config } = useRestaurantConfig();
+  const visibleLinks = config.showKitchenPanel === false ? links.filter((link) => link.to !== '/admin/kitchen') : links;
 
   return (
     <div className="min-h-screen bg-stone-50">
@@ -31,7 +32,7 @@ export function AdminLayout() {
             <span className="hidden sm:inline rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-stone-300">PANEL ADMIN</span>
           </div>
           <nav className="flex gap-2 overflow-x-auto">
-            {links.map(({ to, label, icon: Icon, end }) => (
+            {visibleLinks.map(({ to, label, icon: Icon, end }) => (
               <NavLink
                 key={to}
                 to={to}
