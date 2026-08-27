@@ -25,6 +25,7 @@ const envSchema = z.object({
   WOMPI_PRIVATE_KEY: z.string().optional(),
   WOMPI_EVENTS_SECRET: z.string().optional(),
   SENTRY_DSN: z.string().optional(),
+  MAPBOX_SECRET_TOKEN: z.string().startsWith('sk.').optional(),
   JWT_REFRESH_SECRET: z.string().min(32).default('REQUIRED-set-JWT_REFRESH_SECRET-in-production'),
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
   JWT_RESET_SECRET: z.string().min(32).default('REQUIRED-set-JWT_RESET_SECRET-in-production'),

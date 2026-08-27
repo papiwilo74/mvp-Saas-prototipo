@@ -1,4 +1,5 @@
 import { prisma } from '../config/prisma.js';
+import { env } from '../config/env.js';
 
 const DEG_TO_KM = 111.32;
 
@@ -110,4 +111,16 @@ export const getDistanceFromRestaurant = async (restaurantId, customerLat, custo
   } catch {
     return null;
   }
+};
+
+export const getRouteDistanceFromRestaurant = async (restaurantId, customerLat, customerLng) => {
+  if (!env.MAPBOX_SECRET_TOKEN || customerLat == null || customerLng == null) return null;
+  const config = await prisma.restaurantConfig.findUnique({ where: { restaurantId }, select: { storeLatitude: true, storeLongitude: true } });
+  if (config?.storeLatitude == null || config?.storeLongitude == null) return null;
+  const coordinates = `${config.storeLongitude},${config.storeLatitude};${customerLng},${customerLat}`;
+  const response = await fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${coordinates}?overview=false&access_token=${env.MAPBOX_SECRET_TOKEN}`);
+  if (!response.ok) return null;
+  const data = await response.json();
+  const route = data.routes?.[0];
+  return route ? { distanceKm: route.distance / 1000, durationMinutes: Math.ceil(route.duration / 60) } : null;
 };

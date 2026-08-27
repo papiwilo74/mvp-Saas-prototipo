@@ -8,6 +8,7 @@ import { logger } from './logger.service.js';
 import { emitNewOrder, emitOrderStatusChanged } from './socket.service.js';
 import { sendStatusUpdate } from './whatsapp.service.js';
 import { notifyOrderStatus } from './push.service.js';
+import { getRouteDistanceFromRestaurant } from './maps.service.js';
 import {
   normalizeCoupons,
   normalizeZones,
@@ -84,6 +85,9 @@ export const createOrder = async ({
 
   const subtotal = Math.round(orderItems.reduce((sum, item) => sum + item.subtotal, 0));
   const deliveryZones = normalizeZones(restaurant.config);
+  const route = fulfillmentMode === 'DELIVERY'
+    ? await getRouteDistanceFromRestaurant(restaurant.id, customerLatitude, customerLongitude)
+    : null;
 
   const { zone: detectedZone, geoStatus } = await detectZoneFromAddress(restaurant.id, customer.address, deliveryZones);
 
@@ -119,6 +123,11 @@ export const createOrder = async ({
     );
   }
 
+  const routeZone = route ? deliveryZones
+    .filter((zone) => zone.isActive !== false && Number.isFinite(Number(zone.maxKm)) && Number(zone.maxKm) >= route.distanceKm)
+    .sort((a, b) => Number(a.maxKm) - Number(b.maxKm))[0] : null;
+  selectedZone = routeZone || selectedZone;
+  if (fulfillmentMode === 'DELIVERY' && route && !routeZone) throw new ApiError(400, 'La dirección está fuera de la cobertura de entrega');
   const deliveryFee = fulfillmentMode === 'PICKUP' ? 0 : Math.round(Number(selectedZone?.fee ?? restaurant.config?.deliveryFee ?? 0));
   const coupons = normalizeCoupons(restaurant.config);
   const selectedCoupon = couponCode
@@ -189,7 +198,7 @@ export const createOrder = async ({
         customerLatitude: customerLatitude ?? null,
         customerLongitude: customerLongitude ?? null,
         fulfillmentMode,
-        deliveryDistanceKm: null,
+        deliveryDistanceKm: route?.distanceKm ?? null,
         deliveryZoneName: selectedZone?.name || null,
         scheduledFor: scheduledFor ? new Date(scheduledFor) : null,
         notes,

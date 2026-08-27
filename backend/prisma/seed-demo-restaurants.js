@@ -197,6 +197,8 @@ async function main() {
       openingHours: 'Lunes a sábado: 9:00 a.m. - 6:00 p.m.',
       acceptsScheduledOrders: false,
       deliveryFee: 6000,
+      storeLatitude: 4.667,
+      storeLongitude: -74.056,
       deliveryZones: [
         { name: 'Hasta 3 km', fee: 5000, maxKm: 3, estimatedMinutes: 30, isActive: true },
         { name: 'Hasta 6 km', fee: 8000, maxKm: 6, estimatedMinutes: 45, isActive: true },
