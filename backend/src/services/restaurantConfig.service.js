@@ -31,26 +31,34 @@ export const getPublicConfig = async (restaurantSlug = DEFAULT_RESTAURANT_SLUG) 
   return { ...restaurant, config: sanitized };
 };
 
-export const updateConfig = async (restaurantId, data) =>
-  prisma.restaurantConfig.upsert({
+export const updateConfig = async (restaurantId, data) => {
+  const safeData = { ...data };
+  for (const field of ['wompiPrivateKey', 'whatsappToken']) {
+    if (!safeData[field]) delete safeData[field];
+  }
+  const saved = await prisma.restaurantConfig.upsert({
     where: { restaurantId },
     update: {
-      ...data,
-      deliveryZones: data.deliveryZones || [],
-      storeLatitude: data.storeLatitude ?? null,
-      storeLongitude: data.storeLongitude ?? null,
-      deliveryModes: data.deliveryModes || ['DELIVERY', 'PICKUP'],
-      coupons: data.coupons || [],
-      businessHours: data.businessHours || null
+      ...safeData,
+      deliveryZones: safeData.deliveryZones || [],
+      storeLatitude: safeData.storeLatitude ?? null,
+      storeLongitude: safeData.storeLongitude ?? null,
+      deliveryModes: safeData.deliveryModes || ['DELIVERY', 'PICKUP'],
+      coupons: safeData.coupons || [],
+      businessHours: safeData.businessHours || null
     },
     create: {
-      ...data,
-      deliveryZones: data.deliveryZones || [],
-      storeLatitude: data.storeLatitude ?? null,
-      storeLongitude: data.storeLongitude ?? null,
-      deliveryModes: data.deliveryModes || ['DELIVERY', 'PICKUP'],
-      coupons: data.coupons || [],
-      businessHours: data.businessHours || null,
+      ...safeData,
+      deliveryZones: safeData.deliveryZones || [],
+      storeLatitude: safeData.storeLatitude ?? null,
+      storeLongitude: safeData.storeLongitude ?? null,
+      deliveryModes: safeData.deliveryModes || ['DELIVERY', 'PICKUP'],
+      coupons: safeData.coupons || [],
+      businessHours: safeData.businessHours || null,
       restaurantId
     }
   });
+  return { ...saved, wompiPrivateKey: undefined, whatsappToken: undefined, secretStatus: {
+    wompiPrivateKey: Boolean(saved.wompiPrivateKey), whatsappToken: Boolean(saved.whatsappToken)
+  } };
+};
