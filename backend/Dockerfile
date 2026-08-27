@@ -1,21 +1,25 @@
-FROM node:20-alpine AS base
+FROM node:20-alpine
 
 WORKDIR /app
+
+# Instalar OpenSSL requerido por Prisma Client en Linux Alpine
 RUN apk add --no-cache openssl
 
+# Copiar archivos de configuración de paquetes y esquema de Prisma
 COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
+COPY prisma ./prisma/
 
-COPY prisma/ ./prisma/
-RUN npx prisma generate
+# Instalar dependencias para que el CLI de Prisma esté disponible durante el build
+RUN npm ci
 
+# Copiar el resto del código fuente del backend
 COPY . .
 
+# Generar el cliente de Prisma dentro del contenedor Docker
+RUN npx prisma generate
+
+# Exponer el puerto de la aplicación Express
 EXPOSE 4000
 
-FROM base AS development
-RUN npm install --dev
-CMD ["npm", "run", "dev"]
-
-FROM base AS production
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+# Comando para iniciar el servidor
+CMD ["node", "src/server.js"]
