@@ -97,6 +97,9 @@ model RestaurantConfig {
   leadTimeMinutes Int      @default(30)
   deliveryFee    Decimal?   @db.Decimal(10, 2)
   deliveryZones  Json? @db.JsonB
+  storeLatitude  Float?
+  storeLongitude Float?
+  deliveryModes  String[] @default(["DELIVERY", "PICKUP"])
   coupons        Json? @db.JsonB
   paymentMethods String[]   @default([])
   wompiPublicKey String?
@@ -227,6 +230,10 @@ model Order {
   customerPhone String?
   customerEmail String?
   customerAddress String?
+  customerLatitude Float?
+  customerLongitude Float?
+  deliveryDistanceKm Decimal? @db.Decimal(10, 2)
+  fulfillmentMode String @default("DELIVERY")
   deliveryZoneName String?
   scheduledFor DateTime?
   wompiTransactionId String?

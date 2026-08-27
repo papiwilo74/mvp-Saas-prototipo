@@ -126,6 +126,8 @@ export function CartPage() {
         notes,
         couponCode: couponCode.trim() || undefined,
         deliveryZoneName: deliveryZoneName || undefined,
+        customerLatitude: deliveryLocation?.latitude,
+        customerLongitude: deliveryLocation?.longitude,
         scheduledFor: scheduledFor || undefined,
         pointsRedeemed: loyaltyEnabled ? pointsToRedeem : 0,
         tableNumber: labels.showTableNumber && tableNumber ? Number(tableNumber) : undefined,

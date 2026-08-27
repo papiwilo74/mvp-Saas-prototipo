@@ -48,6 +48,7 @@ export const createOrder = async ({
   pointsRedeemed = 0,
   wompiTransactionId,
   tableNumber
+  , fulfillmentMode = 'DELIVERY', customerLatitude, customerLongitude
 }) => {
   if (!items || !Array.isArray(items) || items.length === 0) {
     throw new ApiError(400, 'El pedido debe contener al menos un producto');
@@ -118,7 +119,7 @@ export const createOrder = async ({
     );
   }
 
-  const deliveryFee = Math.round(Number(selectedZone?.fee ?? restaurant.config?.deliveryFee ?? 0));
+  const deliveryFee = fulfillmentMode === 'PICKUP' ? 0 : Math.round(Number(selectedZone?.fee ?? restaurant.config?.deliveryFee ?? 0));
   const coupons = normalizeCoupons(restaurant.config);
   const selectedCoupon = couponCode
     ? coupons.find((coupon) => coupon.code?.toLowerCase() === couponCode.toLowerCase())
@@ -185,6 +186,10 @@ export const createOrder = async ({
         customerPhone: customer.phone,
         customerEmail: customer.email,
         customerAddress: customer.address,
+        customerLatitude: customerLatitude ?? null,
+        customerLongitude: customerLongitude ?? null,
+        fulfillmentMode,
+        deliveryDistanceKm: null,
         deliveryZoneName: selectedZone?.name || null,
         scheduledFor: scheduledFor ? new Date(scheduledFor) : null,
         notes,

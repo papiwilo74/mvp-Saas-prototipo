@@ -5,7 +5,7 @@ const PUBLIC_CONFIG_FIELDS = [
   'id', 'restaurantName', 'logoUrl', 'heroImageUrl', 'primaryColor', 'secondaryColor',
   'phone', 'whatsapp', 'address', 'email', 'facebookUrl', 'instagramUrl',
   'openingHours', 'businessHours', 'acceptsScheduledOrders', 'leadTimeMinutes',
-  'deliveryFee', 'deliveryZones', 'coupons', 'paymentMethods', 'wompiPublicKey',
+  'deliveryFee', 'deliveryZones', 'storeLatitude', 'storeLongitude', 'deliveryModes', 'coupons', 'paymentMethods', 'wompiPublicKey',
   'loyaltyProgram',
 ];
 
@@ -37,15 +37,20 @@ export const updateConfig = async (restaurantId, data) =>
     update: {
       ...data,
       deliveryZones: data.deliveryZones || [],
+      storeLatitude: data.storeLatitude ?? null,
+      storeLongitude: data.storeLongitude ?? null,
+      deliveryModes: data.deliveryModes || ['DELIVERY', 'PICKUP'],
       coupons: data.coupons || [],
       businessHours: data.businessHours || null
     },
     create: {
       ...data,
       deliveryZones: data.deliveryZones || [],
+      storeLatitude: data.storeLatitude ?? null,
+      storeLongitude: data.storeLongitude ?? null,
+      deliveryModes: data.deliveryModes || ['DELIVERY', 'PICKUP'],
       coupons: data.coupons || [],
       businessHours: data.businessHours || null,
       restaurantId
     }
   });
-
