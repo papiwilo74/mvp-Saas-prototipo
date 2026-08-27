@@ -17,7 +17,7 @@ export function AppLayout() {
   const activeDeliveryZoneCount = (config.deliveryZones || []).filter((zone) => zone.isActive !== false).length;
 
   return (
-    <div className="app-shell">
+    <div className="app-shell flex min-h-screen flex-col">
       <header className="sticky top-0 z-30 border-b border-white/60 bg-[#f7f1e8]/90 backdrop-blur">
         <DemoBanner />
         <div className="container-page flex flex-col gap-3 py-3 md:flex-row md:items-center md:justify-between">
@@ -52,11 +52,11 @@ export function AppLayout() {
         </div>
       </header>
 
-      <main>
+      <main className="flex-1">
         <Outlet />
       </main>
 
-      <footer className="border-t border-stone-200 bg-white py-6 text-center text-xs text-stone-500">
+      <footer className="mt-auto border-t border-stone-200 bg-white py-6 text-center text-xs text-stone-500">
         <div className="container-page flex flex-wrap items-center justify-center gap-4">
           <Link to="/terms" className="font-semibold hover:text-stone-950 transition-colors">Términos de Servicio</Link>
           <span className="text-stone-300">•</span>

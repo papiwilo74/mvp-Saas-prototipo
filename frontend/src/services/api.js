@@ -30,7 +30,9 @@ api.interceptors.response.use(
     }
 
     // Prevención estricta de "infinite loop" excluyendo específicamente /login y /refresh de los reintentos
-    const isAuthRoute = error.config.url?.includes('/auth/login') || error.config.url?.includes('/auth/refresh');
+    const isAuthRoute = error.config.url?.includes('/auth/login')
+      || error.config.url?.includes('/auth/refresh')
+      || error.config.url?.includes('/auth/me');
 
     if (error.response?.status === 401 && !error.config._retry && !isAuthRoute) {
       error.config._retry = true;

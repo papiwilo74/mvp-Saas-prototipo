@@ -37,6 +37,15 @@ const storeProducts = [
   { name: 'Moña scrunchie satinada', description: 'Moña suave para el cabello disponible en colores surtidos.', price: 12000, category: 'Belleza', trackStock: true, stock: 30 }
 ];
 
+const skincareProducts = [
+  { name: 'Limpiador facial suave', description: 'Limpieza diaria para rostro, con aloe vera y niacinamida.', price: 32000, category: 'Limpieza facial', imageUrl: 'https://images.unsplash.com/photo-1556228578-8c89e6adf883', trackStock: true, stock: 25 },
+  { name: 'Serum de vitamina C', description: 'Serum iluminador para ayudar a mejorar la apariencia de manchas.', price: 58000, category: 'Tratamientos', imageUrl: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be', trackStock: true, stock: 18 },
+  { name: 'Crema hidratante facial', description: 'Hidratación ligera para todo tipo de piel.', price: 45000, category: 'Hidratación', imageUrl: 'https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd', trackStock: true, stock: 20 },
+  { name: 'Protector solar SPF 50', description: 'Protección facial de amplio espectro, acabado ligero.', price: 52000, category: 'Protección solar', imageUrl: 'https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8', trackStock: true, stock: 30 },
+  { name: 'Mascarilla de arcilla', description: 'Tratamiento semanal para limpiar y refrescar la piel.', price: 28000, category: 'Tratamientos', trackStock: true, stock: 16 },
+  { name: 'Kit rutina facial', description: 'Limpiador, serum y crema hidratante para una rutina completa.', price: 119000, category: 'Kits', isCombo: true, comboItems: ['Limpiador facial suave', 'Serum de vitamina C', 'Crema hidratante facial'], trackStock: true, stock: 10 }
+];
+
 async function createRestaurant({ name, slug, email, phone, address, adminEmail, adminPassword, products, config }) {
   console.log(`Creando ${name}...`);
 
@@ -163,6 +172,35 @@ async function main() {
   });
 
   await createRestaurant({
+    name: 'Aura Skin',
+    slug: 'aura-skin',
+    email: 'hola@auraskin.com',
+    phone: '+57 315 888 1122',
+    address: 'Carrera 7 #72-41, Bogota',
+    adminEmail: 'admin@auraskin.com',
+    adminPassword: 'Aura123!',
+    products: skincareProducts,
+    config: {
+      restaurantName: 'Aura Skin',
+      logoUrl: 'https://images.unsplash.com/photo-1612817288484-6f916006741a',
+      primaryColor: '#be7c8c',
+      secondaryColor: '#59434a',
+      businessType: 'store',
+      businessLabel: 'tienda',
+      catalogLabel: 'Catálogo',
+      orderLabel: 'compra',
+      productLabel: 'producto',
+      fulfillmentLabel: 'entrega',
+      showTableNumber: false,
+      showKitchenPanel: false,
+      openingHours: 'Lunes a sábado: 9:00 a.m. - 6:00 p.m.',
+      acceptsScheduledOrders: false,
+      deliveryFee: 6000,
+      paymentMethods: ['CASH', 'NEQUI', 'CARD']
+    }
+  });
+
+  await createRestaurant({
     name: 'Pizza Roma',
     slug: 'pizza-roma',
     email: 'hola@pizzaroma.com',
@@ -232,6 +270,7 @@ async function main() {
   console.log('\nSuperadmin: superadmin@demo.com / SuperAdmin123!');
   console.log('Demo original: admin@demo.com / Admin123!');
   console.log('Tienda demo: admin@variedadesmartha.com / Martha123!');
+  console.log('Tienda facial demo: admin@auraskin.com / Aura123!');
 }
 
 main()

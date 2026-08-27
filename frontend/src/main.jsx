@@ -13,6 +13,12 @@ import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import './styles/theme.css';
 import './styles/index.css';
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js');
+  });
+}
+
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,
   environment: import.meta.env.VITE_NODE_ENV || 'development',
