@@ -62,12 +62,15 @@ export const errorHandler = (error, req, res, _next) => {
   }
 
   const errorCode = error.errorCode || statusToErrorCode[statusCode] || 'INTERNAL_ERROR';
+  const safeMessage = statusCode >= 500 && env.NODE_ENV === 'production'
+    ? 'Ocurrió un error interno. Usa el código de soporte para solicitar ayuda.'
+    : (error.message || 'Error interno del servidor');
 
   return res.status(statusCode).json({
     success: false,
-    message: error.message || 'Error interno del servidor',
+    message: safeMessage,
     errorCode,
-    details: error.details,
+    ...(env.NODE_ENV === 'development' && error.details ? { details: error.details } : {}),
     requestId: req.id,
     ...(env.NODE_ENV === 'development' && { stack: error.stack })
   });
