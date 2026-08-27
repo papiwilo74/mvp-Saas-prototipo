@@ -15,8 +15,11 @@ export function LandingPage() {
   const featured = products.slice(0, 3);
   const combos = products.filter((product) => product.isCombo).slice(0, 2);
   const topZone = (config.deliveryZones || []).find((zone) => zone.isActive !== false);
+  const isStore = config.businessType === 'store';
   const whatsappUrl = `https://wa.me/${config.whatsapp?.replace(/\D/g, '') || ''}`;
-  const heroImage = config.heroImageUrl || 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd';
+  const heroImage = config.heroImageUrl || (isStore
+    ? 'https://images.unsplash.com/photo-1612817288484-6f916006741a'
+    : 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd');
 
   return (
     <div className="pb-8">
@@ -29,13 +32,15 @@ export function LandingPage() {
             <div>
               <div className="badge-chip text-[color:var(--color-primary)]">
               <Clock size={16} />
-                Pedidos directos sin depender solo de apps externas
+                {isStore ? 'Compra directa, fácil y segura' : 'Pedidos directos sin depender solo de apps externas'}
               </div>
               <h1 className="mt-4 max-w-2xl text-4xl font-black tracking-tight text-stone-950 sm:text-6xl">
                 {config.restaurantName}
               </h1>
               <p className="mt-4 max-w-2xl text-base leading-7 text-stone-600 sm:text-lg">
-                Una vitrina digital premium para vender combos, impulsar recompra y recibir pedidos directamente en tu panel con una experiencia rapida, visual y confiable.
+                {isStore
+                  ? `Una tienda digital premium para ${config.orderLabel || 'comprar'} productos, impulsar la recompra y recibir pedidos directamente en tu panel.`
+                  : 'Una vitrina digital premium para vender combos, impulsar recompra y recibir pedidos directamente en tu panel con una experiencia rapida, visual y confiable.'}
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <span className="badge-chip">
@@ -53,7 +58,7 @@ export function LandingPage() {
               </div>
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <Link to="/menu" className="btn-primary flex-1 sm:flex-none">
-                  Ver menu y ordenar
+                  {isStore ? 'Ver catálogo y comprar' : 'Ver menú y ordenar'}
                   <ArrowRight size={18} />
                 </Link>
                 <a className="btn-secondary flex-1 sm:flex-none" href={whatsappUrl}>
@@ -67,7 +72,7 @@ export function LandingPage() {
                   <p className="mt-1 text-sm text-stone-600">{topZone ? topZone.name : 'Cobertura principal'}</p>
                 </div>
                 <div className="safe-panel p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.2em] text-stone-500">Combo estrella</p>
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-stone-500">{isStore ? 'Más vendido' : 'Combo estrella'}</p>
                   <p className="mt-2 text-lg font-black">{combos[0]?.name || 'Burger + papas'}</p>
                   <p className="mt-1 text-sm text-stone-600">{formatCurrency(combos[0]?.price || 29900)}</p>
                 </div>
@@ -86,7 +91,7 @@ export function LandingPage() {
               </div>
               <img
                 src={heroImage}
-                alt="Comida destacada"
+                alt={`${config.restaurantName} destacado`}
                 className="h-[420px] w-full rounded-[32px] object-cover shadow-soft"
               />
               <div className="absolute -bottom-5 right-4 z-10 rounded-[28px] bg-stone-950 px-5 py-4 text-white shadow-soft">
@@ -138,7 +143,7 @@ export function LandingPage() {
         <div className="mb-5 flex items-end justify-between gap-3">
           <div>
             <h2 className="section-title">Destacados que venden solos</h2>
-            <p className="section-copy">Una seleccion pensada para impresionar al restaurante cuando vea la demo.</p>
+            <p className="section-copy">Una selección pensada para mostrar lo mejor de {config.restaurantName}.</p>
           </div>
           <Link to="/menu" className="text-sm font-black text-[color:var(--color-primary)]">Ver menu</Link>
         </div>
@@ -155,9 +160,9 @@ export function LandingPage() {
         <div className="glass-panel px-6 py-8 sm:px-8">
           <div className="grid gap-6 md:grid-cols-[0.8fr_1fr] md:items-center">
             <div>
-              <h2 className="section-title">La demo ya comunica valor de negocio</h2>
+              <h2 className="section-title">Tu tienda ya comunica valor de negocio</h2>
               <p className="section-copy">
-                Presenta catalogo, promociones, tiempos de entrega y pedido directo en una sola experiencia. Esto te ayuda a vender implementacion a restaurantes desde la primera reunion.
+                Presenta catálogo, promociones, entregas y compras directas en una sola experiencia para tus clientes.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -180,17 +185,16 @@ export function LandingPage() {
         <div className="rounded-[32px] bg-gradient-to-br from-stone-950 to-stone-900 px-6 py-10 text-white sm:px-10 sm:py-12">
           <div className="mx-auto max-w-2xl text-center">
             <Store size={32} className="mx-auto text-orange-400" />
-            <h2 className="mt-4 text-3xl font-black tracking-tight">Tu propio canal de pedidos</h2>
+            <h2 className="mt-4 text-3xl font-black tracking-tight">Tu propio canal de ventas</h2>
             <p className="mt-3 text-base leading-7 text-stone-400">
-              Esta demo es un producto SaaS listo para implementar en tu restaurante. 
-              Catalogo digital, domicilios, cupones, panel admin, CRM de clientes y mas.
+              Una experiencia digital lista para vender productos, recibir compras y administrar tu negocio.
             </p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               <div className="flex items-start gap-3 rounded-2xl bg-white/10 p-4 text-left">
                 <CheckCircle2 size={20} className="mt-0.5 shrink-0 text-emerald-400" />
                 <div>
                   <p className="font-bold">Catalogo y pedidos</p>
-                  <p className="text-sm text-stone-400">Menu visual, combos, variantes y pedidos directos por WhatsApp.</p>
+                <p className="text-sm text-stone-400">Catálogo visual, productos, combos y compras directas.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3 rounded-2xl bg-white/10 p-4 text-left">
@@ -222,7 +226,7 @@ export function LandingPage() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-xl bg-orange-600 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-orange-500"
               >
-                Quiero esto para mi restaurante
+                Quiero esto para mi negocio
                 <ArrowRight size={18} />
               </a>
               <Link to="/menu" className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10">

@@ -183,6 +183,7 @@ async function main() {
     config: {
       restaurantName: 'Aura Skin',
       logoUrl: 'https://images.unsplash.com/photo-1612817288484-6f916006741a',
+      heroImageUrl: 'https://images.unsplash.com/photo-1556228578-8c89e6adf883',
       primaryColor: '#be7c8c',
       secondaryColor: '#59434a',
       businessType: 'store',
