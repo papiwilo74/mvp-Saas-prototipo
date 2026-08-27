@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || '';
+const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN || '';
+mapboxgl.accessToken = mapboxToken.startsWith('pk.') ? mapboxToken : '';
 
 export function DeliveryMap({ address, onSelect }) {
   const containerRef = useRef(null);
@@ -42,7 +43,7 @@ export function DeliveryMap({ address, onSelect }) {
     finally { setSearching(false); }
   };
 
-  if (!mapboxgl.accessToken) return null;
+  if (!mapboxgl.accessToken) return <p className="mt-3 text-xs text-amber-700">El mapa no está disponible en este momento.</p>;
   return <>
     <div ref={containerRef} className="mt-3 h-64 overflow-hidden rounded-2xl border border-stone-200" />
     <button type="button" onClick={searchAddress} disabled={searching} className="btn-secondary mt-2 w-full text-sm">{searching ? 'Buscando...' : 'Buscar ubicación en el mapa'}</button>
