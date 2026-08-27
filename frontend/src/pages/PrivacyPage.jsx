@@ -49,6 +49,15 @@ export function PrivacyPage() {
           </section>
 
           <section className="safe-panel p-6 sm:p-8 bg-white/90">
+            <h2 className="text-xl font-black text-stone-950 mb-3">6. Proveedores tecnológicos</h2>
+            <div className="space-y-3 text-sm text-stone-600 leading-relaxed">
+              <p>Para operar la plataforma podemos utilizar proveedores especializados: Vercel para la interfaz, Render para la API, Neon para la base de datos, Mapbox para geocodificación y rutas, Wompi para pagos, Resend para correos y Cloudinary para imágenes.</p>
+              <p>Cada proveedor recibe únicamente la información necesaria para prestar su función. Los datos de pago son procesados por Wompi; la plataforma no almacena números completos de tarjetas ni códigos de seguridad.</p>
+              <p>Las coordenadas de entrega se usan para calcular cobertura y tarifa, y se guardan asociadas al pedido para fines operativos y de soporte.</p>
+            </div>
+          </section>
+
+          <section className="safe-panel p-6 sm:p-8 bg-white/90">
             <h2 className="text-xl font-black text-stone-950 flex items-center gap-2 mb-3">
               <Eye className="text-blue-600" size={20} />
               2. Finalidad del Tratamiento de los Datos

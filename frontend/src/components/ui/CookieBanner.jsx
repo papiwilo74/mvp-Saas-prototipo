@@ -50,7 +50,7 @@ export function CookieBanner() {
             </button>
           </div>
           <p className="mt-1.5 text-xs leading-relaxed text-stone-600">
-            Utilizamos cookies técnicas y almacenamiento local estrictamente necesarios para guardar tu carrito de compras, recordar tus sesiones seguras y calcular las tarifas de entrega en tu zona.{' '}
+            Usamos cookies técnicas y almacenamiento local estrictamente necesarios para mantener tu sesión, guardar tu carrito y recordar preferencias. No usamos cookies publicitarias ni de seguimiento.{' '}
             <Link to="/privacy" className="font-bold underline text-stone-900 hover:text-amber-700">
               Ver Política de Privacidad
             </Link>
@@ -62,7 +62,7 @@ export function CookieBanner() {
               onClick={acceptAll}
               className="rounded-full bg-stone-950 px-4 py-2 text-xs font-bold text-white transition-all hover:bg-stone-800 active:scale-95 shadow-sm"
             >
-              Aceptar todas
+              Entendido
             </button>
             <button
               type="button"
