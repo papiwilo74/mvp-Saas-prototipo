@@ -11,6 +11,7 @@ import { api } from '../services/api';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import { isValidColombianPhone } from '../utils/validators';
 import { buildWhatsAppOrderUrl } from '../utils/whatsappOrder';
+import { DeliveryMap } from '../components/ui/DeliveryMap';
 
 const CUSTOMER_STORAGE_KEY = `ff_customer:${env.restaurantSlug}`;
 
@@ -32,6 +33,7 @@ export function CartPage() {
   const [paymentMethod, setPaymentMethod] = useState(config.paymentMethods?.includes('WOMPI') ? 'WOMPI' : (config.paymentMethods?.[0] || 'CASH'));
   const [couponCode, setCouponCode] = useState('');
   const [deliveryZoneName, setDeliveryZoneName] = useState(config.deliveryZones?.[0]?.name || '');
+  const [deliveryLocation, setDeliveryLocation] = useState(null);
   const [scheduledFor, setScheduledFor] = useState('');
   const [tableNumber, setTableNumber] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -202,6 +204,8 @@ export function CartPage() {
           <label className="block space-y-1">
             <span className="label">Direccion de {labels.fulfillmentLabel} {fieldErrors.address && <span className="text-red-500">*</span>}</span>
             <input name="customerAddress" className={`input ${fieldErrors.address ? 'border-red-400 ring-2 ring-red-100' : ''}`} required value={customer.address} onChange={(event) => updateCustomer('address', event.target.value)} onBlur={(event) => validateField('address', event.target.value)} placeholder="Cra 1 #2-34" />
+            <DeliveryMap onSelect={setDeliveryLocation} />
+            {deliveryLocation && <p className="mt-2 text-xs text-stone-500">Ubicación seleccionada: {deliveryLocation.latitude.toFixed(5)}, {deliveryLocation.longitude.toFixed(5)}</p>}
           </label>
           {labels.showTableNumber ? (
             <label className="block space-y-1">
