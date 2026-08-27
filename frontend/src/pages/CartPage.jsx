@@ -57,7 +57,7 @@ export function CartPage() {
     .filter((zone) => Number.isFinite(Number(zone.maxKm)) && Number(zone.maxKm) >= distanceKm)
     .sort((a, b) => Number(a.maxKm) - Number(b.maxKm))[0];
   const effectiveZone = distanceZone || selectedZone;
-  const deliveryFee = Number(effectiveZone?.fee ?? config.deliveryFee ?? 0);
+  const deliveryFee = fulfillmentMode === 'PICKUP' ? 0 : Number(effectiveZone?.fee ?? config.deliveryFee ?? 0);
   useEffect(() => {
     if (distanceZone && distanceZone.name !== deliveryZoneName) setDeliveryZoneName(distanceZone.name);
   }, [distanceZone?.name]);
@@ -103,7 +103,7 @@ export function CartPage() {
     } else {
       setPhoneError('');
     }
-    if (!customer.address.trim()) errors.address = true;
+    if (fulfillmentMode === 'DELIVERY' && !customer.address.trim()) errors.address = true;
     if (items.some((item) => item.product.trackStock && item.quantity > (item.product.stock || 0))) {
       setError(`Algunos productos exceden el stock disponible. Revisa las cantidades.`);
       return false;
@@ -224,9 +224,11 @@ export function CartPage() {
               {(config.deliveryModes || ['DELIVERY', 'PICKUP']).map((mode) => <option key={mode} value={mode}>{mode === 'PICKUP' ? 'Recoger en tienda' : 'Domicilio'}</option>)}
             </select>
             {fulfillmentMode === 'DELIVERY' && <span className="label">Direccion de {labels.fulfillmentLabel} {fieldErrors.address && <span className="text-red-500">*</span>}</span>}
-            <input name="customerAddress" className={`input ${fieldErrors.address ? 'border-red-400 ring-2 ring-red-100' : ''}`} required value={customer.address} onChange={(event) => updateCustomer('address', event.target.value)} onBlur={(event) => validateField('address', event.target.value)} placeholder="Cra 1 #2-34" />
-            <DeliveryMap address={customer.address} onSelect={setDeliveryLocation} />
-            {deliveryLocation && <p className="mt-2 text-xs text-stone-500">Ubicación seleccionada: {deliveryLocation.latitude.toFixed(5)}, {deliveryLocation.longitude.toFixed(5)}</p>}
+            {fulfillmentMode === 'DELIVERY' && <>
+              <input name="customerAddress" className={`input ${fieldErrors.address ? 'border-red-400 ring-2 ring-red-100' : ''}`} required value={customer.address} onChange={(event) => updateCustomer('address', event.target.value)} onBlur={(event) => validateField('address', event.target.value)} placeholder="Cra 1 #2-34" />
+              <DeliveryMap address={customer.address} onSelect={setDeliveryLocation} />
+              {deliveryLocation && <p className="mt-2 text-xs text-stone-500">Ubicación seleccionada: {deliveryLocation.latitude.toFixed(5)}, {deliveryLocation.longitude.toFixed(5)}</p>}
+            </>}
           </label>
           {labels.showTableNumber ? (
             <label className="block space-y-1">
@@ -241,7 +243,7 @@ export function CartPage() {
             <span className="label">Email</span>
             <input className="input" type="email" value={customer.email} onChange={(event) => updateCustomer('email', event.target.value)} />
           </label>
-          {activeZones.length ? (
+          {fulfillmentMode === 'DELIVERY' && activeZones.length ? (
             <label className="block space-y-1">
               <span className="label">Zona de {labels.fulfillmentLabel}</span>
               <select className="input" value={deliveryZoneName} onChange={(event) => setDeliveryZoneName(event.target.value)}>
