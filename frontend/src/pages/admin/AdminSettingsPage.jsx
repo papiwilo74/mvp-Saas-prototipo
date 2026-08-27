@@ -112,6 +112,14 @@ export function AdminSettingsPage() {
           <span className="label">Costo de domicilio</span>
           <input className="input" type="number" min="0" value={form.deliveryFee || 0} onChange={(event) => update('deliveryFee', Number(event.target.value))} />
         </label>
+        <div className="sm:col-span-2 rounded-xl border border-stone-200 p-4">
+          <p className="label">Origen y tarifas por distancia</p>
+          <p className="mt-1 text-xs text-stone-500">Usa las coordenadas del local y define el máximo de cada rango.</p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            <input className="input" type="number" step="any" placeholder="Latitud del negocio" value={form.storeLatitude ?? ''} onChange={(e) => update('storeLatitude', e.target.value === '' ? null : Number(e.target.value))} />
+            <input className="input" type="number" step="any" placeholder="Longitud del negocio" value={form.storeLongitude ?? ''} onChange={(e) => update('storeLongitude', e.target.value === '' ? null : Number(e.target.value))} />
+          </div>
+        </div>
         <div className="space-y-2">
           <span className="label">Metodos de pago visibles</span>
           <div className="grid grid-cols-3 gap-2">
@@ -216,10 +224,11 @@ export function AdminSettingsPage() {
             <button type="button" className="btn-secondary" onClick={addDeliveryZone}>Agregar zona</button>
           </div>
           {(form.deliveryZones || []).map((zone, index) => (
-            <div key={`zone-${index}`} className="grid gap-2 rounded-md border border-stone-200 p-3 sm:grid-cols-4">
+            <div key={`zone-${index}`} className="grid gap-2 rounded-md border border-stone-200 p-3 sm:grid-cols-5">
               <input className="input" placeholder="Nombre" value={zone.name || ''} onChange={(event) => updateArrayItem('deliveryZones', index, 'name', event.target.value)} />
               <input className="input" type="number" min="0" placeholder="Costo" value={zone.fee || 0} onChange={(event) => updateArrayItem('deliveryZones', index, 'fee', Number(event.target.value))} />
               <input className="input" type="number" min="0" placeholder="Pedido minimo" value={zone.minOrder || 0} onChange={(event) => updateArrayItem('deliveryZones', index, 'minOrder', Number(event.target.value))} />
+              <input className="input" type="number" min="0" step="0.1" placeholder="Máx. km" value={zone.maxKm || ''} onChange={(event) => updateArrayItem('deliveryZones', index, 'maxKm', Number(event.target.value))} />
               <div className="flex gap-2">
                 <input className="input" type="number" min="0" placeholder="Min" value={zone.estimatedMinutes || 0} onChange={(event) => updateArrayItem('deliveryZones', index, 'estimatedMinutes', Number(event.target.value))} />
                 <button type="button" onClick={() => removeArrayItem('deliveryZones', index)} className="text-red-500 hover:text-red-700 text-xs font-bold shrink-0">X</button>

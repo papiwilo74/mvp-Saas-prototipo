@@ -34,6 +34,7 @@ export function CartPage() {
   const [couponCode, setCouponCode] = useState('');
   const [deliveryZoneName, setDeliveryZoneName] = useState(config.deliveryZones?.[0]?.name || '');
   const [deliveryLocation, setDeliveryLocation] = useState(null);
+  const [fulfillmentMode, setFulfillmentMode] = useState('DELIVERY');
   const [scheduledFor, setScheduledFor] = useState('');
   const [tableNumber, setTableNumber] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -128,6 +129,7 @@ export function CartPage() {
         deliveryZoneName: deliveryZoneName || undefined,
         customerLatitude: deliveryLocation?.latitude,
         customerLongitude: deliveryLocation?.longitude,
+        fulfillmentMode,
         scheduledFor: scheduledFor || undefined,
         pointsRedeemed: loyaltyEnabled ? pointsToRedeem : 0,
         tableNumber: labels.showTableNumber && tableNumber ? Number(tableNumber) : undefined,
@@ -217,7 +219,11 @@ export function CartPage() {
             {phoneError && <p className="text-xs font-semibold text-red-600">{phoneError}</p>}
           </label>
           <label className="block space-y-1">
-            <span className="label">Direccion de {labels.fulfillmentLabel} {fieldErrors.address && <span className="text-red-500">*</span>}</span>
+            <span className="label">Tipo de entrega</span>
+            <select className="input" value={fulfillmentMode} onChange={(event) => setFulfillmentMode(event.target.value)}>
+              {(config.deliveryModes || ['DELIVERY', 'PICKUP']).map((mode) => <option key={mode} value={mode}>{mode === 'PICKUP' ? 'Recoger en tienda' : 'Domicilio'}</option>)}
+            </select>
+            {fulfillmentMode === 'DELIVERY' && <span className="label">Direccion de {labels.fulfillmentLabel} {fieldErrors.address && <span className="text-red-500">*</span>}</span>}
             <input name="customerAddress" className={`input ${fieldErrors.address ? 'border-red-400 ring-2 ring-red-100' : ''}`} required value={customer.address} onChange={(event) => updateCustomer('address', event.target.value)} onBlur={(event) => validateField('address', event.target.value)} placeholder="Cra 1 #2-34" />
             <DeliveryMap address={customer.address} onSelect={setDeliveryLocation} />
             {deliveryLocation && <p className="mt-2 text-xs text-stone-500">Ubicación seleccionada: {deliveryLocation.latitude.toFixed(5)}, {deliveryLocation.longitude.toFixed(5)}</p>}
