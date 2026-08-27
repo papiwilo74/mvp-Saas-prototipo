@@ -21,5 +21,5 @@ RUN npx prisma generate
 # Exponer el puerto de la aplicación Express
 EXPOSE 4000
 
-# Comando para iniciar el servidor
-CMD ["node", "src/server.js"]
+# Ejecutar migraciones automáticas al iniciar el contenedor y luego encender el servidor Express
+CMD ["sh", "-c", "npx prisma migrate deploy && node src/server.js"]
