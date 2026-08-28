@@ -32,7 +32,7 @@ export function CartPage() {
   const [notes, setNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState(config.paymentMethods?.includes('WOMPI') ? 'WOMPI' : (config.paymentMethods?.[0] || 'CASH'));
   const [couponCode, setCouponCode] = useState('');
-  const [deliveryZoneName, setDeliveryZoneName] = useState(config.deliveryZones?.[0]?.name || '');
+  const [deliveryZoneName, setDeliveryZoneName] = useState('');
   const [deliveryLocation, setDeliveryLocation] = useState(null);
   const [fulfillmentMode, setFulfillmentMode] = useState('DELIVERY');
   const [scheduledFor, setScheduledFor] = useState('');
@@ -56,8 +56,10 @@ export function CartPage() {
   const distanceZone = distanceKm === null ? null : activeZones
     .filter((zone) => Number.isFinite(Number(zone.maxKm)) && Number(zone.maxKm) >= distanceKm)
     .sort((a, b) => Number(a.maxKm) - Number(b.maxKm))[0];
-  const effectiveZone = distanceZone || selectedZone;
-  const deliveryFee = fulfillmentMode === 'PICKUP' ? 0 : Number(effectiveZone?.fee ?? config.deliveryFee ?? 0);
+  const effectiveZone = deliveryLocation ? (distanceZone || selectedZone) : null;
+  const deliveryFee = fulfillmentMode === 'PICKUP' || !deliveryLocation
+    ? 0
+    : Number(effectiveZone?.fee ?? config.deliveryFee ?? 0);
   useEffect(() => {
     if (distanceZone && distanceZone.name !== deliveryZoneName) setDeliveryZoneName(distanceZone.name);
   }, [distanceZone?.name]);
@@ -89,6 +91,8 @@ export function CartPage() {
     }
     if (field === 'address') {
       if (!value.trim()) errs.address = true; else delete errs.address;
+      setDeliveryLocation(null);
+      setDeliveryZoneName('');
     }
     setFieldErrors(errs);
   };
@@ -104,6 +108,10 @@ export function CartPage() {
       setPhoneError('');
     }
     if (fulfillmentMode === 'DELIVERY' && !customer.address.trim()) errors.address = true;
+    if (fulfillmentMode === 'DELIVERY' && !deliveryLocation) {
+      setError('Selecciona tu ubicación en el mapa para calcular el costo del domicilio.');
+      return false;
+    }
     if (items.some((item) => item.product.trackStock && item.quantity > (item.product.stock || 0))) {
       setError(`Algunos productos exceden el stock disponible. Revisa las cantidades.`);
       return false;
@@ -226,7 +234,7 @@ export function CartPage() {
             {fulfillmentMode === 'DELIVERY' && <span className="label">Direccion de {labels.fulfillmentLabel} {fieldErrors.address && <span className="text-red-500">*</span>}</span>}
             {fulfillmentMode === 'DELIVERY' && <>
               <input name="customerAddress" className={`input ${fieldErrors.address ? 'border-red-400 ring-2 ring-red-100' : ''}`} required value={customer.address} onChange={(event) => updateCustomer('address', event.target.value)} onBlur={(event) => validateField('address', event.target.value)} placeholder="Cra 1 #2-34" />
-              <DeliveryMap address={customer.address} onSelect={setDeliveryLocation} />
+              <DeliveryMap address={customer.address} onSelect={(location) => setDeliveryLocation(location)} />
               {deliveryLocation && <p className="mt-2 text-xs text-stone-500">Ubicación seleccionada: {deliveryLocation.latitude.toFixed(5)}, {deliveryLocation.longitude.toFixed(5)}</p>}
             </>}
           </label>
@@ -248,7 +256,7 @@ export function CartPage() {
               <span className="label">Zona de {labels.fulfillmentLabel}</span>
               <select className="input" value={deliveryZoneName} onChange={(event) => setDeliveryZoneName(event.target.value)}>
                 {activeZones.map((zone) => (
-                  <option key={zone.name} value={zone.name}>
+                <option key={zone.name} value={zone.name}>
                     {zone.name} - {formatCurrency(zone.fee || 0)}
                   </option>
                 ))}
@@ -384,13 +392,23 @@ export function CartPage() {
           </div>
         </div>
         <div className="mt-5 grid gap-3">
-          {selectedZone ? (
+          {fulfillmentMode === 'DELIVERY' && !deliveryLocation ? (
+            <div className="safe-panel border-amber-200 bg-amber-50 p-4">
+              <div className="flex items-start gap-3">
+                <MapPinned className="mt-0.5 text-amber-600" size={18} />
+                <div>
+                  <p className="text-sm font-black text-amber-900">Ubica tu dirección para calcular el domicilio</p>
+                  <p className="mt-1 text-sm text-amber-800">El costo se mostrará cuando selecciones tu ubicación en el mapa.</p>
+                </div>
+              </div>
+            </div>
+          ) : effectiveZone ? (
             <div className="safe-panel p-4">
               <div className="flex items-start gap-3">
                 <MapPinned className="mt-0.5 text-[color:var(--color-primary)]" size={18} />
                 <div>
-                  <p className="text-sm font-black">Entrega en {selectedZone.name}</p>
-                  <p className="mt-1 text-sm text-stone-600">Costo {formatCurrency(selectedZone.fee || 0)}{selectedZone.estimatedMinutes ? ` · aprox. ${selectedZone.estimatedMinutes} min` : ''}</p>
+                  <p className="text-sm font-black">Entrega en {effectiveZone.name}</p>
+                  <p className="mt-1 text-sm text-stone-600">Costo {formatCurrency(effectiveZone.fee || 0)}{effectiveZone.estimatedMinutes ? ` · aprox. ${effectiveZone.estimatedMinutes} min` : ''}</p>
                 </div>
               </div>
             </div>

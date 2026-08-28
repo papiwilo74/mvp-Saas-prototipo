@@ -85,6 +85,9 @@ export const createOrder = async ({
 
   const subtotal = Math.round(orderItems.reduce((sum, item) => sum + item.subtotal, 0));
   const deliveryZones = normalizeZones(restaurant.config);
+  if (fulfillmentMode === 'DELIVERY' && (!Number.isFinite(Number(customerLatitude)) || !Number.isFinite(Number(customerLongitude)))) {
+    throw new ApiError(400, 'Selecciona tu ubicación en el mapa para calcular el costo del domicilio');
+  }
   const route = fulfillmentMode === 'DELIVERY'
     ? await getRouteDistanceFromRestaurant(restaurant.id, customerLatitude, customerLongitude)
     : null;
