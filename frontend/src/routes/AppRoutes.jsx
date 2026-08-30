@@ -3,10 +3,25 @@ import { Route, Routes } from 'react-router-dom';
 import { ProtectedRoute } from '../components/routing/ProtectedRoute';
 import { env } from '../config/env';
 
-const loadPage = (name) => () => import(`../pages/${name}.jsx`).then(m => ({ default: m[name] }));
-const loadAdmin = (name) => () => import(`../pages/admin/${name}.jsx`).then(m => ({ default: m[name] }));
-const loadSuper = (name) => () => import(`../pages/superadmin/${name}.jsx`).then(m => ({ default: m[name] }));
-const loadLayout = (name) => () => import(`../layouts/${name}.jsx`).then(m => ({ default: m[name] }));
+const handleDynamicImport = (importFn) => () =>
+  importFn().catch((err) => {
+    // Si falla cargar el chunk (ej. nuevo deploy en Vercel con nuevos hashes), forzar recarga limpia
+    const isChunkError =
+      err?.message?.includes('Failed to fetch dynamically imported module') ||
+      err?.name === 'ChunkLoadError';
+    if (isChunkError && !sessionStorage.getItem('chunk_reload_retry')) {
+      sessionStorage.setItem('chunk_reload_retry', '1');
+      window.location.reload();
+      return new Promise(() => {});
+    }
+    sessionStorage.removeItem('chunk_reload_retry');
+    throw err;
+  });
+
+const loadPage = (name) => handleDynamicImport(() => import(`../pages/${name}.jsx`).then((m) => ({ default: m[name] })));
+const loadAdmin = (name) => handleDynamicImport(() => import(`../pages/admin/${name}.jsx`).then((m) => ({ default: m[name] })));
+const loadSuper = (name) => handleDynamicImport(() => import(`../pages/superadmin/${name}.jsx`).then((m) => ({ default: m[name] })));
+const loadLayout = (name) => handleDynamicImport(() => import(`../layouts/${name}.jsx`).then((m) => ({ default: m[name] })));
 
 const AppLayout = lazy(loadLayout('AppLayout'));
 const AdminLayout = lazy(loadLayout('AdminLayout'));
