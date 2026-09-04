@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import { ProtectedRoute } from '../components/routing/ProtectedRoute';
 import { env } from '../config/env';
 
@@ -66,11 +66,19 @@ function PageLoader() {
   );
 }
 
+function RootLandingPage() {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const hasRestaurant = Boolean(params.get('restaurant'));
+
+  return hasRestaurant ? <LandingPage /> : <SaasLandingPage />;
+}
+
 export function AppRoutes() {
   return (
     <Routes>
       <Route element={<Suspense fallback={<PageLoader />}><AppLayout /></Suspense>}>
-        <Route path="/" element={<Suspense fallback={<PageLoader />}><LandingPage /></Suspense>} />
+        <Route path="/" element={<Suspense fallback={<PageLoader />}><RootLandingPage /></Suspense>} />
         <Route path="/menu" element={<Suspense fallback={<PageLoader />}><MenuPage /></Suspense>} />
         <Route path="/products/:id" element={<Suspense fallback={<PageLoader />}><ProductDetailPage /></Suspense>} />
         <Route path="/cart" element={<Suspense fallback={<PageLoader />}><CartPage /></Suspense>} />

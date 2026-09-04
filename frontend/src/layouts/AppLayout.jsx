@@ -16,7 +16,9 @@ export function AppLayout() {
   const { config } = useRestaurantConfig();
   const location = useLocation();
   const tenantQuery = location.search;
-  const isSaasRoute = location.pathname === '/saas' || location.pathname === '/registro-restaurante';
+  const params = new URLSearchParams(location.search);
+  const hasRestaurantParam = Boolean(params.get('restaurant'));
+  const isSaasRoute = location.pathname === '/saas' || location.pathname === '/registro-restaurante' || (location.pathname === '/' && !hasRestaurantParam);
   const activeDeliveryZoneCount = (config.deliveryZones || []).filter((zone) => zone.isActive !== false).length;
 
   return (
