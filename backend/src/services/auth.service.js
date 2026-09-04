@@ -134,3 +134,67 @@ export const revokeRefreshTokens = async (userId) => {
     data: { refreshTokenVersion: { increment: 1 } }
   });
 };
+
+export const registerRestaurant = async ({ restaurantName, slug, phone, adminName, email, password }) => {
+  const existingRestaurant = await prisma.restaurant.findUnique({ where: { slug } });
+  if (existingRestaurant) {
+    throw new ApiError(409, 'El enlace (slug) ya está en uso por otro restaurante. Elige otro.');
+  }
+
+  const existingUser = await prisma.user.findUnique({ where: { email } });
+  if (existingUser) {
+    throw new ApiError(409, 'Ya existe una cuenta registrada con este correo.');
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  const result = await prisma.$transaction(async (tx) => {
+    const restaurant = await tx.restaurant.create({
+      data: {
+        name: restaurantName,
+        slug,
+        phone,
+        email
+      }
+    });
+
+    await tx.restaurantConfig.create({
+      data: {
+        restaurantId: restaurant.id,
+        restaurantName,
+        phone,
+        whatsapp: phone,
+        primaryColor: '#ea580c',
+        secondaryColor: '#141414',
+        paymentMethods: ['CASH', 'NEQUI'],
+        deliveryModes: ['DELIVERY', 'PICKUP']
+      }
+    });
+
+    await tx.orderCounter.create({
+      data: {
+        restaurantId: restaurant.id,
+        lastOrderNumber: 0
+      }
+    });
+
+    const user = await tx.user.create({
+      data: {
+        name: adminName,
+        email,
+        passwordHash,
+        role: 'ADMIN',
+        restaurantId: restaurant.id
+      }
+    });
+
+    return { restaurant, user };
+  });
+
+  return {
+    user: publicUser(result.user),
+    restaurant: { id: result.restaurant.id, name: result.restaurant.name, slug: result.restaurant.slug },
+    token: signToken(result.user),
+    refreshToken: signRefreshToken(result.user)
+  };
+};

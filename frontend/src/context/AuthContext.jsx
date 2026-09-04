@@ -21,6 +21,12 @@ export function AuthProvider({ children }) {
     return data.user;
   };
 
+  const registerRestaurant = async (payload) => {
+    const { data } = await api.post('/auth/register-restaurant', payload);
+    setUser(data.user);
+    return data;
+  };
+
   const login = async (payload) => {
     const { data } = await api.post('/auth/login', payload);
     setUser(data.user);
@@ -37,7 +43,7 @@ export function AuthProvider({ children }) {
   };
 
   const value = useMemo(
-    () => ({ user, loading, isAdmin: user?.role === 'ADMIN' || user?.role === 'SUPERADMIN', isSuperAdmin: user?.role === 'SUPERADMIN', register, login, logout }),
+    () => ({ user, loading, isAdmin: user?.role === 'ADMIN' || user?.role === 'SUPERADMIN', isSuperAdmin: user?.role === 'SUPERADMIN', register, registerRestaurant, login, logout }),
     [user, loading]
   );
 

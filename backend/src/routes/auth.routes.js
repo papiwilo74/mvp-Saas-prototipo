@@ -5,7 +5,7 @@ import { validate } from '../middlewares/validate.middleware.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { createRateLimit } from '../middlewares/rateLimit.middleware.js';
 import { env } from '../config/env.js';
-import { loginSchema, registerSchema, forgotPasswordSchema, resetPasswordSchema } from '../validators/auth.validator.js';
+import { loginSchema, registerSchema, registerRestaurantSchema, forgotPasswordSchema, resetPasswordSchema } from '../validators/auth.validator.js';
 
 export const authRouter = Router();
 
@@ -21,6 +21,7 @@ const recoveryLimit = createRateLimit({
 });
 
 authRouter.post('/register', sensitiveAuthLimit, validate(registerSchema), asyncHandler(authController.register));
+authRouter.post('/register-restaurant', sensitiveAuthLimit, validate(registerRestaurantSchema), asyncHandler(authController.registerRestaurant));
 authRouter.post('/login', sensitiveAuthLimit, validate(loginSchema), asyncHandler(authController.login));
 authRouter.get('/me', authenticate, asyncHandler(authController.me));
 authRouter.post('/logout', authenticate, asyncHandler(authController.logout));

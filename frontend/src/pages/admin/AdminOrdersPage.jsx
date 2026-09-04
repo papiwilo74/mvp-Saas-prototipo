@@ -86,6 +86,11 @@ export function AdminOrdersPage() {
     loadOrders(pagination.page);
   };
 
+  const updatePayment = async (orderId, paymentStatus) => {
+    await api.patch(`/orders/${orderId}/payment-status`, { paymentStatus });
+    loadOrders(pagination.page);
+  };
+
   const updateFilter = (field, value) => setFilters((current) => ({ ...current, [field]: value }));
   const toggleExpand = (orderId) => setExpandedOrder((current) => (current === orderId ? null : orderId));
 
@@ -169,6 +174,7 @@ export function AdminOrdersPage() {
                 <th className="p-3">Cliente</th>
                 <th className="p-3">Fecha</th>
                 <th className="p-3">Total</th>
+                <th className="p-3">Pago</th>
                 <th className="p-3">Estado</th>
                 <th className="p-3">Cambiar</th>
                 <th className="p-3">WhatsApp</th>
@@ -202,6 +208,31 @@ export function AdminOrdersPage() {
                       <td className="p-3">{formatDate(order.createdAt)}</td>
                       <td className="p-3 font-bold">{formatCurrency(order.total)}</td>
                       <td className="p-3">
+                        <div className="flex flex-col gap-1 items-start">
+                          <span className="text-xs font-semibold text-stone-600">
+                            {paymentLabels[order.paymentMethod] || order.paymentMethod}
+                          </span>
+                          {order.paymentStatus === 'APPROVED' ? (
+                            <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800">
+                              ✓ Pagado
+                            </span>
+                          ) : (
+                            <div className="flex flex-col gap-1">
+                              <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-800">
+                                {order.paymentMethod === 'NEQUI' ? '⚠️ Nequi por verificar' : '⏳ Pendiente'}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => updatePayment(order.id, 'APPROVED')}
+                                className="rounded bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm hover:bg-emerald-700 transition"
+                              >
+                                Confirmar pago
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-3">
                         <StatusBadge status={order.status} />
                       </td>
                       <td className="p-3">
@@ -219,7 +250,7 @@ export function AdminOrdersPage() {
                     </tr>
                     {isExpanded && (
                       <tr key={`${order.id}-detail`} className="order-detail-row">
-                        <td colSpan={8}>
+                        <td colSpan={9}>
                           <div className="grid gap-3 md:grid-cols-2">
                             <div>
                               <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-500 mb-2">Productos del pedido</p>

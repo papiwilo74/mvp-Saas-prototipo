@@ -18,6 +18,18 @@ export const register = async (req, res) => {
   res.status(201).json({ user: toPublicUser(result.user) });
 };
 
+export const registerRestaurant = async (req, res) => {
+  const result = await authService.registerRestaurant(req.validated.body);
+
+  res.cookie('ff_token', result.token, getCookieOpts(15 * 60 * 1000));
+  res.cookie('ff_refresh', result.refreshToken, getCookieOpts(7 * 24 * 60 * 60 * 1000));
+
+  res.status(201).json({
+    user: toPublicUser(result.user),
+    restaurant: result.restaurant
+  });
+};
+
 export const login = async (req, res) => {
   const result = await authService.login(req.validated.body);
 

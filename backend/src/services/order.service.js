@@ -180,7 +180,7 @@ export const createOrder = async ({
       }
     });
 
-    const paymentStatus = paymentMethod === 'WOMPI' ? 'PENDING' : 'APPROVED';
+    const paymentStatus = paymentMethod === 'CARD' ? 'APPROVED' : 'PENDING';
 
     const { lastOrderNumber: orderNumber } = await transaction.orderCounter.upsert({
       where: { restaurantId: restaurant.id },
@@ -253,5 +253,63 @@ export const updateOrderStatus = async (restaurantId, orderId, status) => {
     logger.warn({ err }, 'Notificación push falló');
   });
 
+  return updatedOrder;
+};
+
+export const handlePaymentSuccess = async (reference, wompiTransactionId, amountInCents) => {
+  if (!prisma.order?.findFirst) return null;
+  let order = null;
+  if (reference) {
+    order = await prisma.order.findFirst({
+      where: {
+        OR: [
+          { id: reference },
+          { wompiTransactionId: reference },
+          { wompiTransactionId: wompiTransactionId || undefined }
+        ]
+      },
+      include: { items: { include: { product: true } } }
+    });
+  }
+
+  if (!order && wompiTransactionId) {
+    order = await prisma.order.findFirst({
+      where: { wompiTransactionId },
+      include: { items: { include: { product: true } } }
+    });
+  }
+
+  if (!order) {
+    logger.warn({ reference, wompiTransactionId, amountInCents }, 'Orden no encontrada para webhook de pago Wompi exitoso');
+    return null;
+  }
+
+  const updatedOrder = await prisma.order.update({
+    where: { id: order.id },
+    data: {
+      paymentStatus: 'APPROVED',
+      wompiTransactionId: wompiTransactionId || order.wompiTransactionId
+    },
+    include: { items: { include: { product: true } } }
+  });
+
+  emitOrderStatusChanged(order.restaurantId, updatedOrder);
+  logger.info({ orderId: order.id, orderNumber: order.orderNumber }, 'Pago de orden confirmado vía Wompi');
+  return updatedOrder;
+};
+
+export const updatePaymentStatus = async (restaurantId, orderId, paymentStatus) => {
+  const order = await prisma.order.findFirst({ where: { id: orderId, restaurantId } });
+
+  if (!order) throw new ApiError(404, 'Pedido no encontrado en esta tienda');
+
+  const updatedOrder = await prisma.order.update({
+    where: { id: orderId },
+    data: { paymentStatus },
+    include: { items: { include: { product: true } } }
+  });
+
+  emitOrderStatusChanged(restaurantId, updatedOrder);
+  logger.info({ orderId, paymentStatus, restaurantId }, 'Estado de pago de orden actualizado');
   return updatedOrder;
 };

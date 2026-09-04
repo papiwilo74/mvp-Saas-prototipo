@@ -7,7 +7,7 @@ function getRestaurantSlug() {
   const fromQuery = params.get('restaurant');
   if (fromQuery) return fromQuery;
 
-  const reservedPaths = ['menu', 'cart', 'admin', 'superadmin', 'login', 'checkout', 'profile', 'orders', 'products', 'icons', 'assets', 'sw.js', 'manifest.json', 'favicon.ico'];
+  const reservedPaths = ['saas', 'registro-restaurante', 'menu', 'cart', 'admin', 'superadmin', 'login', 'checkout', 'profile', 'orders', 'products', 'icons', 'assets', 'sw.js', 'manifest.json', 'favicon.ico'];
   const pathSlug = pathname.replace(/^\/+|\/+$/g, '');
   if (pathSlug && !reservedPaths.includes(pathSlug) && !pathSlug.includes('/') && !pathSlug.includes('.')) {
     return pathSlug;

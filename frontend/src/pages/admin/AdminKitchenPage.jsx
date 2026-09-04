@@ -5,6 +5,7 @@ import { StatusBadge } from '../../components/ui/StatusBadge';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
 import { formatCurrency, formatDate } from '../../utils/formatters';
+import { paymentLabels } from '../../utils/whatsappOrder';
 
 const KITCHEN_COLUMNS = [
   { id: 'PENDING', title: 'Pendientes', bg: 'bg-amber-500/10', border: 'border-amber-500/30' },
@@ -146,9 +147,20 @@ export function AdminKitchenPage() {
                     >
                       <div className="flex items-start justify-between">
                         <div>
-                          <span className="text-base font-black text-stone-900">
-                            #{order.orderNumber}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-base font-black text-stone-900">
+                              #{order.orderNumber}
+                            </span>
+                            {order.paymentStatus === 'APPROVED' ? (
+                              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-800">
+                                ✓ Pagado
+                              </span>
+                            ) : (
+                              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-800">
+                                ⚠️ {order.paymentMethod === 'NEQUI' ? 'Nequi sin verificar' : 'Pago pendiente'}
+                              </span>
+                            )}
+                          </div>
                           <p className="text-xs font-bold text-stone-700">{order.customerName}</p>
                           {order.customerAddress && (
                             <p className="text-[11px] text-stone-500 truncate max-w-[200px]">

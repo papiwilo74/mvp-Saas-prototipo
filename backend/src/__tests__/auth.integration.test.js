@@ -121,7 +121,7 @@ describe('Auth Integration', () => {
       const res = await request(app).get('/api/auth/me');
 
       expect(res.status).toBe(401);
-      expect(res.body.message).toBe('Token requerido');
+      expect(res.body.message).toBe('Token requerido para esta acción');
     });
   });
 
@@ -138,7 +138,7 @@ describe('Auth Integration', () => {
         .set('Cookie', `ff_token=${token}`);
 
       expect(res.status).toBe(200);
-      expect(res.body.message).toBe('Sesion cerrada');
+      expect(res.body.message).toBe('Sesión cerrada exitosamente');
 
       const cookies = res.headers['set-cookie'];
       expect(cookies).toBeDefined();

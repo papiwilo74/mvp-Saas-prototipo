@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { prisma } from '../config/prisma.js';
 import { env } from '../config/env.js';
+import { handlePaymentSuccess } from './order.service.js';
 
 const WOMPI_API = env.WOMPI_ENV === 'prod'
   ? 'https://api.wompi.co/v1'
@@ -123,6 +124,14 @@ export const processWompiWebhook = async (body, signature) => {
         reference: reference || id
       }
     });
+  }
+
+  if (mappedStatus === 'APPROVED') {
+    try {
+      await handlePaymentSuccess(reference, id, amount_in_cents);
+    } catch (err) {
+      console.error('Error sincronizando orden desde webhook Wompi:', err);
+    }
   }
 
   return transaction;

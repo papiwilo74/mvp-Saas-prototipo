@@ -45,3 +45,10 @@ export const updateOrderStatusSchema = z.object({
     status: z.enum(['PENDING', 'PREPARING', 'ON_THE_WAY', 'DELIVERED', 'CANCELLED'])
   })
 });
+
+export const updatePaymentStatusSchema = z.object({
+  params: z.object({ id: z.string().min(1) }),
+  body: z.object({
+    paymentStatus: z.enum(['PENDING', 'APPROVED', 'DECLINED', 'ERROR'])
+  })
+});

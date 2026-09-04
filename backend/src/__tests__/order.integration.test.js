@@ -146,7 +146,8 @@ vi.mock('../services/whatsapp.service.js', () => ({
 
 vi.mock('../services/maps.service.js', () => ({
   isAddressInZone: vi.fn().mockResolvedValue(null),
-  getDistanceFromRestaurant: vi.fn()
+  getDistanceFromRestaurant: vi.fn(),
+  getRouteDistanceFromRestaurant: vi.fn().mockResolvedValue({ distanceKm: 2, durationMinutes: 10 })
 }));
 
 import { app } from '../app.js';
@@ -185,7 +186,8 @@ describe('Order Integration', () => {
             address: 'Calle 123'
           },
           items: [{ productId: 'prod-1', quantity: 1 }],
-          paymentMethod: 'CASH'
+          paymentMethod: 'CASH',
+          fulfillmentMode: 'PICKUP'
         });
 
       expect(res.status).toBe(201);

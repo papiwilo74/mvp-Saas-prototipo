@@ -41,6 +41,8 @@ const TermsPage = lazy(loadPage('TermsPage'));
 const PrivacyPage = lazy(loadPage('PrivacyPage'));
 const OrderHistoryPage = lazy(loadPage('OrderHistoryPage'));
 const ProfilePage = lazy(loadPage('ProfilePage'));
+const SaasLandingPage = lazy(loadPage('SaasLandingPage'));
+const RestaurantRegisterPage = lazy(loadPage('RestaurantRegisterPage'));
 
 const AdminDashboardPage = lazy(loadAdmin('AdminDashboardPage'));
 const AdminProductsPage = lazy(loadAdmin('AdminProductsPage'));
@@ -81,6 +83,8 @@ export function AppRoutes() {
         <Route path="/reset-password" element={<Suspense fallback={<PageLoader />}><ResetPasswordPage /></Suspense>} />
         <Route path="/terms" element={<Suspense fallback={<PageLoader />}><TermsPage /></Suspense>} />
         <Route path="/privacy" element={<Suspense fallback={<PageLoader />}><PrivacyPage /></Suspense>} />
+        <Route path="/saas" element={<Suspense fallback={<PageLoader />}><SaasLandingPage /></Suspense>} />
+        <Route path="/registro-restaurante" element={<Suspense fallback={<PageLoader />}><RestaurantRegisterPage /></Suspense>} />
       </Route>
 
       <Route path="/admin" element={<Suspense fallback={<PageLoader />}><ProtectedRoute requireAdmin><AdminLayout /></ProtectedRoute></Suspense>}>

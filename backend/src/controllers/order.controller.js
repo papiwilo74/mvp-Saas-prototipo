@@ -67,3 +67,12 @@ export const updateStatus = async (req, res) => {
   );
   res.json({ order: toOrderResponse(order) });
 };
+
+export const updatePayment = async (req, res) => {
+  const order = await orderService.updatePaymentStatus(
+    req.user.restaurantId,
+    req.validated.params.id,
+    req.validated.body.paymentStatus
+  );
+  res.json({ order: toOrderResponse(order) });
+};
