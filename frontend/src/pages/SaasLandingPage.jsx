@@ -6,15 +6,11 @@ import {
   CheckCircle2,
   ChefHat,
   ChevronDown,
-  DollarSign,
-  HelpCircle,
   QrCode,
-  ShieldCheck,
   Smartphone,
   Sparkles,
   TrendingUp,
   Truck,
-  Users,
   Zap
 } from 'lucide-react';
 import { SEOHead } from '../components/seo/SEOHead';

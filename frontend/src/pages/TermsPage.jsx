@@ -73,7 +73,7 @@ export function TermsPage() {
                 Los tiempos de preparación y entrega indicados en la plataforma son estimaciones que pueden variar por condiciones climáticas, tráfico o alta demanda en cocina.
               </p>
               <p>
-                Debido a la naturaleza perecedera de los alimentos preparados, una vez que el restaurante ha comenzado la preparación del pedido (estado <em>"En preparación"</em>), la orden no podrá ser cancelada de manera unilateral por el cliente. En caso de inconsistencias con el pedido recibido, el cliente deberá comunicarse inmediatamente con el restaurante mediante los canales de contacto habilitados.
+                Debido a la naturaleza perecedera de los alimentos preparados, una vez que el restaurante ha comenzado la preparación del pedido (estado <em>&quot;En preparación&quot;</em>), la orden no podrá ser cancelada de manera unilateral por el cliente. En caso de inconsistencias con el pedido recibido, el cliente deberá comunicarse inmediatamente con el restaurante mediante los canales de contacto habilitados.
               </p>
             </div>
           </section>

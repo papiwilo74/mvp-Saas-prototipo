@@ -1,5 +1,4 @@
 import Redis from 'ioredis';
-import { env } from './env.js';
 
 const redisUrl = process.env.REDIS_URL;
 const redisConfigured = Boolean(redisUrl);

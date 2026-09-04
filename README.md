@@ -59,8 +59,8 @@ Los restaurantes pequeños en Colombia pagan **comisiones del 20-30%** a platafo
 ```mermaid
 graph TB
     subgraph Cliente["🌐 Cliente - Vercel"]
-        A[React 19 + Vite] --> B[TailwindCSS]
-        A --> C[React Router v7]
+        A[React 18 + Vite] --> B[TailwindCSS]
+        A --> C[React Router v6]
         A --> D[Socket.io Client]
     end
 
@@ -128,10 +128,10 @@ sequenceDiagram
 ### Frontend
 | Tecnología | Uso |
 |:---|:---|
-| **React 19** | UI components y SPA |
+| **React 18** | UI components y SPA |
 | **Vite 5** | Build tool y HMR |
 | **TailwindCSS 3** | Utility-first styling |
-| **React Router 7** | Client-side routing |
+| **React Router 6** | Client-side routing |
 | **Socket.io Client** | Real-time updates |
 | **Recharts** | Gráficas de analíticas |
 | **Lucide React** | Iconografía |

@@ -32,12 +32,32 @@ jobs:
         run: npm test -- --run
         working-directory: ./frontend
 
+      - name: Lint Frontend
+        run: npm run lint
+        working-directory: ./frontend
+
+      - name: Build Frontend
+        run: npm run build
+        working-directory: ./frontend
+
       - name: Install Backend Dependencies
         run: npm ci
         working-directory: ./backend
 
       - name: Run Prisma Generate
         run: npx prisma generate
+        working-directory: ./backend
+
+      - name: Run Backend Tests
+        run: npm test -- --run
+        working-directory: ./backend
+
+      - name: Lint Backend
+        run: npm run lint
+        working-directory: ./backend
+
+      - name: Build Backend
+        run: npm run build
         working-directory: ./backend
 
   docker-build:

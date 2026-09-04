@@ -5,7 +5,6 @@ import { StatusBadge } from '../../components/ui/StatusBadge';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
 import { formatCurrency, formatDate } from '../../utils/formatters';
-import { paymentLabels } from '../../utils/whatsappOrder';
 
 const KITCHEN_COLUMNS = [
   { id: 'PENDING', title: 'Pendientes', bg: 'bg-amber-500/10', border: 'border-amber-500/30' },
@@ -54,6 +53,8 @@ export function AdminKitchenPage() {
   };
 
   useEffect(() => {
+    // Initial data loading is an external request triggered by the screen lifecycle.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadOrders();
 
     const socket = io(import.meta.env.VITE_API_URL || '', {

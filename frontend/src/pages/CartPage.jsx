@@ -61,6 +61,8 @@ export function CartPage() {
     ? 0
     : Number(effectiveZone?.fee ?? config.deliveryFee ?? 0);
   useEffect(() => {
+    // Synchronizes the user-selected zone with the closest calculated delivery zone.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (distanceZone && distanceZone.name !== deliveryZoneName) setDeliveryZoneName(distanceZone.name);
   }, [distanceZone?.name]);
   const activeCoupons = (config.coupons || []).filter((coupon) => coupon.isActive !== false);
