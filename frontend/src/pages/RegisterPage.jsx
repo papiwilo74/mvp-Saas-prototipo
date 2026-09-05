@@ -81,11 +81,12 @@ export function RegisterPage() {
               <input
                 className="input w-full pl-10 pr-10"
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Minimo 8 caracteres"
+                placeholder="Mínimo 8: Mayúscula, minúscula, número y símbolo"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 required
                 minLength={8}
+                pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,128}"
               />
               <button
                 type="button"
@@ -95,6 +96,7 @@ export function RegisterPage() {
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
+            <p className="mt-1 text-[11px] text-stone-500">Debe incluir mayúscula, minúscula, número y símbolo.</p>
           </div>
 
           <button type="submit" disabled={submitting} className="btn-primary w-full justify-center">

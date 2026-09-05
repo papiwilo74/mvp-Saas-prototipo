@@ -24,8 +24,8 @@ export function ResetPasswordPage() {
       return;
     }
 
-    if (password.length < 8) {
-      setError('La contrasena debe tener al menos 8 caracteres');
+    if (!/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,128}/.test(password)) {
+      setError('La contraseña debe tener 8 caracteres e incluir mayúscula, minúscula, número y símbolo');
       return;
     }
 
@@ -82,12 +82,13 @@ export function ResetPasswordPage() {
             <span className="label">Nueva contrasena</span>
             <div className="relative">
               <Lock size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
-              <input className="input w-full pl-10 pr-10" type={showPassword ? 'text' : 'password'} required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Minimo 8 caracteres" />
+              <input className="input w-full pl-10 pr-10" type={showPassword ? 'text' : 'password'} required minLength={8} pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,128}" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mínimo 8: Mayúscula, minúscula, número y símbolo" />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600">
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </label>
+          <p className="-mt-2 text-[11px] text-stone-500">Debe incluir mayúscula, minúscula, número y símbolo.</p>
           <label className="block space-y-1">
             <span className="label">Confirmar contrasena</span>
             <div className="relative">

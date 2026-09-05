@@ -178,11 +178,12 @@ export function RestaurantRegisterPage() {
                 <input
                   className="input w-full pl-9 pr-10 text-sm"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Mínimo 8 caracteres"
+                  placeholder="Mínimo 8: Mayúscula, minúscula, número y símbolo"
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   required
                   minLength={8}
+                  pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,128}"
                 />
                 <button
                   type="button"
@@ -192,6 +193,7 @@ export function RestaurantRegisterPage() {
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
+              <p className="mt-1 text-[11px] text-stone-500">Debe incluir mayúscula, minúscula, número y símbolo.</p>
             </div>
 
             <div className="rounded-xl border border-stone-200 bg-stone-50/80 p-3 text-xs text-stone-600 space-y-1">
