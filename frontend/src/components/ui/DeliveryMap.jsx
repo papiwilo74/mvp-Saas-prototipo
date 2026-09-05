@@ -43,7 +43,7 @@ export function DeliveryMap({ address, onSelect }) {
     finally { setSearching(false); }
   };
 
-  if (!mapboxgl.accessToken) return <p className="mt-3 text-xs text-amber-700">El mapa no está disponible en este momento.</p>;
+  if (!mapboxgl.accessToken) return <p className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-800">El mapa requiere configurar el token público de Mapbox (`VITE_MAPBOX_TOKEN`).</p>;
   return <>
     <div ref={containerRef} className="mt-3 h-64 overflow-hidden rounded-2xl border border-stone-200" />
     <button type="button" onClick={searchAddress} disabled={searching} className="btn-secondary mt-2 w-full text-sm">{searching ? 'Buscando...' : 'Buscar ubicación en el mapa'}</button>

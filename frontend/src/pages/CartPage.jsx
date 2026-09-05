@@ -56,7 +56,8 @@ export function CartPage() {
   const distanceZone = distanceKm === null ? null : activeZones
     .filter((zone) => Number.isFinite(Number(zone.maxKm)) && Number(zone.maxKm) >= distanceKm)
     .sort((a, b) => Number(a.maxKm) - Number(b.maxKm))[0];
-  const effectiveZone = deliveryLocation ? (distanceZone || selectedZone) : null;
+  const effectiveZone = deliveryLocation ? distanceZone : null;
+  const deliveryUnavailable = fulfillmentMode === 'DELIVERY' && Boolean(deliveryLocation) && !distanceZone;
   const deliveryFee = fulfillmentMode === 'PICKUP' || !deliveryLocation
     ? 0
     : Number(effectiveZone?.fee ?? config.deliveryFee ?? 0);
@@ -112,6 +113,10 @@ export function CartPage() {
     if (fulfillmentMode === 'DELIVERY' && !customer.address.trim()) errors.address = true;
     if (fulfillmentMode === 'DELIVERY' && !deliveryLocation) {
       setError('Selecciona tu ubicación en el mapa para calcular el costo del domicilio.');
+      return false;
+    }
+    if (deliveryUnavailable) {
+      setError('Esta dirección está fuera del área de domicilio. Elige otra dirección o selecciona retiro en tienda.');
       return false;
     }
     if (items.some((item) => item.product.trackStock && item.quantity > (item.product.stock || 0))) {
@@ -466,6 +471,7 @@ export function CartPage() {
                 <span className="font-black">{formatCurrency(deliveryFee)}</span>
               </div>
             )}
+            {deliveryUnavailable && <p className="mt-2 text-sm font-semibold text-red-600">Esta dirección está demasiado lejos para realizar el domicilio.</p>}
             {pointsToRedeem > 0 && (
               <div className="flex items-center justify-between">
                 <span className="text-amber-300">Puntos canjeados ({pointsToRedeem})</span>
