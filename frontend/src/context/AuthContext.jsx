@@ -17,13 +17,13 @@ export function AuthProvider({ children }) {
 
   const register = async (payload) => {
     const { data } = await api.post('/auth/register', payload);
-    setUser(data.user);
+    if (data.user && !data.verificationRequired) setUser(data.user);
     return data.user;
   };
 
   const registerRestaurant = async (payload) => {
     const { data } = await api.post('/auth/register-restaurant', payload);
-    setUser(data.user);
+    if (data.user && !data.verificationRequired) setUser(data.user);
     return data;
   };
 

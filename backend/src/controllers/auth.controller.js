@@ -39,6 +39,11 @@ export const login = async (req, res) => {
   res.json({ user: toPublicUser(result.user) });
 };
 
+export const verifyEmail = async (req, res) => {
+  const result = await authService.verifyEmail(req.validated.body);
+  res.json(result);
+};
+
 export const logout = async (req, res) => {
   if (req.user) {
     await authService.revokeRefreshTokens(req.user.id);

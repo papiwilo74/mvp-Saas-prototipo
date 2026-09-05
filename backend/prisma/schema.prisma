@@ -124,6 +124,10 @@ model User {
   passwordHash         String
   passwordResetToken   String?
   passwordResetExpires DateTime?
+  emailVerifiedAt      DateTime?
+  emailVerificationCodeHash String?
+  emailVerificationExpires DateTime?
+  emailVerificationAttempts Int @default(0)
   refreshTokenVersion  Int        @default(0)
   role                 UserRole   @default(CUSTOMER)
   restaurantId         String?

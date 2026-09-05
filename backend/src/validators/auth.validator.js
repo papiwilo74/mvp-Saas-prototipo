@@ -25,6 +25,13 @@ export const loginSchema = z.object({
   })
 });
 
+export const verifyEmailSchema = z.object({
+  body: z.object({
+    email: z.string().trim().email('Correo electrónico inválido'),
+    code: z.string().trim().regex(/^\d{6}$/, 'El código debe tener 6 dígitos')
+  })
+});
+
 export const forgotPasswordSchema = z.object({
   body: z.object({
     email: z.string().trim().email('Correo electrónico inválido')

@@ -5,7 +5,7 @@ import { prisma } from '../config/prisma.js';
 import { ApiError } from '../utils/apiError.js';
 import { signToken, signRefreshToken, verifyRefreshToken } from '../utils/token.js';
 import { env } from '../config/env.js';
-import { sendWelcomeEmail } from './email.service.js';
+import { sendWelcomeEmail, sendEmailVerificationEmail } from './email.service.js';
 import { logger } from './logger.service.js';
 
 const publicUser = (user) => ({
@@ -15,6 +15,16 @@ const publicUser = (user) => ({
   role: user.role,
   restaurantId: user.restaurantId
 });
+
+const createVerification = async (user, update) => {
+  const code = String(crypto.randomInt(100000, 1000000));
+  await update({
+    emailVerificationCodeHash: crypto.createHash('sha256').update(code).digest('hex'),
+    emailVerificationExpires: new Date(Date.now() + 10 * 60 * 1000),
+    emailVerificationAttempts: 0
+  });
+  await sendEmailVerificationEmail({ to: user.email, name: user.name, code });
+};
 
 export const register = async ({ name, email, password, storeSlug, restaurantSlug }) => {
   const slugToSearch = storeSlug || restaurantSlug || DEFAULT_RESTAURANT_SLUG;
@@ -34,7 +44,8 @@ export const register = async ({ name, email, password, storeSlug, restaurantSlu
     logger.warn({ err, email: user.email }, 'Welcome email failed to send');
   });
 
-  return { user: publicUser(user), token: signToken(user), refreshToken: signRefreshToken(user) };
+  await createVerification(user, (data) => prisma.user.update({ where: { id: user.id }, data }));
+  return { user: publicUser(user), verificationRequired: true };
 };
 
 export const forgotPassword = async ({ email }) => {
@@ -100,7 +111,23 @@ export const login = async ({ email, password }) => {
     throw new ApiError(401, 'Credenciales invalidas');
   }
 
+  if (!user.emailVerifiedAt) throw new ApiError(403, 'Debes confirmar tu correo antes de iniciar sesión');
+
   return { user: publicUser(user), token: signToken(user), refreshToken: signRefreshToken(user) };
+};
+
+export const verifyEmail = async ({ email, code }) => {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user || user.emailVerifiedAt) return { message: 'Correo confirmado correctamente' };
+  if (user.emailVerificationAttempts >= 5) throw new ApiError(429, 'Demasiados intentos. Solicita un nuevo código.');
+  if (!user.emailVerificationExpires || user.emailVerificationExpires < new Date()) throw new ApiError(400, 'El código expiró. Solicita uno nuevo.');
+  const hash = crypto.createHash('sha256').update(code).digest('hex');
+  if (hash !== user.emailVerificationCodeHash) {
+    await prisma.user.update({ where: { id: user.id }, data: { emailVerificationAttempts: { increment: 1 } } });
+    throw new ApiError(400, 'Código incorrecto');
+  }
+  await prisma.user.update({ where: { id: user.id }, data: { emailVerifiedAt: new Date(), emailVerificationCodeHash: null, emailVerificationExpires: null, emailVerificationAttempts: 0 } });
+  return { message: 'Correo confirmado correctamente' };
 };
 
 export const refresh = async (refreshToken) => {
@@ -191,10 +218,10 @@ export const registerRestaurant = async ({ restaurantName, slug, phone, adminNam
     return { restaurant, user };
   });
 
+  await createVerification(result.user, (data) => prisma.user.update({ where: { id: result.user.id }, data }));
   return {
     user: publicUser(result.user),
     restaurant: { id: result.restaurant.id, name: result.restaurant.name, slug: result.restaurant.slug },
-    token: signToken(result.user),
-    refreshToken: signRefreshToken(result.user)
+    verificationRequired: true
   };
 };

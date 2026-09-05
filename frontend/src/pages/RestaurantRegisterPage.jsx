@@ -40,7 +40,7 @@ export function RestaurantRegisterPage() {
     setSubmitting(true);
     try {
       await registerRestaurant(form);
-      navigate('/admin');
+      navigate(`/verify-email?email=${encodeURIComponent(form.email.trim())}`);
     } catch (err) {
       setError(err.response?.data?.message || 'No pudimos registrar tu negocio. Verifica los datos e intenta de nuevo.');
     } finally {

@@ -99,8 +99,8 @@ async function createRestaurant({ name, slug, email, phone, address, adminEmail,
   const passwordHash = await bcrypt.hash(adminPassword, 10);
   await prisma.user.upsert({
     where: { email: adminEmail },
-    update: {},
-    create: { name: `Admin ${name}`, email: adminEmail, passwordHash, role: 'ADMIN', restaurantId: restaurant.id }
+    update: { emailVerifiedAt: new Date() },
+    create: { name: `Admin ${name}`, email: adminEmail, passwordHash, role: 'ADMIN', restaurantId: restaurant.id, emailVerifiedAt: new Date() }
   });
 
   const categories = [...new Set(products.map((p) => p.category))];

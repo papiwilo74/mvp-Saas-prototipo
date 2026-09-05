@@ -17,7 +17,7 @@ export function RegisterPage() {
     setSubmitting(true);
     try {
       await register(form);
-      navigate('/menu');
+      navigate(`/verify-email?email=${encodeURIComponent(form.email.trim())}`);
     } catch (err) {
       setError(err.response?.data?.message || 'No pudimos crear tu cuenta. Intenta de nuevo.');
     } finally {

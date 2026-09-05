@@ -43,6 +43,7 @@ const OrderHistoryPage = lazy(loadPage('OrderHistoryPage'));
 const ProfilePage = lazy(loadPage('ProfilePage'));
 const SaasLandingPage = lazy(loadPage('SaasLandingPage'));
 const RestaurantRegisterPage = lazy(loadPage('RestaurantRegisterPage'));
+const VerifyEmailPage = lazy(loadPage('VerifyEmailPage'));
 
 const AdminDashboardPage = lazy(loadAdmin('AdminDashboardPage'));
 const AdminProductsPage = lazy(loadAdmin('AdminProductsPage'));
@@ -94,6 +95,7 @@ export function AppRoutes() {
         <Route path="/saas" element={<Suspense fallback={<PageLoader />}><SaasLandingPage /></Suspense>} />
         <Route path="/registro-restaurante" element={<Suspense fallback={<PageLoader />}><RestaurantRegisterPage /></Suspense>} />
         <Route path="/registro-negocio" element={<Suspense fallback={<PageLoader />}><RestaurantRegisterPage /></Suspense>} />
+        <Route path="/verify-email" element={<Suspense fallback={<PageLoader />}><VerifyEmailPage /></Suspense>} />
       </Route>
 
       <Route path="/admin" element={<Suspense fallback={<PageLoader />}><ProtectedRoute requireAdmin><AdminLayout /></ProtectedRoute></Suspense>}>
