@@ -63,7 +63,7 @@ export function RestaurantRegisterPage() {
           </div>
 
           <h1 className="mt-2 text-2xl font-black tracking-tight text-stone-900 sm:text-3xl">
-            Registra tu Restaurante
+            Registra tu negocio
           </h1>
           <p className="mt-1 text-sm text-stone-600">
             Ten tu propia página de pedidos online lista para vender en minutos.
@@ -79,7 +79,7 @@ export function RestaurantRegisterPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-500">
-                  Nombre del Restaurante
+                  Nombre del negocio
                 </label>
                 <div className="relative">
                   <Building2 size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
@@ -209,7 +209,7 @@ export function RestaurantRegisterPage() {
               disabled={submitting}
               className="btn-primary w-full justify-center py-3 text-base font-black shadow-md"
             >
-              {submitting ? 'Creando tu restaurante...' : 'Comenzar 14 días gratis'}
+              {submitting ? 'Creando tu negocio...' : 'Comenzar 14 días gratis'}
             </button>
           </form>
 

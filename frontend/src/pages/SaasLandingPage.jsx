@@ -51,8 +51,8 @@ export function SaasLandingPage() {
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900">
       <SEOHead
-        title="BcaXen | Plataforma SaaS de Pedidos Online para Restaurantes"
-        description="Tu propia página de pedidos online con marca propia, menú QR, pantalla de cocina y 0% comisiones. Empieza tu prueba gratis de 14 días."
+        title="BcaXen | Plataforma de ventas online para negocios"
+        description="Tu propia página de ventas online con marca propia, catálogo, pagos directos y 0% comisiones. Empieza tu prueba gratis de 14 días."
       />
 
       {/* Hero Section */}
@@ -63,7 +63,7 @@ export function SaasLandingPage() {
         <div className="mx-auto max-w-5xl text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-4 py-1.5 text-xs font-bold text-orange-400">
             <Sparkles size={14} />
-            <span>0% Comisiones por Pedido · Hecho para Restaurantes</span>
+            <span>0% Comisiones por Pedido · Hecho para cualquier negocio</span>
           </div>
 
           <h1 className="mt-6 text-4xl font-black tracking-tight sm:text-6xl sm:leading-tight">
@@ -76,7 +76,7 @@ export function SaasLandingPage() {
 
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
-              to="/registro-restaurante"
+              to="/registro-negocio"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-orange-600 px-7 py-3.5 text-base font-black text-white shadow-lg shadow-orange-600/30 transition hover:bg-orange-500"
             >
               Comenzar prueba gratis de 14 días
@@ -167,7 +167,7 @@ export function SaasLandingPage() {
 
             <div className="mt-8 text-center">
               <Link
-                to="/registro-restaurante"
+                to="/registro-negocio"
                 className="btn-primary inline-flex items-center gap-2 px-8 py-3 font-black"
               >
                 Comenzar a ahorrar ahora
@@ -182,8 +182,8 @@ export function SaasLandingPage() {
       <section className="bg-stone-100/70 py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl">
           <div className="text-center">
-            <h2 className="text-3xl font-black tracking-tight">Todo lo que necesita tu restaurante para operar</h2>
-            <p className="mt-3 text-sm text-stone-600">Diseñado especialmente para la agilidad de los negocios de comida rápida en Colombia.</p>
+            <h2 className="text-3xl font-black tracking-tight">Todo lo que necesita tu negocio para operar</h2>
+              <p className="mt-3 text-sm text-stone-600">Diseñado para vender, cobrar y organizar cualquier tipo de negocio en Colombia.</p>
           </div>
 
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -269,7 +269,7 @@ export function SaasLandingPage() {
                 <span className="text-4xl font-black text-stone-900">$79.000</span>
                 <span className="text-xs text-stone-500">COP / mes</span>
               </div>
-              <p className="mt-2 text-xs text-stone-600">Para restaurantes que quieren empezar a vender online directo.</p>
+              <p className="mt-2 text-xs text-stone-600">Para negocios que quieren empezar a vender online directo.</p>
 
               <ul className="mt-6 space-y-3 text-xs text-stone-700">
                 <li className="flex items-center gap-2">
@@ -295,7 +295,7 @@ export function SaasLandingPage() {
               </ul>
 
               <Link
-                to="/registro-restaurante"
+                to="/registro-negocio"
                 className="btn-secondary mt-8 w-full justify-center font-bold"
               >
                 Comenzar prueba gratis
@@ -314,7 +314,7 @@ export function SaasLandingPage() {
                 <span className="text-4xl font-black text-stone-900">$129.000</span>
                 <span className="text-xs text-stone-500">COP / mes</span>
               </div>
-              <p className="mt-2 text-xs text-stone-600">Para restaurantes con alto volumen de pedidos y delivery propio.</p>
+              <p className="mt-2 text-xs text-stone-600">Para negocios con alto volumen de pedidos y entregas propias.</p>
 
               <ul className="mt-6 space-y-3 text-xs text-stone-700">
                 <li className="flex items-center gap-2">
@@ -344,7 +344,7 @@ export function SaasLandingPage() {
               </ul>
 
               <Link
-                to="/registro-restaurante"
+                to="/registro-negocio"
                 className="btn-primary mt-8 w-full justify-center font-black shadow-md"
               >
                 Comenzar prueba gratis de 14 días
@@ -392,16 +392,16 @@ export function SaasLandingPage() {
       {/* CTA Final */}
       <section className="bg-orange-600 py-16 text-center text-white px-4">
         <div className="mx-auto max-w-3xl">
-          <h2 className="text-3xl font-black sm:text-4xl">¿Listo para hacer crecer tu restaurante?</h2>
+          <h2 className="text-3xl font-black sm:text-4xl">¿Listo para hacer crecer tu negocio?</h2>
           <p className="mt-3 text-sm text-orange-100">
-            Únete a los restaurantes independientes que ya no pagan comisiones abusivas.
+            Únete a los negocios independientes que ya no pagan comisiones abusivas.
           </p>
           <div className="mt-8">
             <Link
-              to="/registro-restaurante"
+              to="/registro-negocio"
               className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-3.5 text-base font-black text-orange-700 shadow-xl hover:bg-stone-100 transition"
             >
-              Crear mi restaurante gratis
+              Crear mi negocio gratis
               <ArrowRight size={18} />
             </Link>
           </div>

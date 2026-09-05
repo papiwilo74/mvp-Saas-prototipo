@@ -18,11 +18,11 @@ export function LoginPage() {
 
     try {
       setSubmitting(true);
-      const user = await login(form);
+      const user = await login({ email: form.email.trim(), password: form.password });
       const restaurantQuery = location.search || '';
       navigate(user.role === 'SUPERADMIN' ? '/superadmin' : user.role === 'ADMIN' ? `/admin${restaurantQuery}` : `/${restaurantQuery}`);
     } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Credenciales invalidas');
+      setError(requestError.response?.data?.message || requestError.message || 'No pudimos iniciar sesión. Verifica tus datos e inténtalo de nuevo.');
     } finally {
       setSubmitting(false);
     }
@@ -30,9 +30,9 @@ export function LoginPage() {
 
   return (
     <div className="container-page flex justify-center py-10">
-      <SEOHead title="Ingreso" description="Panel de administracion del restaurante." />
+      <SEOHead title="Ingreso" description="Ingresa al panel de administración de tu negocio." />
       <form onSubmit={onSubmit} className="w-full max-w-md rounded-md border border-stone-200 bg-white p-6 shadow-sm">
-        <h1 className="text-2xl font-black">Ingreso administrador</h1>
+        <h1 className="text-2xl font-black">Ingresa a tu negocio</h1>
         <div className="mt-6 space-y-4">
           <label className="block space-y-1">
             <span className="label">Correo</span>
@@ -54,9 +54,9 @@ export function LoginPage() {
             <Link to="/register" className="font-bold text-stone-950 underline">Crear cuenta cliente</Link>
           </p>
           <div className="mt-3 rounded-xl bg-orange-50 border border-orange-200/80 p-3">
-            <p className="text-xs font-bold text-orange-900">¿Tienes un restaurante o negocio?</p>
-            <Link to="/registro-restaurante" className="mt-1 inline-block text-xs font-black text-orange-700 underline hover:text-orange-900">
-              Registra tu restaurante aquí (14 días gratis) →
+            <p className="text-xs font-bold text-orange-900">¿Tienes un negocio?</p>
+            <Link to="/registro-negocio" className="mt-1 inline-block text-xs font-black text-orange-700 underline hover:text-orange-900">
+              Registra tu negocio aquí (14 días gratis) →
             </Link>
           </div>
         </div>

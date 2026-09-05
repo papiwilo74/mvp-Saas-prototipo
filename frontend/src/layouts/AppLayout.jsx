@@ -18,7 +18,7 @@ export function AppLayout() {
   const tenantQuery = location.search;
   const params = new URLSearchParams(location.search);
   const hasRestaurantParam = Boolean(params.get('restaurant'));
-  const isSaasRoute = location.pathname === '/saas' || location.pathname === '/registro-restaurante' || (location.pathname === '/' && !hasRestaurantParam);
+  const isSaasRoute = location.pathname === '/saas' || location.pathname === '/registro-restaurante' || location.pathname === '/registro-negocio' || (location.pathname === '/' && !hasRestaurantParam);
   const activeDeliveryZoneCount = (config.deliveryZones || []).filter((zone) => zone.isActive !== false).length;
 
   return (
@@ -30,7 +30,7 @@ export function AppLayout() {
               <span className="text-2xl">🍔</span>
               <div className="leading-none">
                 <span className="text-lg font-black tracking-tight">BcaXen</span>
-                <span className="block text-[10px] font-bold uppercase tracking-wider text-orange-600">SaaS Restaurantes</span>
+                <span className="block text-[10px] font-bold uppercase tracking-wider text-orange-600">SaaS para negocios</span>
               </div>
             </Link>
 
@@ -43,7 +43,7 @@ export function AppLayout() {
               <Link to="/login" className="btn-secondary min-h-10 px-3.5 text-xs font-bold">
                 Ingreso
               </Link>
-              <Link to="/registro-restaurante" className="btn-primary min-h-10 px-4 text-xs font-black shadow-sm">
+              <Link to="/registro-negocio" className="btn-primary min-h-10 px-4 text-xs font-black shadow-sm">
                 Probar 14 días gratis
               </Link>
             </div>
