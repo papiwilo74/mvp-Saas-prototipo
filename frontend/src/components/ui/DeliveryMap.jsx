@@ -9,8 +9,13 @@ export function DeliveryMap({ address, onSelect }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
+  const onSelectRef = useRef(onSelect);
   const [searching, setSearching] = useState(false);
   const [message, setMessage] = useState('');
+  useEffect(() => {
+    onSelectRef.current = onSelect;
+  }, [onSelect]);
+
   useEffect(() => {
     if (!containerRef.current || !mapboxgl.accessToken) return undefined;
     const map = new mapboxgl.Map({ container: containerRef.current, style: 'mapbox://styles/mapbox/streets-v12', center: [-74.0721, 4.711], zoom: 11 });
@@ -19,10 +24,10 @@ export function DeliveryMap({ address, onSelect }) {
     map.on('click', ({ lngLat }) => {
       markerRef.current?.remove();
       markerRef.current = new mapboxgl.Marker({ color: '#be7c8c' }).setLngLat(lngLat).addTo(map);
-      onSelect?.({ latitude: lngLat.lat, longitude: lngLat.lng });
+      onSelectRef.current?.({ latitude: lngLat.lat, longitude: lngLat.lng });
     });
     return () => { markerRef.current?.remove(); map.remove(); mapRef.current = null; };
-  }, [onSelect]);
+  }, []);
 
   const searchAddress = async () => {
     if (!address?.trim()) return setMessage('Escribe primero una dirección.');
@@ -34,10 +39,15 @@ export function DeliveryMap({ address, onSelect }) {
       const feature = data.features?.[0];
       if (!feature || !mapRef.current) return setMessage('No encontramos esa dirección. Ajusta el texto e intenta de nuevo.');
       const [longitude, latitude] = feature.center;
-      mapRef.current.flyTo({ center: [longitude, latitude], zoom: 16 });
+      const centerMap = () => {
+        mapRef.current?.resize();
+        mapRef.current?.flyTo({ center: [longitude, latitude], zoom: 16, essential: true });
+      };
+      if (mapRef.current.isStyleLoaded()) centerMap();
+      else mapRef.current.once('load', centerMap);
       markerRef.current?.remove();
       markerRef.current = new mapboxgl.Marker({ color: '#be7c8c' }).setLngLat([longitude, latitude]).addTo(mapRef.current);
-      onSelect?.({ latitude, longitude });
+      onSelectRef.current?.({ latitude, longitude });
       setMessage('Ubicación encontrada. Puedes ajustar el marcador en el mapa.');
     } catch { setMessage('No fue posible buscar la dirección.'); }
     finally { setSearching(false); }
