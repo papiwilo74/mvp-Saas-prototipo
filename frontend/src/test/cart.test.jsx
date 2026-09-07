@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { CartProvider, useCart } from '../context/CartContext';
+import { env } from '../config/env';
 
 const product = (id, overrides = {}) => ({
   id,
@@ -74,7 +75,7 @@ describe('CartContext', () => {
   it('persiste el carrito en localStorage', () => {
     const { result } = renderCartHook();
     act(() => result.current.addItem(product('1')));
-    const stored = JSON.parse(localStorage.getItem('ff_cart'));
+    const stored = JSON.parse(localStorage.getItem(`ff_cart:${env.restaurantSlug}`));
     expect(stored).toHaveLength(1);
   });
 });

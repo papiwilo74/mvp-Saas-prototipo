@@ -11,7 +11,8 @@ const { mockUser, mockBcrypt, mockPrisma } = vi.hoisted(() => {
     email: 'test@example.com',
     passwordHash: '$2a$10$hashedpassword',
     role: 'ADMIN',
-    restaurantId: 'rest-1'
+    restaurantId: 'rest-1',
+    emailVerifiedAt: new Date()
   };
   return {
     mockUser: userObj,

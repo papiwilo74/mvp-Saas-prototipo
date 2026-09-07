@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../services/api';
 
 export function VerifyEmailPage() {
   const [params] = useSearchParams();
   const email = params.get('email') || '';
-  const navigate = useNavigate();
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);

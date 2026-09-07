@@ -7,7 +7,8 @@ vi.mock('../config/prisma.js', () => {
     user: {
       findUnique: vi.fn(),
       findFirst: vi.fn(),
-      create: vi.fn()
+      create: vi.fn(),
+      update: vi.fn().mockResolvedValue({})
     },
     restaurant: {
       findUnique: vi.fn(),
@@ -17,7 +18,10 @@ vi.mock('../config/prisma.js', () => {
   return { prisma: mockPrisma };
 });
 
-vi.mock('../services/email.service.js', () => ({ sendWelcomeEmail: vi.fn().mockResolvedValue(true) }));
+vi.mock('../services/email.service.js', () => ({
+  sendWelcomeEmail: vi.fn().mockResolvedValue(true),
+  sendEmailVerificationEmail: vi.fn().mockResolvedValue(true)
+}));
 vi.mock('../services/socket.service.js', () => ({ emitToRestaurant: vi.fn() }));
 
 const mockPrisma = (await import('../config/prisma.js')).prisma;
@@ -39,12 +43,13 @@ describe('POST /api/auth/register', () => {
 
     const res = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'Test User', email: 'test@example.com', password: 'password123' });
+      .send({ name: 'Test User', email: 'test@example.com', password: 'Password123!' });
 
     expect(res.status).toBe(201);
     expect(res.body.user).toBeDefined();
     expect(res.body.user.email).toBe('test@example.com');
     expect(res.body.user.name).toBe('Test User');
+    expect(res.body.verificationRequired).toBe(true);
   });
 
   it('returns 422 for missing fields', async () => {
@@ -66,7 +71,7 @@ describe('POST /api/auth/register', () => {
   it('returns 422 for invalid email', async () => {
     const res = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'Test User', email: 'not-an-email', password: 'password123' });
+      .send({ name: 'Test User', email: 'not-an-email', password: 'Password123!' });
 
     expect(res.status).toBe(422);
   });

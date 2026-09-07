@@ -11,7 +11,7 @@ vi.mock('../context/AuthContext', () => ({
 describe('ProtectedRoute', () => {
   it('shows loading state', () => {
     mockUseAuth.mockReturnValue({ user: null, loading: true });
-    render(<ProtectedRoute><p>Contenido</p></ProtectedRoute>);
+    render(<MemoryRouter><ProtectedRoute><p>Contenido</p></ProtectedRoute></MemoryRouter>);
     expect(screen.getByText('Cargando sesion...')).toBeInTheDocument();
   });
 
@@ -23,7 +23,7 @@ describe('ProtectedRoute', () => {
 
   it('renders children when authenticated', () => {
     mockUseAuth.mockReturnValue({ user: { id: '1' }, loading: false, isAdmin: false, isSuperAdmin: false });
-    render(<ProtectedRoute><p>Contenido</p></ProtectedRoute>);
+    render(<MemoryRouter><ProtectedRoute><p>Contenido</p></ProtectedRoute></MemoryRouter>);
     expect(screen.getByText('Contenido')).toBeInTheDocument();
   });
 
@@ -35,7 +35,7 @@ describe('ProtectedRoute', () => {
 
   it('renders children when requireAdmin and isAdmin', () => {
     mockUseAuth.mockReturnValue({ user: { id: '1' }, loading: false, isAdmin: true, isSuperAdmin: false });
-    render(<ProtectedRoute requireAdmin><p>Admin</p></ProtectedRoute>);
+    render(<MemoryRouter><ProtectedRoute requireAdmin><p>Admin</p></ProtectedRoute></MemoryRouter>);
     expect(screen.getByText('Admin')).toBeInTheDocument();
   });
 
@@ -47,7 +47,7 @@ describe('ProtectedRoute', () => {
 
   it('renders children when requireSuperAdmin and isSuperAdmin', () => {
     mockUseAuth.mockReturnValue({ user: { id: '1' }, loading: false, isAdmin: true, isSuperAdmin: true });
-    render(<ProtectedRoute requireSuperAdmin><p>Super</p></ProtectedRoute>);
+    render(<MemoryRouter><ProtectedRoute requireSuperAdmin><p>Super</p></ProtectedRoute></MemoryRouter>);
     expect(screen.getByText('Super')).toBeInTheDocument();
   });
 });

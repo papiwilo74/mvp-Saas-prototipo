@@ -13,7 +13,8 @@ const mockPrisma = vi.hoisted(() => ({
   },
   user: {
     findUnique: vi.fn(),
-    create: vi.fn()
+    create: vi.fn(),
+    update: vi.fn().mockResolvedValue({})
   },
   $transaction: vi.fn()
 }));
@@ -23,7 +24,8 @@ vi.mock('../config/prisma.js', () => ({
 }));
 
 vi.mock('../services/email.service.js', () => ({
-  sendWelcomeEmail: vi.fn()
+  sendWelcomeEmail: vi.fn(),
+  sendEmailVerificationEmail: vi.fn().mockResolvedValue(true)
 }));
 
 vi.mock('../utils/token.js', () => ({
@@ -78,8 +80,7 @@ describe('Auth Service - registerRestaurant', () => {
       slug: 'napoli-pizza'
     });
     expect(result.user.role).toBe('ADMIN');
-    expect(result.token).toBe('mock-jwt-token');
-    expect(result.refreshToken).toBe('mock-refresh-token');
+    expect(result.verificationRequired).toBe(true);
     expect(mockPrisma.restaurant.create).toHaveBeenCalled();
     expect(mockPrisma.restaurantConfig.create).toHaveBeenCalled();
     expect(mockPrisma.orderCounter.create).toHaveBeenCalled();

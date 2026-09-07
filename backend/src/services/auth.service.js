@@ -23,6 +23,9 @@ const createVerification = async (user, update) => {
     emailVerificationExpires: new Date(Date.now() + 10 * 60 * 1000),
     emailVerificationAttempts: 0
   });
+  if (process.env.NODE_ENV !== 'production' || !env.RESEND_API_KEY) {
+    logger.info({ email: user.email, code }, '🔑 Código de verificación de correo generado (modo dev/fallback)');
+  }
   await sendEmailVerificationEmail({ to: user.email, name: user.name, code });
 };
 
