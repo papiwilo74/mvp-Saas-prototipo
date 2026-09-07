@@ -27,11 +27,11 @@ function sanitizeUrl(url) {
 }
 
 export function SEOHead({ title, description, image, siteName }) {
-  const defaultSiteName = 'TuTienda SaaS';
+  const defaultSiteName = 'OrderFlow';
 
   const safeSiteName = sanitizeText(siteName) || defaultSiteName;
   const safeTitle = sanitizeText(title);
-  const safeDescription = sanitizeText(description) || 'Plataforma de pedidos online para tu negocio. Vende tus productos desde el celular.';
+  const safeDescription = sanitizeText(description) || 'Plataforma de ventas y pedidos online para negocios. Vende directo con 0% comisiones.';
   const safeImage = sanitizeUrl(image);
 
   const fullTitle = safeTitle ? `${safeTitle} - ${safeSiteName}` : safeSiteName;

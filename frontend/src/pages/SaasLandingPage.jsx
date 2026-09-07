@@ -19,7 +19,7 @@ import { formatCurrency } from '../utils/formatters';
 const FAQS = [
   {
     q: '¿Cobran alguna comisión por pedido?',
-    a: 'No. En BcaXen cobramos una suscripción mensual fija. El 100% del valor de tus pedidos es tuyo, sin comisiones ocultas ni cobros porcentuales.'
+    a: 'No. En OrderFlow cobramos una suscripción mensual fija. El 100% del valor de tus pedidos es tuyo, sin comisiones ocultas ni cobros porcentuales.'
   },
   {
     q: '¿Mis clientes necesitan descargar una aplicación o registrarse?',
@@ -44,14 +44,14 @@ export function SaasLandingPage() {
   const [activeFaq, setActiveFaq] = useState(null);
 
   const deliveryAppCommission = Math.round(monthlySales * 0.25);
-  const bcaxenCost = 79000;
-  const monthlySavings = Math.max(0, deliveryAppCommission - bcaxenCost);
+  const orderFlowCost = 79000;
+  const monthlySavings = Math.max(0, deliveryAppCommission - orderFlowCost);
   const yearlySavings = monthlySavings * 12;
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900">
       <SEOHead
-        title="BcaXen | Plataforma de ventas online para negocios"
+        title="OrderFlow | Plataforma de ventas online para negocios"
         description="Tu propia página de ventas online con marca propia, catálogo, pagos directos y 0% comisiones. Empieza tu prueba gratis de 14 días."
       />
 
@@ -118,7 +118,7 @@ export function SaasLandingPage() {
                 ¿Cuánto dinero estás perdiendo en comisiones?
               </h2>
               <p className="mt-2 text-sm text-stone-600">
-                Mueve el control para ver cuánto te ahorras al recibir pedidos directos con BcaXen.
+                Mueve el control para ver cuánto te ahorras al recibir pedidos directos con OrderFlow.
               </p>
             </div>
 
@@ -151,8 +151,8 @@ export function SaasLandingPage() {
               </div>
 
               <div className="rounded-2xl border border-stone-200 bg-stone-50 p-5 text-center">
-                <span className="text-xs font-black uppercase tracking-wider text-stone-500">Costo BcaXen</span>
-                <p className="mt-2 text-2xl font-black text-stone-900">{formatCurrency(bcaxenCost)}</p>
+                <span className="text-xs font-black uppercase tracking-wider text-stone-500">Costo OrderFlow</span>
+                <p className="mt-2 text-2xl font-black text-stone-900">{formatCurrency(orderFlowCost)}</p>
                 <p className="mt-1 text-xs text-stone-500">Tarifa fija mensual sin comisiones</p>
               </div>
 

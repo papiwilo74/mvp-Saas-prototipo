@@ -1,13 +1,13 @@
 {
-  "name": "FastFood SaaS - Pedidos Online",
-  "short_name": "FastFood App",
-  "description": "App de pedidos online para restaurantes. Pide tu comida favorita desde el celular.",
+  "name": "OrderFlow - Pedidos y Ventas Online",
+  "short_name": "OrderFlow",
+  "description": "Plataforma de ventas y pedidos online con marca propia y 0% comisiones para tu negocio.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f7f1e8",
   "theme_color": "#ea580c",
   "orientation": "portrait-primary",
-  "categories": ["food", "restaurants", "business"],
+  "categories": ["business", "shopping", "food", "restaurants"],
   "prefer_related_applications": false,
   "icons": [
     {

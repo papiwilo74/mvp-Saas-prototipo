@@ -22,7 +22,7 @@ export function SuperAdminLayout() {
         <div className="h-1 w-full" style={{ backgroundColor: 'var(--color-primary, #ea580c)' }} />
         <div className="container-page flex min-h-16 flex-wrap items-center justify-between gap-3 py-3">
           <div className="flex items-center gap-4">
-            <Link to="/superadmin" className="text-sm font-black tracking-tight text-white">FastFood SaaS</Link>
+            <Link to="/superadmin" className="text-sm font-black tracking-tight text-white">OrderFlow</Link>
             <span className="rounded-full bg-amber-500/20 px-3 py-1 text-xs font-bold text-amber-400">SUPERADMIN</span>
           </div>
           <div className="flex items-center gap-2 overflow-x-auto">

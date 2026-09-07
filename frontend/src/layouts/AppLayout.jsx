@@ -1,4 +1,4 @@
-import { Clock3, Home, ShoppingBag, Store } from 'lucide-react';
+import { Clock3, Home, ShoppingBag, Store, Zap } from 'lucide-react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useRestaurantConfig } from '../context/RestaurantConfigContext';
@@ -26,10 +26,12 @@ export function AppLayout() {
       {isSaasRoute ? (
         <header className="sticky top-0 z-30 border-b border-stone-200 bg-white/95 backdrop-blur">
           <div className="container-page flex items-center justify-between py-3.5">
-            <Link to="/saas" className="flex items-center gap-2 text-stone-900">
-              <span className="text-2xl">🍔</span>
+            <Link to="/saas" className="group flex items-center gap-2.5 text-stone-900">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white shadow-sm shadow-orange-500/20 transition-transform group-hover:scale-105">
+                <Zap className="h-5 w-5 fill-current" />
+              </div>
               <div className="leading-none">
-                <span className="text-lg font-black tracking-tight">BcaXen</span>
+                <span className="text-lg font-black tracking-tight">OrderFlow</span>
                 <span className="block text-[10px] font-bold uppercase tracking-wider text-orange-600">SaaS para negocios</span>
               </div>
             </Link>

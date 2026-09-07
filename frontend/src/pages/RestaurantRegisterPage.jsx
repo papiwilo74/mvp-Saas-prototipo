@@ -53,7 +53,7 @@ export function RestaurantRegisterPage() {
       <div className="w-full max-w-lg">
         <Link to="/saas" className="mb-6 inline-flex items-center gap-1.5 text-sm font-semibold text-stone-500 hover:text-stone-800">
           <ArrowLeft size={16} />
-          Volver a BcaXen
+          Volver a OrderFlow
         </Link>
 
         <div className="glass-panel p-6 sm:p-8">
