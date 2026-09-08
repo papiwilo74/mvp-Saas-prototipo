@@ -190,11 +190,6 @@ export function AdminSettingsPage() {
           </div>
         </div>
 
-        <div className="border-t border-stone-200 pt-4 sm:col-span-2">
-          <span className="label">API Key de Mapas (Mapbox / Google Maps)</span>
-          <p className="text-xs text-stone-500 mb-3">Validación automática de direcciones y cálculo de distancia en zonas de cobertura.</p>
-          <input className="input" placeholder="pk.eyJ1... o AIzaSy..." type="password" value={form.googleMapsApiKey || ''} onChange={(event) => update('googleMapsApiKey', event.target.value)} />
-        </div>
 
         <div className="border-t border-stone-200 pt-4 sm:col-span-2">
           <span className="label">Programa de fidelizacion</span>
