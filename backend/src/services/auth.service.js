@@ -133,6 +133,15 @@ export const verifyEmail = async ({ email, code }) => {
   return { message: 'Correo confirmado correctamente' };
 };
 
+export const resendVerificationCode = async ({ email }) => {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) return { message: 'Si el correo existe, recibirás un nuevo código.' };
+  if (user.emailVerifiedAt) return { message: 'Este correo ya se encuentra confirmado.' };
+
+  await createVerification(user, (data) => prisma.user.update({ where: { id: user.id }, data }));
+  return { message: 'Código reenviado con éxito. Revisa tu bandeja de entrada o spam.' };
+};
+
 export const refresh = async (refreshToken) => {
   if (!refreshToken) throw new ApiError(401, 'Refresh token requerido');
 

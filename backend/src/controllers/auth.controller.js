@@ -45,6 +45,11 @@ export const verifyEmail = async (req, res) => {
   res.json(result);
 };
 
+export const resendVerification = async (req, res) => {
+  const result = await authService.resendVerificationCode(req.validated.body);
+  res.json(result);
+};
+
 export const logout = async (req, res) => {
   if (req.user) {
     await authService.revokeRefreshTokens(req.user.id);

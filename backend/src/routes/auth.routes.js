@@ -24,6 +24,7 @@ authRouter.post('/register', sensitiveAuthLimit, validate(registerSchema), async
 authRouter.post('/register-restaurant', sensitiveAuthLimit, validate(registerRestaurantSchema), asyncHandler(authController.registerRestaurant));
 authRouter.post('/login', sensitiveAuthLimit, validate(loginSchema), asyncHandler(authController.login));
 authRouter.post('/verify-email', recoveryLimit, validate(verifyEmailSchema), asyncHandler(authController.verifyEmail));
+authRouter.post('/resend-verification', recoveryLimit, validate(forgotPasswordSchema), asyncHandler(authController.resendVerification));
 authRouter.get('/me', authenticate, asyncHandler(authController.me));
 authRouter.post('/logout', authenticate, asyncHandler(authController.logout));
 authRouter.post('/forgot-password', recoveryLimit, validate(forgotPasswordSchema), asyncHandler(authController.forgotPassword));
