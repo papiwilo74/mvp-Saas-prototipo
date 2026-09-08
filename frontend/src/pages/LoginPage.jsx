@@ -43,7 +43,16 @@ export function LoginPage() {
             <input className="input" type="password" required value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} />
           </label>
         </div>
-        {error && <p className="mt-4 rounded-md bg-red-50 p-3 text-sm font-semibold text-red-700">{error}</p>}
+        {error && (
+          <div className="mt-4 rounded-md bg-red-50 p-3 text-sm font-semibold text-red-700">
+            <p>{error}</p>
+            {error.toLowerCase().includes('confirmar tu correo') && (
+              <Link to={`/verificar-email?email=${encodeURIComponent(form.email.trim())}`} className="mt-2 inline-block font-bold text-orange-700 underline hover:text-orange-900">
+                Haz clic aquí para ingresar tu código de confirmación →
+              </Link>
+            )}
+          </div>
+        )}
         <button type="submit" disabled={submitting} className="btn-primary mt-6 w-full">{submitting ? 'Ingresando...' : 'Ingresar'}</button>
         <div className="mt-3 text-center">
           <Link to="/forgot-password" className="text-xs font-semibold text-stone-500 underline hover:text-stone-800">Olvide mi contrasena</Link>
