@@ -16,7 +16,8 @@ const envSchema = z.object({
   PUBLIC_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60000),
   PUBLIC_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(60),
   RESEND_API_KEY: z.string().optional(),
-  EMAIL_FROM: z.string().default('FastFood SaaS <pedidos@example.com>'),
+  RESEND_FROM: z.string().optional(),
+  EMAIL_FROM: z.string().default('OrderFlow <soporte@orderflowapp.online>'),
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
@@ -59,10 +60,16 @@ const allowedOrigins = validatedEnv.ALLOWED_ORIGINS
   ? validatedEnv.ALLOWED_ORIGINS.split(',').map((o) => normalizeUrl(o.trim())).filter(Boolean).join(',')
   : undefined;
 
+const rawEmailFrom = validatedEnv.RESEND_FROM || validatedEnv.EMAIL_FROM;
+const emailFrom = rawEmailFrom.includes('<')
+  ? rawEmailFrom
+  : `OrderFlow <${rawEmailFrom.trim()}>`;
+
 export const env = {
   ...validatedEnv,
   FRONTEND_URL: frontendUrl,
-  ALLOWED_ORIGINS: allowedOrigins
+  ALLOWED_ORIGINS: allowedOrigins,
+  EMAIL_FROM: emailFrom
 };
 
 // Production checks (console is fine here — runs before logger is available)

@@ -114,14 +114,22 @@ export const sendWelcomeEmail = async ({ to, name }) => {
 };
 
 export const sendEmailVerificationEmail = async ({ to, name, code }) => {
-  if (!resend || !to) return;
+  if (!resend || !to) {
+    logger.warn({ to, hasResend: !!resend }, 'No se pudo enviar verificación: Resend no configurado o destinatario vacío');
+    return;
+  }
   try {
-    await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: env.EMAIL_FROM,
       to,
-      subject: 'Confirma tu correo electrónico',
+      subject: 'Confirma tu correo electrónico - OrderFlow',
       html: `<div style="max-width:480px;margin:20px auto;padding:32px;font-family:sans-serif;text-align:center"><h1>Hola ${name}</h1><p>Tu código de confirmación es:</p><p style="font-size:32px;font-weight:800;letter-spacing:8px;color:#ea580c">${code}</p><p style="font-size:12px;color:#777">Este código expira en 10 minutos.</p></div>`
     });
+    if (error) {
+      logger.error({ err: error, to, from: env.EMAIL_FROM }, 'Resend error al enviar verificación');
+    } else {
+      logger.info({ id: data?.id, to }, 'Código de verificación enviado exitosamente');
+    }
   } catch (error) {
     logger.error({ err: error }, 'Error al enviar verificación de correo');
   }
