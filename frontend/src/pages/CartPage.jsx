@@ -206,8 +206,8 @@ export function CartPage() {
           </div>
           <div className="grid gap-2 sm:max-w-[220px]">
             <div className="safe-panel p-3">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-500">Zonas</p>
-              <p className="mt-1 text-sm font-black">{selectedZone?.name || 'General'}</p>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-500">Entrega</p>
+              <p className="mt-1 text-sm font-black">{distanceZone?.name || (fulfillmentMode === 'PICKUP' ? 'Retiro en tienda' : 'Selecciona dirección')}</p>
             </div>
           </div>
         </div>
@@ -258,17 +258,28 @@ export function CartPage() {
             <span className="label">Email</span>
             <input className="input" type="email" value={customer.email} onChange={(event) => updateCustomer('email', event.target.value)} />
           </label>
-          {fulfillmentMode === 'DELIVERY' && activeZones.length ? (
-            <label className="block space-y-1">
-              <span className="label">Zona de {labels.fulfillmentLabel}</span>
-              <select className="input" value={deliveryZoneName} onChange={(event) => setDeliveryZoneName(event.target.value)}>
-                {activeZones.map((zone) => (
-                <option key={zone.name} value={zone.name}>
-                    {zone.name} - {formatCurrency(zone.fee || 0)}
-                  </option>
-                ))}
-              </select>
-            </label>
+          {fulfillmentMode === 'DELIVERY' && activeZones.length && deliveryLocation ? (
+            <div className="rounded-xl border p-3.5">
+              {distanceZone ? (
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <MapPinned size={16} className="shrink-0 text-emerald-600" />
+                    <div>
+                      <p className="text-sm font-black text-stone-900">{distanceZone.name}</p>
+                      <p className="text-xs text-stone-500">
+                        {distanceKm !== null ? `${distanceKm.toFixed(1)} km` : ''}{distanceZone.estimatedMinutes ? ` · ~${distanceZone.estimatedMinutes} min` : ''}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-black text-emerald-700">{formatCurrency(distanceZone.fee || 0)}</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-red-600">
+                  <MapPinned size={16} className="shrink-0" />
+                  <p className="text-sm font-semibold">Esta dirección está fuera del área de cobertura</p>
+                </div>
+              )}
+            </div>
           ) : null}
           {config.acceptsScheduledOrders ? (
             <label className="block space-y-1">
