@@ -33,12 +33,32 @@ const __dirname = path.dirname(__filename);
 // Normalización de orígenes permitidos (elimina slashes al final)
 const normalizeOrigin = (url) => (typeof url === 'string' ? url.trim().replace(/\/+$/, '') : '');
 
+const expandOriginVariants = (originUrl) => {
+  const clean = normalizeOrigin(originUrl);
+  if (!clean) return [];
+  try {
+    const parsed = new URL(clean);
+    if (parsed.hostname.startsWith('www.')) {
+      const nonWww = new URL(clean);
+      nonWww.hostname = parsed.hostname.replace(/^www\./, '');
+      return [clean, normalizeOrigin(nonWww.origin)];
+    } else if (parsed.hostname !== 'localhost' && !parsed.hostname.match(/^(\d{1,3}\.){3}\d{1,3}$/)) {
+      const withWww = new URL(clean);
+      withWww.hostname = `www.${parsed.hostname}`;
+      return [clean, normalizeOrigin(withWww.origin)];
+    }
+    return [clean];
+  } catch {
+    return [clean];
+  }
+};
+
 const rawOrigins = [
   env.FRONTEND_URL,
   ...(env.ALLOWED_ORIGINS ? env.ALLOWED_ORIGINS.split(',') : [])
 ];
 
-const allowedOrigins = Array.from(new Set(rawOrigins.map(normalizeOrigin).filter(Boolean)));
+const allowedOrigins = Array.from(new Set(rawOrigins.flatMap(expandOriginVariants).filter(Boolean)));
 
 app.use(compression());
 
