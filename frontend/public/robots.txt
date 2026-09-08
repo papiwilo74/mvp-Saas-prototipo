@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://fastfood-saas.vercel.app/sitemap.xml
+Sitemap: https://orderflowapp.online/sitemap.xml
