@@ -96,6 +96,7 @@ export function AppRoutes() {
         <Route path="/registro-restaurante" element={<Suspense fallback={<PageLoader />}><RestaurantRegisterPage /></Suspense>} />
         <Route path="/registro-negocio" element={<Suspense fallback={<PageLoader />}><RestaurantRegisterPage /></Suspense>} />
         <Route path="/verify-email" element={<Suspense fallback={<PageLoader />}><VerifyEmailPage /></Suspense>} />
+        <Route path="/verificar-email" element={<Suspense fallback={<PageLoader />}><VerifyEmailPage /></Suspense>} />
       </Route>
 
       <Route path="/admin" element={<Suspense fallback={<PageLoader />}><ProtectedRoute requireAdmin><AdminLayout /></ProtectedRoute></Suspense>}>
