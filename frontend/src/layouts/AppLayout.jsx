@@ -17,8 +17,19 @@ export function AppLayout() {
   const location = useLocation();
   const tenantQuery = location.search;
   const params = new URLSearchParams(location.search);
-  const hasRestaurantParam = Boolean(params.get('restaurant'));
-  const isSaasRoute = location.pathname === '/saas' || location.pathname === '/registro-restaurante' || location.pathname === '/registro-negocio' || (location.pathname === '/' && !hasRestaurantParam);
+  const saasRoutes = [
+    '/saas',
+    '/registro-restaurante',
+    '/registro-negocio',
+    '/login',
+    '/forgot-password',
+    '/reset-password',
+    '/verify-email',
+    '/verificar-email',
+    '/terms',
+    '/privacy'
+  ];
+  const isSaasRoute = saasRoutes.includes(location.pathname) || (location.pathname === '/' && !hasRestaurantParam);
   const activeDeliveryZoneCount = (config.deliveryZones || []).filter((zone) => zone.isActive !== false).length;
 
   return (

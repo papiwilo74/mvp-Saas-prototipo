@@ -19,8 +19,8 @@ export function LoginPage() {
     try {
       setSubmitting(true);
       const user = await login({ email: form.email.trim(), password: form.password });
-      const restaurantQuery = location.search || '';
-      navigate(user.role === 'SUPERADMIN' ? '/superadmin' : user.role === 'ADMIN' ? `/admin${restaurantQuery}` : `/${restaurantQuery}`);
+      const targetSlug = user.restaurantSlug ? `?restaurant=${user.restaurantSlug}` : (location.search || '');
+      navigate(user.role === 'SUPERADMIN' ? '/superadmin' : user.role === 'ADMIN' ? `/admin${targetSlug}` : `/${targetSlug}`);
     } catch (requestError) {
       setError(requestError.response?.data?.message || requestError.message || 'No pudimos iniciar sesión. Verifica tus datos e inténtalo de nuevo.');
     } finally {

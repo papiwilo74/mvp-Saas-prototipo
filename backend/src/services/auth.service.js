@@ -13,7 +13,8 @@ const publicUser = (user) => ({
   name: user.name,
   email: user.email,
   role: user.role,
-  restaurantId: user.restaurantId
+  restaurantId: user.restaurantId,
+  restaurantSlug: user.restaurant?.slug || user.restaurantSlug || null
 });
 
 const createVerification = async (user, update) => {
@@ -100,7 +101,10 @@ export const resetPassword = async ({ email, token, password }) => {
 };
 
 export const login = async ({ email, password }) => {
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: { restaurant: { select: { slug: true, name: true } } }
+  });
 
   if (!user) {
     logger.warn({ email }, 'Failed login attempt: user not found');
