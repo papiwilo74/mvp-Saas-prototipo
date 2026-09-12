@@ -17,6 +17,7 @@ export function AppLayout() {
   const location = useLocation();
   const tenantQuery = location.search;
   const params = new URLSearchParams(location.search);
+  const hasRestaurantParam = Boolean(params.get('restaurant'));
   const saasRoutes = [
     '/saas',
     '/registro-restaurante',
