@@ -1,7 +1,9 @@
 import { QrCode, Save } from 'lucide-react';
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { QRCode } from '../../components/ui/QRCode';
 import { useRestaurantConfig } from '../../context/RestaurantConfigContext';
+import { env } from '../../config/env';
 import { api } from '../../services/api';
 
 const paymentOptions = [
@@ -13,13 +15,17 @@ const paymentOptions = [
 
 export function AdminSettingsPage() {
   const { config, setConfig } = useRestaurantConfig();
+  const location = useLocation();
   const [form, setForm] = useState(config);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showQR, setShowQR] = useState(false);
 
-  const menuUrl = `${window.location.origin}/menu`;
+  const searchParams = new URLSearchParams(location.search);
+  const restaurantSlug = searchParams.get('restaurant') || env.restaurantSlug;
+  const restaurantQuery = restaurantSlug && restaurantSlug !== 'demo-burger' ? `?restaurant=${restaurantSlug}` : '';
+  const menuUrl = `${window.location.origin}/menu${restaurantQuery}`;
 
   const onSubmit = async (event) => {
     event.preventDefault();
