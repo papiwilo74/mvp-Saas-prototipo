@@ -1,7 +1,7 @@
 import { BarChart3, CookingPot, LayoutDashboard, Package, ReceiptText, Settings, UserCog, UsersRound } from 'lucide-react';
 import { SocketNotifier } from '../components/ui/SocketNotifier';
 import { OnboardingWizard } from '../components/ui/OnboardingWizard';
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useRestaurantConfig } from '../context/RestaurantConfigContext';
 import { DemoBanner } from '../components/ui/DemoBanner';
 
