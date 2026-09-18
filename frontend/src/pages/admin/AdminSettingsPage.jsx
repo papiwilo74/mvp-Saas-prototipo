@@ -15,7 +15,7 @@ const paymentOptions = [
 ];
 
 export function AdminSettingsPage() {
-  const { config, setConfig } = useRestaurantConfig();
+  const { config, setConfig, activeSlug: configSlug } = useRestaurantConfig();
   const { user } = useAuth();
   const location = useLocation();
   const [form, setForm] = useState(config);
@@ -26,7 +26,7 @@ export function AdminSettingsPage() {
   const [copied, setCopied] = useState(false);
 
   const searchParams = new URLSearchParams(location.search);
-  const restaurantSlug = searchParams.get('restaurant') || user?.restaurantSlug || env.restaurantSlug;
+  const restaurantSlug = searchParams.get('restaurant') || user?.restaurantSlug || configSlug || env.restaurantSlug;
   const menuUrl = `${window.location.origin}/menu?restaurant=${restaurantSlug}`;
 
   const handleCopy = () => {
