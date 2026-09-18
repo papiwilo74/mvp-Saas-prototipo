@@ -1,8 +1,9 @@
-import { QrCode, Save } from 'lucide-react';
+import { Check, Copy, ExternalLink, QrCode, Save } from 'lucide-react';
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { QRCode } from '../../components/ui/QRCode';
 import { useRestaurantConfig } from '../../context/RestaurantConfigContext';
+import { useAuth } from '../../context/AuthContext';
 import { env } from '../../config/env';
 import { api } from '../../services/api';
 
@@ -15,17 +16,24 @@ const paymentOptions = [
 
 export function AdminSettingsPage() {
   const { config, setConfig } = useRestaurantConfig();
+  const { user } = useAuth();
   const location = useLocation();
   const [form, setForm] = useState(config);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showQR, setShowQR] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const searchParams = new URLSearchParams(location.search);
-  const restaurantSlug = searchParams.get('restaurant') || env.restaurantSlug;
-  const restaurantQuery = restaurantSlug && restaurantSlug !== 'demo-burger' ? `?restaurant=${restaurantSlug}` : '';
-  const menuUrl = `${window.location.origin}/menu${restaurantQuery}`;
+  const restaurantSlug = searchParams.get('restaurant') || user?.restaurantSlug || env.restaurantSlug;
+  const menuUrl = `${window.location.origin}/menu?restaurant=${restaurantSlug}`;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(menuUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const onSubmit = async (event) => {
     event.preventDefault();
@@ -270,9 +278,38 @@ export function AdminSettingsPage() {
 
       {showQR && (
         <div className="safe-panel mt-4 p-5 text-center">
-          <p className="label mb-3">Escanea para ver el menu</p>
-          <QRCode url={menuUrl} />
-          <p className="mt-2 text-xs text-stone-500">{menuUrl}</p>
+          <p className="label mb-1 text-base font-bold text-stone-900">Código QR de tu Tienda / Menú</p>
+          <p className="mb-4 text-xs text-stone-500">
+            Tus comensales escanearán este código para ver tu carta y pedir directamente sin comisiones.
+          </p>
+          <div className="flex justify-center">
+            <QRCode url={menuUrl} />
+          </div>
+          <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-2 max-w-lg mx-auto">
+            <input
+              type="text"
+              readOnly
+              value={menuUrl}
+              className="input text-xs w-full sm:w-auto flex-1 font-mono text-stone-600 bg-stone-50 text-center sm:text-left"
+            />
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="btn-secondary w-full sm:w-auto text-xs py-2 px-3 inline-flex items-center justify-center gap-1.5"
+            >
+              {copied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+              <span>{copied ? '¡Copiado!' : 'Copiar link'}</span>
+            </button>
+            <a
+              href={menuUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary w-full sm:w-auto text-xs py-2 px-3 inline-flex items-center justify-center gap-1.5"
+            >
+              <ExternalLink size={14} />
+              <span>Abrir tienda</span>
+            </a>
+          </div>
         </div>
       )}
 

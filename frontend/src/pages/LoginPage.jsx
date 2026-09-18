@@ -60,11 +60,11 @@ export function LoginPage() {
         <div className="mt-6 border-t border-stone-100 pt-4 text-center">
           <p className="text-xs text-stone-500">
             ¿Eres comensal y quieres ver tus pedidos?{' '}
-            <Link to="/register" className="font-bold text-stone-950 underline">Crear cuenta cliente</Link>
+            <Link to="/registro-cliente" className="font-bold text-stone-950 underline">Crear cuenta cliente</Link>
           </p>
           <div className="mt-3 rounded-xl bg-orange-50 border border-orange-200/80 p-3">
-            <p className="text-xs font-bold text-orange-900">¿Tienes un negocio?</p>
-            <Link to="/registro-negocio" className="mt-1 inline-block text-xs font-black text-orange-700 underline hover:text-orange-900">
+            <p className="text-xs font-bold text-orange-900">¿Tienes un restaurante o negocio?</p>
+            <Link to="/registro" className="mt-1 inline-block text-xs font-black text-orange-700 underline hover:text-orange-900">
               Registra tu negocio aquí (14 días gratis) →
             </Link>
           </div>

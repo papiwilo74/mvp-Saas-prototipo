@@ -4,6 +4,7 @@ import { env } from '../config/env';
 import { api } from '../services/api';
 import { apiQueryKey } from '../hooks/useApiQuery';
 import { getBusinessLabels } from '../utils/businessLabels';
+import { useAuth } from './AuthContext';
 
 const fallbackConfig = {
   restaurantName: 'Demo Burger',
@@ -45,11 +46,21 @@ function normalizeConfig(config) {
 
 export function RestaurantConfigProvider({ children }) {
   const queryClient = useQueryClient();
+  const auth = useAuth();
+  const user = auth?.user;
+
+  // Determinar el slug activo con prioridad:
+  // 1. ?restaurant=slug en URL
+  // 2. user.restaurantSlug si el usuario es administrador de un restaurante
+  // 3. env.restaurantSlug
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const fromQuery = searchParams?.get('restaurant');
+  const activeSlug = fromQuery || user?.restaurantSlug || env.restaurantSlug;
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: apiQueryKey('restaurantConfig', env.restaurantSlug),
+    queryKey: apiQueryKey('restaurantConfig', activeSlug),
     queryFn: async () => {
-      const { data } = await api.get('/restaurant-config', { params: { restaurant: env.restaurantSlug } });
+      const { data } = await api.get('/restaurant-config', { params: { restaurant: activeSlug } });
       return normalizeConfig(data.restaurant.config);
     },
     staleTime: 10 * 60 * 1000,
@@ -61,8 +72,8 @@ export function RestaurantConfigProvider({ children }) {
   const labels = useMemo(() => getBusinessLabels(config), [config]);
 
   const setConfig = useCallback((newConfig) => {
-    queryClient.setQueryData(apiQueryKey('restaurantConfig', env.restaurantSlug), normalizeConfig(newConfig));
-  }, [queryClient]);
+    queryClient.setQueryData(apiQueryKey('restaurantConfig', activeSlug), normalizeConfig(newConfig));
+  }, [queryClient, activeSlug]);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--color-primary', config.primaryColor);
@@ -73,9 +84,10 @@ export function RestaurantConfigProvider({ children }) {
     config,
     labels,
     setConfig,
+    activeSlug,
     loading: isLoading && !data,
     isError
-  }), [config, labels, setConfig, isLoading, isError, data]);
+  }), [config, labels, setConfig, activeSlug, isLoading, isError, data]);
 
   return <RestaurantConfigContext.Provider value={value}>{children}</RestaurantConfigContext.Provider>;
 }

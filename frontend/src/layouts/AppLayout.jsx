@@ -20,8 +20,11 @@ export function AppLayout() {
   const hasRestaurantParam = Boolean(params.get('restaurant'));
   const saasRoutes = [
     '/saas',
+    '/registro',
+    '/register',
     '/registro-restaurante',
     '/registro-negocio',
+    '/registro-cliente',
     '/login',
     '/forgot-password',
     '/reset-password',
@@ -57,7 +60,7 @@ export function AppLayout() {
               <Link to="/login" className="btn-secondary min-h-10 px-3.5 text-xs font-bold">
                 Ingreso
               </Link>
-              <Link to="/registro-negocio" className="btn-primary min-h-10 px-4 text-xs font-black shadow-sm">
+              <Link to="/registro" className="btn-primary min-h-10 px-4 text-xs font-black shadow-sm">
                 Probar 14 días gratis
               </Link>
             </div>

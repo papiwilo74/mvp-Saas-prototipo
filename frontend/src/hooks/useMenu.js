@@ -2,12 +2,16 @@ import { useMemo } from 'react';
 import { env } from '../config/env';
 import { api } from '../services/api';
 import { useApiQuery, apiQueryKey } from './useApiQuery';
+import { useRestaurantConfig } from '../context/RestaurantConfigContext';
 
 export function useMenu() {
+  const { activeSlug } = useRestaurantConfig() || {};
+  const currentSlug = activeSlug || env.restaurantSlug;
+
   const { data, isLoading, isError, error } = useApiQuery(
-    apiQueryKey('menu', env.restaurantSlug),
+    apiQueryKey('menu', currentSlug),
     async () => {
-      const { data } = await api.get('/menu', { params: { restaurant: env.restaurantSlug } });
+      const { data } = await api.get('/menu', { params: { restaurant: currentSlug } });
       return data.restaurant;
     }
   );

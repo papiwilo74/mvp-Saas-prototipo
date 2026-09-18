@@ -1,7 +1,29 @@
 import { lazy, Suspense } from 'react';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { ProtectedRoute } from '../components/routing/ProtectedRoute';
 import { env } from '../config/env';
+
+const RESERVED_SLUGS = new Set([
+  'saas', 'registro', 'register', 'registro-restaurante', 'registro-negocio', 'registro-cliente',
+  'menu', 'cart', 'admin', 'superadmin', 'login', 'checkout', 'profile', 'orders',
+  'products', 'terms', 'privacy', 'verify-email', 'verificar-email', 'forgot-password', 'reset-password'
+]);
+
+function DynamicRestaurantRedirect() {
+  const { slug } = useParams();
+  if (!slug || RESERVED_SLUGS.has(slug.toLowerCase())) {
+    return <NotFoundPage />;
+  }
+  return <Navigate to={`/?restaurant=${encodeURIComponent(slug)}`} replace />;
+}
+
+function DynamicRestaurantMenuRedirect() {
+  const { slug } = useParams();
+  if (!slug || RESERVED_SLUGS.has(slug.toLowerCase())) {
+    return <NotFoundPage />;
+  }
+  return <Navigate to={`/menu?restaurant=${encodeURIComponent(slug)}`} replace />;
+}
 
 const handleDynamicImport = (importFn) => () =>
   importFn().catch((err) => {
@@ -85,7 +107,11 @@ export function AppRoutes() {
         <Route path="/cart" element={<Suspense fallback={<PageLoader />}><CartPage /></Suspense>} />
         <Route path="/checkout/success" element={<Suspense fallback={<PageLoader />}><CheckoutSuccessPage /></Suspense>} />
         <Route path="/login" element={<Suspense fallback={<PageLoader />}><LoginPage /></Suspense>} />
-        <Route path="/register" element={<Suspense fallback={<PageLoader />}><RegisterPage /></Suspense>} />
+        <Route path="/registro" element={<Suspense fallback={<PageLoader />}><RestaurantRegisterPage /></Suspense>} />
+        <Route path="/register" element={<Suspense fallback={<PageLoader />}><RestaurantRegisterPage /></Suspense>} />
+        <Route path="/registro-restaurante" element={<Suspense fallback={<PageLoader />}><RestaurantRegisterPage /></Suspense>} />
+        <Route path="/registro-negocio" element={<Suspense fallback={<PageLoader />}><RestaurantRegisterPage /></Suspense>} />
+        <Route path="/registro-cliente" element={<Suspense fallback={<PageLoader />}><RegisterPage /></Suspense>} />
         {env.enableOrderHistory ? <Route path="/orders" element={<Suspense fallback={<PageLoader />}><ProtectedRoute><OrderHistoryPage /></ProtectedRoute></Suspense>} /> : null}
         <Route path="/profile" element={<Suspense fallback={<PageLoader />}><ProtectedRoute><ProfilePage /></ProtectedRoute></Suspense>} />
         <Route path="/forgot-password" element={<Suspense fallback={<PageLoader />}><ForgotPasswordPage /></Suspense>} />
@@ -93,8 +119,6 @@ export function AppRoutes() {
         <Route path="/terms" element={<Suspense fallback={<PageLoader />}><TermsPage /></Suspense>} />
         <Route path="/privacy" element={<Suspense fallback={<PageLoader />}><PrivacyPage /></Suspense>} />
         <Route path="/saas" element={<Suspense fallback={<PageLoader />}><SaasLandingPage /></Suspense>} />
-        <Route path="/registro-restaurante" element={<Suspense fallback={<PageLoader />}><RestaurantRegisterPage /></Suspense>} />
-        <Route path="/registro-negocio" element={<Suspense fallback={<PageLoader />}><RestaurantRegisterPage /></Suspense>} />
         <Route path="/verify-email" element={<Suspense fallback={<PageLoader />}><VerifyEmailPage /></Suspense>} />
         <Route path="/verificar-email" element={<Suspense fallback={<PageLoader />}><VerifyEmailPage /></Suspense>} />
       </Route>
@@ -116,6 +140,10 @@ export function AppRoutes() {
         <Route path="restaurants/:id" element={<Suspense fallback={<PageLoader />}><SuperAdminRestaurantDetailPage /></Suspense>} />
         <Route path="new" element={<Suspense fallback={<PageLoader />}><SuperAdminNewRestaurantPage /></Suspense>} />
       </Route>
+
+      {/* Rutas directas para comercios: ej. /aura-skin y /aura-skin/menu */}
+      <Route path="/:slug" element={<Suspense fallback={<PageLoader />}><DynamicRestaurantRedirect /></Suspense>} />
+      <Route path="/:slug/menu" element={<Suspense fallback={<PageLoader />}><DynamicRestaurantMenuRedirect /></Suspense>} />
 
       <Route path="*" element={<Suspense fallback={<PageLoader />}><NotFoundPage /></Suspense>} />
     </Routes>
