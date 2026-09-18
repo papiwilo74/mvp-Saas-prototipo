@@ -2,12 +2,13 @@ import { BarChart3, CookingPot, ExternalLink, LayoutDashboard, LogOut, Package, 
 import { SocketNotifier } from '../components/ui/SocketNotifier';
 import { OnboardingWizard } from '../components/ui/OnboardingWizard';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRestaurantConfig } from '../context/RestaurantConfigContext';
 import { useAuth } from '../context/AuthContext';
 import { DemoBanner } from '../components/ui/DemoBanner';
 import { isSoundEnabled, setSoundEnabled, subscribeSoundChange, playOrderChime } from '../utils/audioAlert';
 import { TrialPaywallModal } from '../components/ui/TrialPaywallModal';
+import { getTrialStatus } from '../utils/trial';
 
 const links = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -34,24 +35,17 @@ export function AdminLayout() {
   const isDemo = (activeSlug || '').includes('demo');
   const isExempt = isSuperAdmin || isDemo;
 
-  const restaurantCreatedAt = user?.restaurantCreatedAt || config?.createdAt;
-  const daysLeft = restaurantCreatedAt && !isExempt
-    ? Math.max(0, Math.ceil((new Date(restaurantCreatedAt).getTime() + 14 * 86400000 - Date.now()) / 86400000))
-    : 14;
-  const isTrialExpired = !isExempt && restaurantCreatedAt && daysLeft <= 0;
+  const { daysLeft, isTrialExpired } = useMemo(() => {
+    const restaurantCreatedAt = user?.restaurantCreatedAt || config?.createdAt;
+    return getTrialStatus(restaurantCreatedAt, isExempt);
+  }, [user?.restaurantCreatedAt, config?.createdAt, isExempt]);
 
-  const [showPaywall, setShowPaywall] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(() => isTrialExpired);
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
 
   useEffect(() => {
     return subscribeSoundChange(setSoundOn);
   }, []);
-
-  useEffect(() => {
-    if (isTrialExpired) {
-      setShowPaywall(true);
-    }
-  }, [isTrialExpired]);
 
   return (
     <div className="min-h-screen bg-stone-50">

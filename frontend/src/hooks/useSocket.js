@@ -27,7 +27,7 @@ export function useSocket(restaurantId, user) {
       s.disconnect();
       socketRef.current = null;
     };
-  }, [restaurantId, user?.id]);
+  }, [restaurantId, user]);
 
   return { socketRef, connected };
 }

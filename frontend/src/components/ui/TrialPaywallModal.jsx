@@ -1,5 +1,4 @@
 import { Check, Flame, MessageCircle, ShieldCheck, Sparkles, X } from 'lucide-react';
-import { env } from '../../config/env';
 
 export function TrialPaywallModal({
   isOpen,

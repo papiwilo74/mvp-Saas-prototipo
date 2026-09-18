@@ -46,7 +46,6 @@ export function CartPage() {
   const paymentMethods = [['CASH', 'Efectivo'], ['NEQUI', 'Nequi'], ['CARD', 'Tarjeta'], ['WOMPI', 'Pago en linea']]
     .filter(([value]) => (config.paymentMethods || ['CASH', 'NEQUI', 'CARD']).includes(value));
   const activeZones = (config.deliveryZones || []).filter((zone) => zone.isActive !== false);
-  const selectedZone = activeZones.find((zone) => zone.name === deliveryZoneName);
   const distanceKm = deliveryLocation && config.storeCoordinates
     ? 6371 * 2 * Math.asin(Math.sqrt(
       Math.sin(((deliveryLocation.latitude - config.storeCoordinates.latitude) * Math.PI / 180) / 2) ** 2
@@ -65,7 +64,7 @@ export function CartPage() {
     // Synchronizes the user-selected zone with the closest calculated delivery zone.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (distanceZone && distanceZone.name !== deliveryZoneName) setDeliveryZoneName(distanceZone.name);
-  }, [distanceZone?.name]);
+  }, [distanceZone, deliveryZoneName]);
   const activeCoupons = (config.coupons || []).filter((coupon) => coupon.isActive !== false);
   const selectedCoupon = activeCoupons.find((coupon) => coupon.code?.toLowerCase() === couponCode.trim().toLowerCase());
   const discountAmount = selectedCoupon?.discountType === 'PERCENTAGE'

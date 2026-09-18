@@ -1,5 +1,5 @@
 import { MessageSquare, Search } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pagination } from '../../components/ui/Pagination';
 import { api } from '../../services/api';
 import { formatCurrency, formatDate } from '../../utils/formatters';
@@ -20,17 +20,21 @@ export function AdminCustomersPage() {
     [customers, selected, selectedId]
   );
 
-  const loadCustomers = (page = pagination.page) => {
-    api.get('/customers', { params: { search, page, pageSize: pagination.pageSize } }).then(({ data }) => {
+  const fetchCustomers = useCallback((page = 1, query = '') => {
+    api.get('/customers', { params: { search: query, page, pageSize: 20 } }).then(({ data }) => {
       setCustomers(data.customers);
       setPagination(data.pagination);
-      if (!selectedId && data.customers[0]) setSelectedId(data.customers[0].id);
+      setSelectedId((prev) => prev || data.customers[0]?.id || null);
     });
+  }, []);
+
+  const loadCustomers = (page = pagination.page) => {
+    fetchCustomers(page, search);
   };
 
   useEffect(() => {
-    loadCustomers(1);
-  }, []);
+    fetchCustomers(1, '');
+  }, [fetchCustomers]);
 
   useEffect(() => {
     if (!selectedId) return;

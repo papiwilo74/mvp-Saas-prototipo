@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 import { Pagination } from '../../components/ui/Pagination';
 import { api } from '../../services/api';
@@ -25,17 +25,17 @@ export function AdminProductsPage() {
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, pageSize: 20 });
   const [uploading, setUploading] = useState(false);
 
-  const load = (page = pagination.page) =>
+  const load = useCallback((page = 1) =>
     Promise.all([api.get('/products', { params: { page, pageSize: pagination.pageSize } }), api.get('/categories')]).then(([productsResponse, categoriesResponse]) => {
       setProducts(productsResponse.data.products);
       setPagination(productsResponse.data.pagination);
       setCategories(categoriesResponse.data.categories);
       setForm((current) => ({ ...current, categoryId: current.categoryId || categoriesResponse.data.categories[0]?.id || '' }));
-    });
+    }), [pagination.pageSize]);
 
   useEffect(() => {
     load(1);
-  }, []);
+  }, [load]);
 
   const onSubmit = async (event) => {
     event.preventDefault();
