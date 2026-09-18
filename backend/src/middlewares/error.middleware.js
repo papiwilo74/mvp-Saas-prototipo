@@ -10,6 +10,7 @@ const statusToErrorCode = {
   403: ErrorCodes?.FORBIDDEN || 'FORBIDDEN',
   404: ErrorCodes?.NOT_FOUND || 'NOT_FOUND',
   409: ErrorCodes?.CONFLICT || 'CONFLICT',
+  422: ErrorCodes?.VALIDATION_ERROR || 'UNPROCESSABLE_ENTITY',
   429: ErrorCodes?.RATE_LIMITED || 'RATE_LIMITED',
   503: ErrorCodes?.SERVICE_UNAVAILABLE || 'SERVICE_UNAVAILABLE',
 };
@@ -32,7 +33,7 @@ export const errorHandler = (error, req, res, _next) => {
 
   const isPrismaKnown = error instanceof Prisma.PrismaClientKnownRequestError;
   const statusCode = error.statusCode || (isPrismaKnown && error.code === 'P2002' ? 409 : isPrismaKnown ? 400 : 500);
-  
+
   if (statusCode >= 500) {
     logger.error({
       err: error,
@@ -52,9 +53,17 @@ export const errorHandler = (error, req, res, _next) => {
   }
 
   if (isPrismaKnown) {
+    let prismaMessage = 'Error al procesar la solicitud con la base de datos.';
+    if (error.code === 'P2002') {
+      const target = Array.isArray(error.meta?.target) ? error.meta.target.join(', ') : (error.meta?.target || 'campo');
+      prismaMessage = `Ya existe un registro con ese valor en: ${target}.`;
+    } else if (error.code === 'P2025') {
+      prismaMessage = 'El registro solicitado no fue encontrado.';
+    }
+
     return res.status(statusCode).json({
       success: false,
-      message: statusCode === 409 ? 'El recurso ya existe o hay un conflicto de datos.' : 'Error al procesar la solicitud con la base de datos.',
+      message: prismaMessage,
       code: error.code,
       errorCode: statusToErrorCode[statusCode] || statusToErrorCode[500] || 'INTERNAL_ERROR',
       requestId: req.id
@@ -66,11 +75,13 @@ export const errorHandler = (error, req, res, _next) => {
     ? 'Ocurrió un error interno. Usa el código de soporte para solicitar ayuda.'
     : (error.message || 'Error interno del servidor');
 
+  const shouldIncludeDetails = (statusCode < 500 && error.details) || (env.NODE_ENV === 'development' && error.details);
+
   return res.status(statusCode).json({
     success: false,
     message: safeMessage,
     errorCode,
-    ...(env.NODE_ENV === 'development' && error.details ? { details: error.details } : {}),
+    ...(shouldIncludeDetails ? { details: error.details } : {}),
     requestId: req.id,
     ...(env.NODE_ENV === 'development' && { stack: error.stack })
   });

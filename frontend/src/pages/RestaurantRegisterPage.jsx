@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ArrowLeft, Building2, CheckCircle2, Eye, EyeOff, Globe, Lock, Mail, Phone, Sparkles, User } from 'lucide-react';
+import { getErrorMessage } from '../utils/errorMessage';
 
 export function RestaurantRegisterPage() {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ export function RestaurantRegisterPage() {
       await registerRestaurant(form);
       navigate(`/verify-email?email=${encodeURIComponent(form.email.trim())}`);
     } catch (err) {
-      setError(err.response?.data?.message || 'No pudimos registrar tu negocio. Verifica los datos e intenta de nuevo.');
+      setError(getErrorMessage(err, 'No pudimos registrar tu negocio. Verifica los datos e intenta de nuevo.'));
     } finally {
       setSubmitting(false);
     }

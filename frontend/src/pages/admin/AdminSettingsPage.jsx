@@ -6,6 +6,7 @@ import { useRestaurantConfig } from '../../context/RestaurantConfigContext';
 import { useAuth } from '../../context/AuthContext';
 import { env } from '../../config/env';
 import { api } from '../../services/api';
+import { getErrorMessage } from '../../utils/errorMessage';
 
 const paymentOptions = [
   ['CASH', 'Efectivo'],
@@ -45,8 +46,7 @@ export function AdminSettingsPage() {
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (err) {
-      const msg = err.response?.data?.message || err.response?.data?.details?.message || 'Error al guardar la configuración';
-      setErrorMessage(typeof msg === 'string' ? msg : JSON.stringify(msg));
+      setErrorMessage(getErrorMessage(err, 'Error al guardar la configuración'));
     } finally {
       setSaving(false);
     }

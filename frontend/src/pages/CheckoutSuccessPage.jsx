@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, Clock3, CookingPot, MapPinned, MessageSquare, ShoppingBag, Star, Ticket } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Clock3, CookingPot, MapPinned, MessageSquare, Printer, ShoppingBag, Star, Ticket } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { io } from 'socket.io-client';
@@ -6,6 +6,7 @@ import { env } from '../config/env';
 import { useRestaurantConfig } from '../context/RestaurantConfigContext';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import { buildWhatsAppOrderUrl, paymentLabels } from '../utils/whatsappOrder';
+import { printOrderTicket } from '../utils/printTicket';
 
 function getStatusSteps(labels) {
   return [
@@ -250,6 +251,16 @@ export function CheckoutSuccessPage() {
           </>
         ) : null}
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          {order && (
+            <button
+              type="button"
+              onClick={() => printOrderTicket(order, config)}
+              className="btn-secondary flex-1 inline-flex items-center justify-center gap-2"
+            >
+              <Printer size={17} />
+              Imprimir comprobante
+            </button>
+          )}
           <Link to="/menu" className="btn-primary flex-1">
             Seguir comprando
             <ArrowRight size={18} />
