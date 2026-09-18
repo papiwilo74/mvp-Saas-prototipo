@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useSocket } from '../../hooks/useSocket';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
+import { playOrderChime } from '../../utils/audioAlert';
 
 export function SocketNotifier() {
   const { user } = useAuth();
@@ -13,6 +14,7 @@ export function SocketNotifier() {
     if (!socket) return;
 
     const handleNewOrder = (order) => {
+      playOrderChime();
       toast(`Nuevo pedido #${order.orderNumber} - $${Number(order.total).toLocaleString('es-CO')}`, 'success');
     };
 
@@ -21,15 +23,19 @@ export function SocketNotifier() {
       toast(`Pedido #${order.orderNumber}: ${statusLabels[order.status] || order.status}`, 'info');
     };
 
+    const handleKitchenOrder = () => {
+      playOrderChime();
+      toast('Nuevo pedido en cocina', 'warning');
+    };
+
     socket.on('new-order', handleNewOrder);
     socket.on('order-updated', handleOrderUpdated);
-    socket.on('kitchen-order', () => {
-      toast('Nuevo pedido en cocina', 'warning');
-    });
+    socket.on('kitchen-order', handleKitchenOrder);
 
     return () => {
       socket.off('new-order', handleNewOrder);
       socket.off('order-updated', handleOrderUpdated);
+      socket.off('kitchen-order', handleKitchenOrder);
     };
   }, [socketRef, toast]);
 

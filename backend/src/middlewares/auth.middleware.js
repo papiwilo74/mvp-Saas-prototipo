@@ -26,7 +26,7 @@ export const authenticate = async (req, res, next) => {
         email: true,
         role: true,
         restaurantId: true,
-        restaurant: { select: { slug: true, name: true } }
+        restaurant: { select: { slug: true, name: true, createdAt: true } }
       }
     });
 

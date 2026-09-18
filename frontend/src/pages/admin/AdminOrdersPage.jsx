@@ -1,10 +1,13 @@
-import { Bell, ChevronDown, ChevronUp, Download, MessageSquare } from 'lucide-react';
+import { Bell, ChevronDown, ChevronUp, Download, MessageSquare, Printer, Volume2, VolumeX } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pagination } from '../../components/ui/Pagination';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { api } from '../../services/api';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { paymentLabels } from '../../utils/whatsappOrder';
+import { useRestaurantConfig } from '../../context/RestaurantConfigContext';
+import { printOrderTicket } from '../../utils/printTicket';
+import { isSoundEnabled, setSoundEnabled, subscribeSoundChange, playOrderChime } from '../../utils/audioAlert';
 
 const statuses = [
   ['PENDING', 'Pendiente'],
@@ -14,34 +17,19 @@ const statuses = [
   ['CANCELLED', 'Cancelado']
 ];
 
-const playNotification = () => {
-  const AudioContext = window.AudioContext || window.webkitAudioContext;
-  if (!AudioContext) return;
-
-  const context = new AudioContext();
-  const oscillator = context.createOscillator();
-  const gain = context.createGain();
-
-  oscillator.type = 'sine';
-  oscillator.frequency.setValueAtTime(880, context.currentTime);
-  oscillator.frequency.setValueAtTime(660, context.currentTime + 0.12);
-  gain.gain.setValueAtTime(0.001, context.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.2, context.currentTime + 0.02);
-  gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.35);
-  oscillator.connect(gain);
-  gain.connect(context.destination);
-  oscillator.start();
-  oscillator.stop(context.currentTime + 0.38);
-};
-
 export function AdminOrdersPage() {
+  const { config } = useRestaurantConfig();
   const [orders, setOrders] = useState([]);
   const [filters, setFilters] = useState({ status: '', from: '', to: '' });
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, pageSize: 20 });
-  const [soundEnabled, setSoundEnabled] = useState(false);
+  const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [expandedOrder, setExpandedOrder] = useState(null);
   const seenOrders = useRef(new Set());
   const initialized = useRef(false);
+
+  useEffect(() => {
+    return subscribeSoundChange(setSoundOn);
+  }, []);
 
   const loadOrders = useCallback((page = pagination.page) => {
     const params = { ...Object.fromEntries(Object.entries(filters).filter(([, value]) => value)), page, pageSize: pagination.pageSize };
@@ -52,7 +40,7 @@ export function AdminOrdersPage() {
       const hasNewOrder = initialized.current && newIds.length > 0;
 
       if (hasNewOrder) {
-        if (soundEnabled) playNotification();
+        if (soundOn) playOrderChime();
         newIds.forEach((id) => {
           const order = data.orders.find((o) => o.id === id);
           if (order && Notification.permission === 'granted') {
@@ -72,7 +60,7 @@ export function AdminOrdersPage() {
     }).catch(() => {
       /* polling errors are expected (network blips) */
     });
-  }, [filters, pagination.page, pagination.pageSize, soundEnabled]);
+  }, [filters, pagination.page, pagination.pageSize, soundOn]);
 
   useEffect(() => {
     loadOrders(1);
@@ -99,7 +87,7 @@ export function AdminOrdersPage() {
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-2xl font-black">Gestion de pedidos</h1>
-          <p className="mt-1 text-sm text-stone-600">Estados visuales, filtros y aviso sonoro para pedidos nuevos.</p>
+          <p className="mt-1 text-sm text-stone-600">Estados visuales, filtros, impresión térmica y aviso sonoro.</p>
         </div>
         <div className="flex gap-2">
           <button type="button" className="btn-secondary min-h-10" onClick={async () => {
@@ -118,13 +106,15 @@ export function AdminOrdersPage() {
           <button
             type="button"
             onClick={() => {
-              setSoundEnabled((current) => !current);
-              if (!soundEnabled) playNotification();
+              const next = !soundOn;
+              setSoundEnabled(next);
+              if (next) playOrderChime();
             }}
-            className={`btn-secondary min-h-10 ${soundEnabled ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : ''}`}
+            className={`btn-secondary min-h-10 ${soundOn ? 'border-emerald-300 bg-emerald-50 text-emerald-800 font-bold' : ''}`}
+            title="Activar o desactivar timbre de nuevos pedidos"
           >
-            <Bell size={17} />
-            {soundEnabled ? 'Sonido activo' : 'Activar sonido'}
+            {soundOn ? <Volume2 size={17} /> : <VolumeX size={17} />}
+            {soundOn ? 'Sonido activo' : 'Activar sonido'}
           </button>
           <button
             type="button"
@@ -177,7 +167,7 @@ export function AdminOrdersPage() {
                 <th className="p-3">Pago</th>
                 <th className="p-3">Estado</th>
                 <th className="p-3">Cambiar</th>
-                <th className="p-3">WhatsApp</th>
+                <th className="p-3">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -241,11 +231,21 @@ export function AdminOrdersPage() {
                         </select>
                       </td>
                       <td className="p-3">
-                        {whatsappUrl ? (
-                          <a href={whatsappUrl} target="_blank" rel="noreferrer" className="btn-secondary min-h-10 px-3" aria-label="WhatsApp cliente">
-                            <MessageSquare size={17} />
-                          </a>
-                        ) : '-'}
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => printOrderTicket(order, config)}
+                            className="btn-secondary min-h-10 px-2.5 text-stone-700 hover:text-stone-900"
+                            title="Imprimir ticket / comanda térmica (80mm)"
+                          >
+                            <Printer size={16} />
+                          </button>
+                          {whatsappUrl && (
+                            <a href={whatsappUrl} target="_blank" rel="noreferrer" className="btn-secondary min-h-10 px-2.5" aria-label="WhatsApp cliente" title="WhatsApp cliente">
+                              <MessageSquare size={16} />
+                            </a>
+                          )}
+                        </div>
                       </td>
                     </tr>
                     {isExpanded && (
@@ -321,6 +321,16 @@ export function AdminOrdersPage() {
                                 )}
                               </div>
                             </div>
+                          </div>
+                          <div className="mt-4 pt-3 border-t border-stone-200 flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() => printOrderTicket(order, config)}
+                              className="btn-secondary text-xs font-bold py-2 px-3 inline-flex items-center gap-1.5 shadow-sm"
+                            >
+                              <Printer size={15} />
+                              Imprimir comanda térmica (80mm / 58mm)
+                            </button>
                           </div>
                         </td>
                       </tr>

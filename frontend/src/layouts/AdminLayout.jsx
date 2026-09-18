@@ -1,10 +1,13 @@
-import { BarChart3, CookingPot, ExternalLink, LayoutDashboard, LogOut, Package, ReceiptText, Settings, UserCog, UsersRound } from 'lucide-react';
+import { BarChart3, CookingPot, ExternalLink, LayoutDashboard, LogOut, Package, ReceiptText, Settings, Sparkles, UserCog, UsersRound, Volume2, VolumeX } from 'lucide-react';
 import { SocketNotifier } from '../components/ui/SocketNotifier';
 import { OnboardingWizard } from '../components/ui/OnboardingWizard';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useRestaurantConfig } from '../context/RestaurantConfigContext';
 import { useAuth } from '../context/AuthContext';
 import { DemoBanner } from '../components/ui/DemoBanner';
+import { isSoundEnabled, setSoundEnabled, subscribeSoundChange, playOrderChime } from '../utils/audioAlert';
+import { TrialPaywallModal } from '../components/ui/TrialPaywallModal';
 
 const links = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -27,6 +30,29 @@ export function AdminLayout() {
   const visibleLinks = config.showKitchenPanel === false ? links.filter((link) => link.to !== '/admin/kitchen') : links;
   const storeUrl = activeSlug ? `/menu?restaurant=${activeSlug}` : '/menu';
 
+  const isSuperAdmin = user?.role === 'SUPERADMIN';
+  const isDemo = (activeSlug || '').includes('demo');
+  const isExempt = isSuperAdmin || isDemo;
+
+  const restaurantCreatedAt = user?.restaurantCreatedAt || config?.createdAt;
+  const daysLeft = restaurantCreatedAt && !isExempt
+    ? Math.max(0, Math.ceil((new Date(restaurantCreatedAt).getTime() + 14 * 86400000 - Date.now()) / 86400000))
+    : 14;
+  const isTrialExpired = !isExempt && restaurantCreatedAt && daysLeft <= 0;
+
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [soundOn, setSoundOn] = useState(isSoundEnabled());
+
+  useEffect(() => {
+    return subscribeSoundChange(setSoundOn);
+  }, []);
+
+  useEffect(() => {
+    if (isTrialExpired) {
+      setShowPaywall(true);
+    }
+  }, [isTrialExpired]);
+
   return (
     <div className="min-h-screen bg-stone-50">
       <DemoBanner />
@@ -39,6 +65,21 @@ export function AdminLayout() {
               {config.restaurantName || user?.restaurant?.name || 'Mi Negocio'}
             </Link>
             <span className="hidden sm:inline rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-bold text-stone-300">ADMIN</span>
+            {!isExempt && (
+              <button
+                type="button"
+                onClick={() => setShowPaywall(true)}
+                className={`hidden sm:inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold transition ${
+                  isTrialExpired
+                    ? 'bg-red-500/20 border border-red-500/40 text-red-300 hover:bg-red-500/30'
+                    : 'bg-amber-500/20 border border-amber-500/40 text-amber-300 hover:bg-amber-500/30'
+                }`}
+                title="Ver planes y suscripción"
+              >
+                <Sparkles size={12} />
+                <span>{isTrialExpired ? 'Prueba vencida' : `Prueba: ${daysLeft}d`}</span>
+              </button>
+            )}
             {activeSlug && (
               <a
                 href={storeUrl}
@@ -73,6 +114,21 @@ export function AdminLayout() {
             </nav>
             <button
               type="button"
+              onClick={() => {
+                const next = !soundOn;
+                setSoundEnabled(next);
+                if (next) playOrderChime();
+              }}
+              className={`inline-flex min-h-9 shrink-0 items-center gap-1 rounded-lg px-2 text-xs font-semibold transition ${
+                soundOn ? 'text-emerald-400 hover:bg-stone-800' : 'text-stone-500 hover:bg-stone-800'
+              }`}
+              title={soundOn ? 'Sonido de pedidos activado' : 'Sonido de pedidos silenciado'}
+              aria-label={soundOn ? 'Silenciar notificaciones sonoras' : 'Activar notificaciones sonoras'}
+            >
+              {soundOn ? <Volume2 size={16} /> : <VolumeX size={16} />}
+            </button>
+            <button
+              type="button"
               onClick={logout}
               className="inline-flex min-h-9 shrink-0 items-center gap-1 rounded-lg px-2 text-xs font-semibold text-stone-400 hover:bg-stone-800 hover:text-white"
               title="Cerrar sesión"
@@ -86,6 +142,14 @@ export function AdminLayout() {
         <OnboardingWizard />
         <Outlet />
       </main>
+      <TrialPaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        daysLeft={daysLeft}
+        isExpired={isTrialExpired}
+        restaurantName={config.restaurantName || user?.restaurantName || 'Mi Negocio'}
+        restaurantSlug={activeSlug}
+      />
     </div>
   );
 }

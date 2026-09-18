@@ -1,10 +1,13 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { ChefHat, Clock, Printer, Volume2, VolumeX, CheckCircle, ArrowRight } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { useAuth } from '../../context/AuthContext';
+import { useRestaurantConfig } from '../../context/RestaurantConfigContext';
 import { api } from '../../services/api';
 import { formatCurrency, formatDate } from '../../utils/formatters';
+import { printOrderTicket } from '../../utils/printTicket';
+import { isSoundEnabled, setSoundEnabled, subscribeSoundChange, playOrderChime } from '../../utils/audioAlert';
 
 const KITCHEN_COLUMNS = [
   { id: 'PENDING', title: 'Pendientes', bg: 'bg-amber-500/10', border: 'border-amber-500/30' },
@@ -14,34 +17,13 @@ const KITCHEN_COLUMNS = [
 
 export function AdminKitchenPage() {
   const { user } = useAuth();
+  const { config } = useRestaurantConfig();
   const [orders, setOrders] = useState([]);
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [selectedTicket, setSelectedTicket] = useState(null);
-  const audioCtxRef = useRef(null);
+  const [soundEnabled, setSoundEnabledState] = useState(isSoundEnabled());
 
-  const playAlertSound = () => {
-    if (!soundEnabled) return;
-    try {
-      const ctx = audioCtxRef.current || new (window.AudioContext || window.webkitAudioContext)();
-      audioCtxRef.current = ctx;
-      if (ctx.state === 'suspended') ctx.resume();
-
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.15); // A5
-      gain.gain.setValueAtTime(0.3, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.5);
-    } catch {
-      // Audio fallback
-    }
-  };
+  useEffect(() => {
+    return subscribeSoundChange(setSoundEnabledState);
+  }, []);
 
   const loadOrders = async () => {
     try {
@@ -63,7 +45,7 @@ export function AdminKitchenPage() {
     });
 
     socket.on('kitchen-order', (newOrder) => {
-      playAlertSound();
+      playOrderChime();
       setOrders((prev) => [newOrder, ...prev.filter((o) => o.id !== newOrder.id)]);
     });
 
@@ -72,7 +54,7 @@ export function AdminKitchenPage() {
     });
 
     return () => socket.disconnect();
-  }, [user?.restaurantId, soundEnabled]);
+  }, [user?.restaurantId]);
 
   const updateStatus = async (orderId, newStatus) => {
     try {
@@ -86,10 +68,7 @@ export function AdminKitchenPage() {
   };
 
   const handlePrint = (order) => {
-    setSelectedTicket(order);
-    setTimeout(() => {
-      window.print();
-    }, 150);
+    printOrderTicket(order, config);
   };
 
   return (
@@ -108,7 +87,11 @@ export function AdminKitchenPage() {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => setSoundEnabled(!soundEnabled)}
+            onClick={() => {
+              const next = !soundEnabled;
+              setSoundEnabled(next);
+              if (next) playOrderChime();
+            }}
             className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-bold transition ${
               soundEnabled
                 ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
@@ -234,37 +217,6 @@ export function AdminKitchenPage() {
           );
         })}
       </div>
-
-      {/* Printable Ticket Template */}
-      {selectedTicket && (
-        <div className="hidden print:block print:fixed print:inset-0 print:bg-white print:p-4 text-black text-xs font-mono">
-          <div className="max-w-[80mm] mx-auto text-center space-y-2">
-            <h1 className="text-lg font-bold">COMANDA DE COCINA</h1>
-            <p className="text-sm">Pedido #{selectedTicket.orderNumber}</p>
-            <p>{formatDate(selectedTicket.createdAt)}</p>
-            <div className="border-b border-dashed my-2"></div>
-            <p className="text-left font-bold">Cliente: {selectedTicket.customerName}</p>
-            {selectedTicket.customerPhone && <p className="text-left">Tel: {selectedTicket.customerPhone}</p>}
-            {selectedTicket.customerAddress && <p className="text-left">Dir: {selectedTicket.customerAddress}</p>}
-            <div className="border-b border-dashed my-2"></div>
-            <div className="text-left space-y-1">
-              {(selectedTicket.items || []).map((item, i) => (
-                <div key={i} className="flex justify-between font-bold text-sm">
-                  <span>{item.quantity}x {item.product?.name}</span>
-                </div>
-              ))}
-            </div>
-            {selectedTicket.notes && (
-              <>
-                <div className="border-b border-dashed my-2"></div>
-                <p className="text-left font-bold">NOTAS: {selectedTicket.notes}</p>
-              </>
-            )}
-            <div className="border-b border-dashed my-2"></div>
-            <p className="font-bold text-sm">Total: {formatCurrency(selectedTicket.total)}</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

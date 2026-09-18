@@ -4,5 +4,8 @@ export const toPublicUser = (user) => ({
   email: user.email,
   role: user.role,
   restaurantId: user.restaurantId,
-  restaurantSlug: user.restaurant?.slug || user.restaurantSlug || null
+  restaurantName: user.restaurant?.name || null,
+  restaurantSlug: user.restaurant?.slug || user.restaurantSlug || null,
+  restaurantCreatedAt: user.restaurant?.createdAt || null
 });
+
