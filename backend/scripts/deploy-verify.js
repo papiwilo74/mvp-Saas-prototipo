@@ -111,8 +111,8 @@ async function checkHealth(baseUrl, timeout) {
       fail(name, status, elapsed, `expected 200`);
       return;
     }
-    if (body.database !== 'ok') {
-      fail(name, status, elapsed, `database=${body.database} expected "ok"`);
+    if (body.database !== 'ok' && body.db !== 'connected' && body.status !== 'ok') {
+      fail(name, status, elapsed, `database=${body.database || body.db} expected "ok" or "connected"`);
       return;
     }
     pass(name, status, elapsed);

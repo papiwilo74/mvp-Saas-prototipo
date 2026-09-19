@@ -21,6 +21,7 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+    serviceWorkers: 'block',
   },
   projects: [
     {
@@ -28,4 +29,11 @@ export default defineConfig({
       use: { browserName: 'chromium' },
     },
   ],
+  webServer: {
+    command: 'npm run preview -- --port 5173 --host 0.0.0.0',
+    cwd: resolve(__dirname, '..', 'frontend'),
+    url: 'http://localhost:5173',
+    reuseExistingServer: true,
+    timeout: 30000,
+  },
 });

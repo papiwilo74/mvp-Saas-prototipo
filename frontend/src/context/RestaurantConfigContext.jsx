@@ -61,7 +61,7 @@ export function RestaurantConfigProvider({ children }) {
     queryKey: apiQueryKey('restaurantConfig', activeSlug),
     queryFn: async () => {
       const { data } = await api.get('/restaurant-config', { params: { restaurant: activeSlug } });
-      return normalizeConfig(data.restaurant.config);
+      return normalizeConfig(data.restaurant?.config || data.config || data);
     },
     staleTime: 10 * 60 * 1000,
     retry: 2,

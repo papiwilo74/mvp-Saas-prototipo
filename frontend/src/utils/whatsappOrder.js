@@ -19,7 +19,7 @@ export function buildWhatsAppOrderUrl({ order, config }) {
           const variantInfo = item.product?._variantLabels?.length
             ? ` (${item.product._variantLabels.join(', ')})`
             : '';
-          return `- ${item.quantity}x ${item.product.name}${variantInfo} - ${formatCurrency(item.subtotal)}`;
+          return `- ${item.quantity}x ${item.product?.name || 'Producto'}${variantInfo} - ${formatCurrency(item.subtotal)}`;
         })
         .join('\n')
     : '';
