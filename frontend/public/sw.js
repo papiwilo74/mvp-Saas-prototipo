@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ff-cache-v3';
+const CACHE_NAME = 'ff-cache-v4';
 const STATIC_ASSETS = ['/', '/menu', '/offline', '/manifest.json', '/icons/icon-192.svg', '/icons/icon-512.svg'];
 
 self.addEventListener('install', (event) => {
@@ -24,6 +24,7 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
+  // 1. Peticiones de API: Network con fallback a cache
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       fetch(event.request)
@@ -37,6 +38,25 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // 2. Navegación HTML (páginas): Network-First para siempre servir la versión más reciente
+  if (event.request.mode === 'navigate' || event.request.destination === 'document') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => {
+          return caches.match(event.request).then((cached) => cached || caches.match('/offline'));
+        })
+    );
+    return;
+  }
+
+  // 3. Assets inmutables con hash (icons, assets): Cache-First
   if (url.pathname.startsWith('/icons/') || url.pathname.startsWith('/assets/')) {
     event.respondWith(
       caches.match(event.request).then((cached) => {
@@ -51,18 +71,18 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // 4. Otras peticiones GET: Network con fallback a cache y /offline
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const fetched = fetch(event.request).then((response) => {
+    fetch(event.request)
+      .then((response) => {
         if (response.ok) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
         return response;
-      }).catch(() => {
-        return caches.match('/offline');
-      });
-      return cached || fetched;
-    })
+      })
+      .catch(() => {
+        return caches.match(event.request).then((cached) => cached || caches.match('/offline'));
+      })
   );
 });

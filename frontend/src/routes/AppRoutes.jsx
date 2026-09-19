@@ -45,6 +45,7 @@ const loadAdmin = (name) => handleDynamicImport(() => import(`../pages/admin/${n
 const loadSuper = (name) => handleDynamicImport(() => import(`../pages/superadmin/${name}.jsx`).then((m) => ({ default: m[name] })));
 const loadLayout = (name) => handleDynamicImport(() => import(`../layouts/${name}.jsx`).then((m) => ({ default: m[name] })));
 
+const SaasLayout = lazy(loadLayout('SaasLayout'));
 const AppLayout = lazy(loadLayout('AppLayout'));
 const AdminLayout = lazy(loadLayout('AdminLayout'));
 const SuperAdminLayout = lazy(loadLayout('SuperAdminLayout'));
@@ -94,33 +95,47 @@ function RootLandingPage() {
   const params = new URLSearchParams(location.search);
   const hasRestaurant = Boolean(params.get('restaurant'));
 
-  return hasRestaurant ? <LandingPage /> : <SaasLandingPage />;
+  return hasRestaurant ? (
+    <AppLayout>
+      <LandingPage />
+    </AppLayout>
+  ) : (
+    <SaasLayout>
+      <SaasLandingPage />
+    </SaasLayout>
+  );
 }
 
 export function AppRoutes() {
   return (
     <Routes>
-      <Route element={<Suspense fallback={<PageLoader />}><AppLayout /></Suspense>}>
-        <Route path="/" element={<Suspense fallback={<PageLoader />}><RootLandingPage /></Suspense>} />
-        <Route path="/menu" element={<Suspense fallback={<PageLoader />}><MenuPage /></Suspense>} />
-        <Route path="/products/:id" element={<Suspense fallback={<PageLoader />}><ProductDetailPage /></Suspense>} />
-        <Route path="/cart" element={<Suspense fallback={<PageLoader />}><CartPage /></Suspense>} />
-        <Route path="/checkout/success" element={<Suspense fallback={<PageLoader />}><CheckoutSuccessPage /></Suspense>} />
+      <Route path="/" element={<Suspense fallback={<PageLoader />}><RootLandingPage /></Suspense>} />
+
+      {/* Rutas Institucionales y de Autenticación SaaS (OrderFlow) */}
+      <Route element={<Suspense fallback={<PageLoader />}><SaasLayout /></Suspense>}>
+        <Route path="/saas" element={<Suspense fallback={<PageLoader />}><SaasLandingPage /></Suspense>} />
         <Route path="/login" element={<Suspense fallback={<PageLoader />}><LoginPage /></Suspense>} />
         <Route path="/registro" element={<Suspense fallback={<PageLoader />}><RestaurantRegisterPage /></Suspense>} />
         <Route path="/register" element={<Suspense fallback={<PageLoader />}><RestaurantRegisterPage /></Suspense>} />
         <Route path="/registro-restaurante" element={<Suspense fallback={<PageLoader />}><RestaurantRegisterPage /></Suspense>} />
         <Route path="/registro-negocio" element={<Suspense fallback={<PageLoader />}><RestaurantRegisterPage /></Suspense>} />
         <Route path="/registro-cliente" element={<Suspense fallback={<PageLoader />}><RegisterPage /></Suspense>} />
-        {env.enableOrderHistory ? <Route path="/orders" element={<Suspense fallback={<PageLoader />}><ProtectedRoute><OrderHistoryPage /></ProtectedRoute></Suspense>} /> : null}
-        <Route path="/profile" element={<Suspense fallback={<PageLoader />}><ProtectedRoute><ProfilePage /></ProtectedRoute></Suspense>} />
         <Route path="/forgot-password" element={<Suspense fallback={<PageLoader />}><ForgotPasswordPage /></Suspense>} />
         <Route path="/reset-password" element={<Suspense fallback={<PageLoader />}><ResetPasswordPage /></Suspense>} />
-        <Route path="/terms" element={<Suspense fallback={<PageLoader />}><TermsPage /></Suspense>} />
-        <Route path="/privacy" element={<Suspense fallback={<PageLoader />}><PrivacyPage /></Suspense>} />
-        <Route path="/saas" element={<Suspense fallback={<PageLoader />}><SaasLandingPage /></Suspense>} />
         <Route path="/verify-email" element={<Suspense fallback={<PageLoader />}><VerifyEmailPage /></Suspense>} />
         <Route path="/verificar-email" element={<Suspense fallback={<PageLoader />}><VerifyEmailPage /></Suspense>} />
+        <Route path="/terms" element={<Suspense fallback={<PageLoader />}><TermsPage /></Suspense>} />
+        <Route path="/privacy" element={<Suspense fallback={<PageLoader />}><PrivacyPage /></Suspense>} />
+      </Route>
+
+      {/* Rutas de Catálogo y Pedidos de Tienda / Restaurante */}
+      <Route element={<Suspense fallback={<PageLoader />}><AppLayout /></Suspense>}>
+        <Route path="/menu" element={<Suspense fallback={<PageLoader />}><MenuPage /></Suspense>} />
+        <Route path="/products/:id" element={<Suspense fallback={<PageLoader />}><ProductDetailPage /></Suspense>} />
+        <Route path="/cart" element={<Suspense fallback={<PageLoader />}><CartPage /></Suspense>} />
+        <Route path="/checkout/success" element={<Suspense fallback={<PageLoader />}><CheckoutSuccessPage /></Suspense>} />
+        {env.enableOrderHistory ? <Route path="/orders" element={<Suspense fallback={<PageLoader />}><ProtectedRoute><OrderHistoryPage /></ProtectedRoute></Suspense>} /> : null}
+        <Route path="/profile" element={<Suspense fallback={<PageLoader />}><ProtectedRoute><ProfilePage /></ProtectedRoute></Suspense>} />
       </Route>
 
       <Route path="/admin" element={<Suspense fallback={<PageLoader />}><ProtectedRoute requireAdmin><AdminLayout /></ProtectedRoute></Suspense>}>

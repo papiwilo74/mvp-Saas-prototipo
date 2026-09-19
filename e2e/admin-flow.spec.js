@@ -249,4 +249,30 @@ test.describe('Flujo administrador: login, gestion de pedidos y superadmin', () 
     await expect(page.getByText('42')).toBeVisible();
     await expect(page.getByText('28')).toBeVisible();
   });
+
+  test('pantalla de login y registro muestra layout limpio de OrderFlow sin Demo Burger', async ({ page }) => {
+    await page.goto('/login');
+    await page.waitForLoadState('networkidle');
+
+    // Debe mostrar branding institucional OrderFlow en header y footer
+    const brandingLink = page.getByRole('link', { name: 'OrderFlow SaaS para negocios' });
+    await expect(brandingLink).toBeVisible();
+    await expect(page.getByText('SaaS para negocios')).toBeVisible();
+    await expect(page.getByText('Calculadora de Ahorro')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Ingresar' })).toBeVisible();
+
+    // NUNCA debe mostrar el encabezado de Demo Burger ni el banner de demostración
+    const header = page.locator('header');
+    await expect(header.getByText('Demo Burger')).not.toBeVisible();
+    await expect(page.getByText('Entorno de demostración')).not.toBeVisible();
+    await expect(page.getByText('3 zonas de entrega')).not.toBeVisible();
+
+    // Verificar también en /registro
+    await page.goto('/registro');
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByRole('link', { name: 'OrderFlow SaaS para negocios' })).toBeVisible();
+    await expect(header.getByText('Demo Burger')).not.toBeVisible();
+    await expect(page.getByText('Entorno de demostración')).not.toBeVisible();
+  });
 });
+
