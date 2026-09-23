@@ -12,17 +12,17 @@ const productVariantSchema = z.object({
 });
 
 const productBody = z.object({
-  name: z.string().min(2),
-  description: z.string().min(5),
-  price: z.coerce.number().positive(),
-  imageUrl: z.string().url().optional().or(z.literal('')),
-  isAvailable: z.boolean().optional(),
-  trackStock: z.boolean().optional(),
-  stock: z.coerce.number().int().min(0).optional().nullable(),
-  isCombo: z.boolean().optional(),
-  comboItems: z.array(z.string().min(1)).optional(),
-  variants: z.array(productVariantSchema).optional(),
-  categoryId: z.string().min(1)
+  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  description: z.string().nullish().or(z.literal('')).transform((v) => (v ? v.trim() : '')),
+  price: z.coerce.number().positive('El precio debe ser un número positivo'),
+  imageUrl: z.string().nullish().or(z.literal('')).transform((v) => (v ? v.trim() : null)),
+  isAvailable: z.boolean().optional().default(true),
+  trackStock: z.boolean().optional().default(false),
+  stock: z.coerce.number().int().min(0).nullish(),
+  isCombo: z.boolean().optional().default(false),
+  comboItems: z.array(z.string().min(1)).nullish().transform((v) => (v || [])),
+  variants: z.array(productVariantSchema).nullish().transform((v) => (v || null)),
+  categoryId: z.string().min(1, 'La categoría es requerida')
 });
 
 export const createProductSchema = z.object({ body: productBody });

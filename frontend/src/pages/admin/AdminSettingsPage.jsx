@@ -1,5 +1,5 @@
 import { Check, Copy, ExternalLink, QrCode, Save } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { QRCode } from '../../components/ui/QRCode';
 import { useRestaurantConfig } from '../../context/RestaurantConfigContext';
@@ -19,12 +19,31 @@ export function AdminSettingsPage() {
   const { config, setConfig, activeSlug: configSlug } = useRestaurantConfig();
   const { user } = useAuth();
   const location = useLocation();
-  const [form, setForm] = useState(config);
+  const [form, setForm] = useState(() => ({
+    ...(config || {}),
+    deliveryZones: Array.isArray(config?.deliveryZones) ? config.deliveryZones : [],
+    coupons: Array.isArray(config?.coupons) ? config.coupons : [],
+    paymentMethods: Array.isArray(config?.paymentMethods) ? config.paymentMethods : ['CASH', 'NEQUI', 'CARD'],
+    deliveryModes: Array.isArray(config?.deliveryModes) ? config.deliveryModes : ['DELIVERY', 'PICKUP']
+  }));
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showQR, setShowQR] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (config && Object.keys(config).length > 0) {
+      setForm((prev) => ({
+        ...prev,
+        ...config,
+        deliveryZones: Array.isArray(config.deliveryZones) ? config.deliveryZones : [],
+        coupons: Array.isArray(config.coupons) ? config.coupons : [],
+        paymentMethods: Array.isArray(config.paymentMethods) ? config.paymentMethods : ['CASH', 'NEQUI', 'CARD'],
+        deliveryModes: Array.isArray(config.deliveryModes) ? config.deliveryModes : ['DELIVERY', 'PICKUP']
+      }));
+    }
+  }, [config]);
 
   const searchParams = new URLSearchParams(location.search);
   const restaurantSlug = searchParams.get('restaurant') || user?.restaurantSlug || configSlug || env.restaurantSlug;
@@ -41,7 +60,14 @@ export function AdminSettingsPage() {
     setErrorMessage('');
     setSaving(true);
     try {
-      const { data } = await api.put('/restaurant-config', form);
+      const payload = {
+        ...form,
+        deliveryZones: Array.isArray(form.deliveryZones) ? form.deliveryZones : [],
+        coupons: Array.isArray(form.coupons) ? form.coupons : [],
+        paymentMethods: Array.isArray(form.paymentMethods) ? form.paymentMethods : ['CASH', 'NEQUI', 'CARD'],
+        deliveryModes: Array.isArray(form.deliveryModes) ? form.deliveryModes : ['DELIVERY', 'PICKUP']
+      };
+      const { data } = await api.put('/restaurant-config', payload);
       setConfig(data.config);
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);

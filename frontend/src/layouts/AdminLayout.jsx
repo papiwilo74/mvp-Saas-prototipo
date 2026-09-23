@@ -40,8 +40,24 @@ export function AdminLayout() {
     return getTrialStatus(restaurantCreatedAt, isExempt);
   }, [user?.restaurantCreatedAt, config?.createdAt, isExempt]);
 
-  const [showPaywall, setShowPaywall] = useState(() => isTrialExpired);
+  const [showPaywall, setShowPaywall] = useState(() => {
+    try {
+      if (sessionStorage.getItem('trial_paywall_dismissed') === 'true') return false;
+    } catch {
+      // ignore storage access errors
+    }
+    return isTrialExpired;
+  });
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
+
+  const handleClosePaywall = () => {
+    try {
+      sessionStorage.setItem('trial_paywall_dismissed', 'true');
+    } catch {
+      // ignore
+    }
+    setShowPaywall(false);
+  };
 
   useEffect(() => {
     return subscribeSoundChange(setSoundOn);
@@ -138,7 +154,7 @@ export function AdminLayout() {
       </main>
       <TrialPaywallModal
         isOpen={showPaywall}
-        onClose={() => setShowPaywall(false)}
+        onClose={handleClosePaywall}
         daysLeft={daysLeft}
         isExpired={isTrialExpired}
         restaurantName={config.restaurantName || user?.restaurantName || 'Mi Negocio'}

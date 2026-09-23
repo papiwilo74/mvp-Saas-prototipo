@@ -23,6 +23,7 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
+  if (!url.protocol.startsWith('http')) return;
 
   // 1. Peticiones de API: Network con fallback a cache
   if (url.pathname.startsWith('/api/')) {

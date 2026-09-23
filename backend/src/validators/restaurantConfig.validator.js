@@ -1,14 +1,14 @@
 import { z } from 'zod';
 
-const optionalUrl = z.string().url().optional().nullable().or(z.literal(''));
-const optionalString = z.string().optional().nullable();
+const optionalUrl = z.string().nullish().or(z.literal('')).transform((val) => (val ? val.trim() : null));
+const optionalString = z.string().nullish().or(z.literal('')).transform((val) => (val ? val.trim() : null));
 
 const deliveryZoneSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, 'El nombre de la zona es requerido'),
   fee: z.coerce.number().min(0).default(0),
-  minOrder: z.coerce.number().min(0).optional().nullable(),
-  estimatedMinutes: z.coerce.number().int().min(0).optional().nullable(),
+  minOrder: z.coerce.number().min(0).nullish(),
+  estimatedMinutes: z.coerce.number().int().min(0).nullish(),
   isActive: z.boolean().optional().default(true),
   coordinates: z.any().optional(),
   polygon: z.any().optional()
@@ -20,7 +20,7 @@ const couponSchema = z.object({
   description: optionalString,
   discountType: z.enum(['PERCENTAGE', 'FIXED']).default('PERCENTAGE'),
   discountValue: z.coerce.number().min(0).default(0),
-  minimumOrder: z.coerce.number().min(0).optional().nullable(),
+  minimumOrder: z.coerce.number().min(0).nullish(),
   startsAt: optionalString,
   endsAt: optionalString,
   isActive: z.boolean().optional().default(true)
@@ -36,20 +36,20 @@ export const updateRestaurantConfigSchema = z.object({
     phone: optionalString,
     whatsapp: optionalString,
     address: optionalString,
-    email: z.string().email().optional().nullable().or(z.literal('')),
+    email: z.string().nullish().or(z.literal('')).transform((val) => (val ? val.trim() : null)),
     facebookUrl: optionalUrl,
     instagramUrl: optionalUrl,
     openingHours: optionalString,
-    businessHours: z.record(z.any()).optional().nullable(),
+    businessHours: z.record(z.any()).nullish().transform((val) => val || null),
     acceptsScheduledOrders: z.boolean().optional().default(false),
     leadTimeMinutes: z.coerce.number().int().min(0).optional().default(30),
     deliveryFee: z.coerce.number().min(0).optional().default(0),
-    storeLatitude: z.coerce.number().min(-90).max(90).optional().nullable(),
-    storeLongitude: z.coerce.number().min(-180).max(180).optional().nullable(),
-    deliveryModes: z.array(z.enum(['DELIVERY', 'PICKUP'])).optional().default(['DELIVERY', 'PICKUP']),
-    deliveryZones: z.array(deliveryZoneSchema).optional().default([]),
-    coupons: z.array(couponSchema).optional().default([]),
-    paymentMethods: z.array(z.string()).optional().default(['CASH', 'NEQUI', 'CARD']),
+    storeLatitude: z.coerce.number().min(-90).max(90).nullish(),
+    storeLongitude: z.coerce.number().min(-180).max(180).nullish(),
+    deliveryModes: z.array(z.enum(['DELIVERY', 'PICKUP'])).nullish().transform((val) => val || ['DELIVERY', 'PICKUP']),
+    deliveryZones: z.array(deliveryZoneSchema).nullish().transform((val) => val || []),
+    coupons: z.array(couponSchema).nullish().transform((val) => val || []),
+    paymentMethods: z.array(z.string()).nullish().transform((val) => val || ['CASH', 'NEQUI', 'CARD']),
     wompiPublicKey: optionalString,
     wompiPrivateKey: optionalString,
     whatsappToken: optionalString,
@@ -59,6 +59,6 @@ export const updateRestaurantConfigSchema = z.object({
       enabled: z.boolean().default(false),
       pointsPerPeso: z.coerce.number().min(0).optional().default(0.01),
       pointsValue: z.coerce.number().min(0).optional().default(10)
-    }).passthrough().optional().nullable()
+    }).passthrough().nullish()
   }).passthrough()
 });

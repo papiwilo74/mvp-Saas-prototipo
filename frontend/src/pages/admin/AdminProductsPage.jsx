@@ -3,6 +3,7 @@ import { Pencil, Trash2 } from 'lucide-react';
 import { Pagination } from '../../components/ui/Pagination';
 import { api } from '../../services/api';
 import { formatCurrency } from '../../utils/formatters';
+import { getErrorMessage } from '../../utils/errorMessage';
 
 const emptyForm = {
   name: '',
@@ -24,6 +25,8 @@ export function AdminProductsPage() {
   const [editingId, setEditingId] = useState(null);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, pageSize: 20 });
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const load = useCallback((page = 1) =>
     Promise.all([api.get('/products', { params: { page, pageSize: pagination.pageSize } }), api.get('/categories')]).then(([productsResponse, categoriesResponse]) => {
@@ -39,22 +42,35 @@ export function AdminProductsPage() {
 
   const onSubmit = async (event) => {
     event.preventDefault();
-    const payload = {
-      ...form,
-      price: Number(form.price),
-      stock: form.trackStock ? Number(form.stock || 0) : null,
-      comboItems: form.isCombo ? form.comboItems.split(',').map((item) => item.trim()).filter(Boolean) : []
-    };
+    setErrorMessage('');
+    setSaving(true);
+    try {
+      const payload = {
+        ...form,
+        name: form.name.trim(),
+        description: form.description ? form.description.trim() : '',
+        price: Number(form.price),
+        imageUrl: form.imageUrl ? form.imageUrl.trim() : null,
+        stock: form.trackStock ? Number(form.stock || 0) : null,
+        comboItems: form.isCombo && typeof form.comboItems === 'string'
+          ? form.comboItems.split(',').map((item) => item.trim()).filter(Boolean)
+          : Array.isArray(form.comboItems) ? form.comboItems : []
+      };
 
-    if (editingId) {
-      await api.put(`/products/${editingId}`, payload);
-    } else {
-      await api.post('/products', payload);
+      if (editingId) {
+        await api.put(`/products/${editingId}`, payload);
+      } else {
+        await api.post('/products', payload);
+      }
+
+      setEditingId(null);
+      setForm({ ...emptyForm, categoryId: categories[0]?.id || '' });
+      load(pagination.page);
+    } catch (err) {
+      setErrorMessage(getErrorMessage(err, 'Error al guardar el producto'));
+    } finally {
+      setSaving(false);
     }
-
-    setEditingId(null);
-    setForm({ ...emptyForm, categoryId: categories[0]?.id || '' });
-    load(pagination.page);
   };
 
   const uploadImage = async (file) => {
@@ -74,9 +90,10 @@ export function AdminProductsPage() {
 
   const editProduct = (product) => {
     setEditingId(product.id);
+    setErrorMessage('');
     setForm({
       name: product.name,
-      description: product.description,
+      description: product.description || '',
       price: Number(product.price),
       imageUrl: product.imageUrl || '',
       categoryId: product.categoryId,
@@ -88,6 +105,12 @@ export function AdminProductsPage() {
     });
   };
 
+  const cancelEdit = () => {
+    setEditingId(null);
+    setErrorMessage('');
+    setForm({ ...emptyForm, categoryId: categories[0]?.id || '' });
+  };
+
   const deleteProduct = async (productId) => {
     await api.delete(`/products/${productId}`);
     load(pagination.page);
@@ -96,15 +119,33 @@ export function AdminProductsPage() {
   return (
     <div className="grid gap-8 lg:grid-cols-[380px_1fr]">
       <form onSubmit={onSubmit} className="h-fit rounded-md border border-stone-200 bg-white p-5 shadow-sm">
-        <h1 className="text-xl font-black">{editingId ? 'Editar producto' : 'Nuevo producto'}</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-black">{editingId ? 'Editar producto' : 'Nuevo producto'}</h1>
+          {editingId ? (
+            <button
+              type="button"
+              onClick={cancelEdit}
+              className="text-xs font-bold text-stone-500 hover:text-stone-800 underline"
+            >
+              Cancelar
+            </button>
+          ) : null}
+        </div>
+
+        {errorMessage ? (
+          <div className="mt-4 rounded-lg bg-red-50 p-3 text-xs font-semibold text-red-600 border border-red-200">
+            {errorMessage}
+          </div>
+        ) : null}
+
         <div className="mt-5 space-y-4">
           <label className="block space-y-1">
             <span className="label">Nombre</span>
             <input className="input" required value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />
           </label>
           <label className="block space-y-1">
-            <span className="label">Descripcion</span>
-            <textarea className="input min-h-24" required value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} />
+            <span className="label">Descripcion (opcional)</span>
+            <textarea className="input min-h-24" value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} placeholder="Ingredientes o detalles del producto" />
           </label>
           <label className="block space-y-1">
             <span className="label">Precio</span>
@@ -150,7 +191,13 @@ export function AdminProductsPage() {
             </label>
           ) : null}
         </div>
-        <button type="submit" className="btn-primary mt-5 w-full">{editingId ? 'Guardar cambios' : 'Crear producto'}</button>
+        <button
+          type="submit"
+          disabled={saving}
+          className="btn-primary mt-5 w-full disabled:opacity-50"
+        >
+          {saving ? 'Guardando...' : (editingId ? 'Guardar cambios' : 'Crear producto')}
+        </button>
       </form>
 
       <section>
