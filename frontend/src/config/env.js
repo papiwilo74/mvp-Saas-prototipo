@@ -19,7 +19,9 @@ function getRestaurantSlug() {
 const restaurantSlug = getRestaurantSlug();
 
 export const env = {
-  apiUrl: import.meta.env.VITE_API_URL || '/api',
+  apiUrl: import.meta.env.VITE_API_URL?.startsWith('https://')
+    ? import.meta.env.VITE_API_URL
+    : '/api',
   restaurantSlug,
   enableOrderHistory: import.meta.env.VITE_ENABLE_ORDER_HISTORY !== 'false',
   demoMode: import.meta.env.VITE_DEMO_MODE === 'true' || restaurantSlug.includes('demo')

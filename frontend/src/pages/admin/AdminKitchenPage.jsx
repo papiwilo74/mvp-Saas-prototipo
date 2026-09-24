@@ -5,6 +5,7 @@ import { StatusBadge } from '../../components/ui/StatusBadge';
 import { useAuth } from '../../context/AuthContext';
 import { useRestaurantConfig } from '../../context/RestaurantConfigContext';
 import { api } from '../../services/api';
+import { env } from '../../config/env';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { printOrderTicket } from '../../utils/printTicket';
 import { isSoundEnabled, setSoundEnabled, subscribeSoundChange, playOrderChime } from '../../utils/audioAlert';
@@ -39,7 +40,11 @@ export function AdminKitchenPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadOrders();
 
-    const socket = io(import.meta.env.VITE_API_URL || '', {
+    const socketBaseUrl = env.apiUrl?.startsWith('http') && !env.apiUrl.includes('localhost')
+      ? env.apiUrl.replace(/\/api$/, '')
+      : (typeof window !== 'undefined' ? window.location.origin : '');
+
+    const socket = io(socketBaseUrl, {
       query: { restaurantId: user?.restaurantId },
       withCredentials: true
     });
