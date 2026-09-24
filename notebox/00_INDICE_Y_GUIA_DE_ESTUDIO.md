@@ -17,6 +17,7 @@ Esta carpeta contiene todas las notas, diagramas y explicaciones técnicas organ
 | **05** | [05_SEGURIDAD_AUTENTICACION_Y_PERMISOS.md](file:///c:/Users/villa/OneDrive/Documentos/aplicacion%20web/notebox/05_SEGURIDAD_AUTENTICACION_Y_PERMISOS.md) | Tokens JWT en cookies HttpOnly/SameSite, CSRF con doble envío, RBAC, Rate Limiting anti-DDoS y Sentry. |
 | **06** | [06_TIEMPO_REAL_PAGOS_Y_LOGISTICA.md](file:///c:/Users/villa/OneDrive/Documentos/aplicacion%20web/notebox/06_TIEMPO_REAL_PAGOS_Y_LOGISTICA.md) | WebSockets por salas de restaurante, pasarela Wompi con webhook criptográfico HMAC SHA-256, Mapbox y WhatsApp. |
 | **07** | [07_TESTING_DEVOPS_Y_PRODUCCION.md](file:///c:/Users/villa/OneDrive/Documentos/aplicacion%20web/notebox/07_TESTING_DEVOPS_Y_PRODUCCION.md) | Vitest (55 tests), Playwright E2E (4 tests), pruebas de carga (stress-test), despliegue en Vercel + Render y runbooks. |
+| **08** | [08_GUIA_PILOTO_REAL_METRICAS_Y_DEMO.md](file:///c:/Users/villa/OneDrive/Documentos/aplicacion%20web/notebox/08_GUIA_PILOTO_REAL_METRICAS_Y_DEMO.md) | Hardening de calidad, protocolo para piloto con usuarios reales, métricas de observabilidad, ADRs y demo profesional. |
 
 ---
 
