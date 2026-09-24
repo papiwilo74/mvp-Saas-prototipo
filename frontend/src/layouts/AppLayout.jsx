@@ -1,4 +1,4 @@
-import { Clock3, Home, ShoppingBag, Store, Zap } from 'lucide-react';
+import { Clock3, Home, ShoppingBag, Store } from 'lucide-react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useRestaurantConfig } from '../context/RestaurantConfigContext';

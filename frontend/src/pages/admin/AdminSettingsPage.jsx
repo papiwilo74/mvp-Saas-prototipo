@@ -1,5 +1,5 @@
 import { Check, Copy, ExternalLink, QrCode, Save } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { QRCode } from '../../components/ui/QRCode';
 import { useRestaurantConfig } from '../../context/RestaurantConfigContext';
@@ -15,10 +15,7 @@ const paymentOptions = [
   ['WOMPI', 'Pago en linea (Wompi)']
 ];
 
-export function AdminSettingsPage() {
-  const { config, setConfig, activeSlug: configSlug } = useRestaurantConfig();
-  const { user } = useAuth();
-  const location = useLocation();
+function SettingsForm({ config, setConfig, menuUrl }) {
   const [form, setForm] = useState(() => ({
     ...(config || {}),
     deliveryZones: Array.isArray(config?.deliveryZones) ? config.deliveryZones : [],
@@ -31,23 +28,6 @@ export function AdminSettingsPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [showQR, setShowQR] = useState(false);
   const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    if (config && Object.keys(config).length > 0) {
-      setForm((prev) => ({
-        ...prev,
-        ...config,
-        deliveryZones: Array.isArray(config.deliveryZones) ? config.deliveryZones : [],
-        coupons: Array.isArray(config.coupons) ? config.coupons : [],
-        paymentMethods: Array.isArray(config.paymentMethods) ? config.paymentMethods : ['CASH', 'NEQUI', 'CARD'],
-        deliveryModes: Array.isArray(config.deliveryModes) ? config.deliveryModes : ['DELIVERY', 'PICKUP']
-      }));
-    }
-  }, [config]);
-
-  const searchParams = new URLSearchParams(location.search);
-  const restaurantSlug = searchParams.get('restaurant') || user?.restaurantSlug || configSlug || env.restaurantSlug;
-  const menuUrl = `${window.location.origin}/menu?restaurant=${restaurantSlug}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(menuUrl);
@@ -362,3 +342,24 @@ export function AdminSettingsPage() {
     </form>
   );
 }
+
+export function AdminSettingsPage() {
+  const { config, setConfig, activeSlug: configSlug } = useRestaurantConfig();
+  const { user } = useAuth();
+  const location = useLocation();
+
+  const searchParams = new URLSearchParams(location.search);
+  const restaurantSlug = searchParams.get('restaurant') || user?.restaurantSlug || configSlug || env.restaurantSlug;
+  const menuUrl = `${window.location.origin}/menu?restaurant=${restaurantSlug}`;
+
+  return (
+    <SettingsForm
+      key={config?.id || restaurantSlug || 'settings'}
+      config={config}
+      setConfig={setConfig}
+      menuUrl={menuUrl}
+      restaurantSlug={restaurantSlug}
+    />
+  );
+}
+
