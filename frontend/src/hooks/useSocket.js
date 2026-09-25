@@ -7,11 +7,7 @@ export function useSocket(restaurantId, user) {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    const socketBaseUrl = env.apiUrl?.startsWith('http')
-      ? env.apiUrl.replace(/\/api$/, '')
-      : (typeof window !== 'undefined' ? window.location.origin : '');
-
-    const s = io(socketBaseUrl, {
+    const s = io(env.socketUrl, {
       query: { restaurantId: restaurantId || '' },
       withCredentials: true,
       auth: user ? { token: '' } : undefined

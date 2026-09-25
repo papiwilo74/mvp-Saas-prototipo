@@ -30,15 +30,12 @@
         {
           "key": "Cross-Origin-Opener-Policy",
           "value": "same-origin"
-        },
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "https://www.orderflowapp.online"
         }
       ]
     }
   ],
   "rewrites": [
+    { "source": "/api/:path*", "destination": "https://mvp-saas-prototipo.onrender.com/api/:path*" },
     { "source": "/sw.js", "destination": "/sw.js" },
     { "source": "/manifest.json", "destination": "/manifest.json" },
     { "source": "/icons/:path*", "destination": "/icons/:path*" },

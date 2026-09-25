@@ -40,11 +40,7 @@ export function AdminKitchenPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadOrders();
 
-    const socketBaseUrl = env.apiUrl?.startsWith('http') && !env.apiUrl.includes('localhost')
-      ? env.apiUrl.replace(/\/api$/, '')
-      : (typeof window !== 'undefined' ? window.location.origin : '');
-
-    const socket = io(socketBaseUrl, {
+    const socket = io(env.socketUrl, {
       query: { restaurantId: user?.restaurantId },
       withCredentials: true
     });

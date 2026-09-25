@@ -29,11 +29,7 @@ export function CheckoutSuccessPage() {
   const currentStep = statusSteps.findIndex((s) => s.status === currentStatus);
 
   useEffect(() => {
-    const socketBaseUrl = env.apiUrl?.startsWith('http')
-      ? env.apiUrl.replace(/\/api$/, '')
-      : (typeof window !== 'undefined' ? window.location.origin : '');
-
-    const socket = io(socketBaseUrl, {
+    const socket = io(env.socketUrl, {
       query: { restaurantId: config.id || '' }
     });
     socket.on('order-status-changed', (updated) => {
