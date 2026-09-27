@@ -25,8 +25,7 @@ const getSocketUrl = () => {
   if (import.meta.env.VITE_API_URL?.startsWith('https://')) {
     return import.meta.env.VITE_API_URL.replace(/\/api$/, '');
   }
-  const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-  if (isLocal) {
+  if (import.meta.env.DEV && typeof window !== 'undefined') {
     return `${window.location.protocol}//${window.location.hostname}:4000`;
   }
   return 'https://mvp-saas-prototipo.onrender.com';
