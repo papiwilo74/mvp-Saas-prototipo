@@ -46,11 +46,16 @@ export function CartPage() {
   const paymentMethods = [['CASH', 'Efectivo'], ['NEQUI', 'Nequi'], ['CARD', 'Tarjeta'], ['WOMPI', 'Pago en linea']]
     .filter(([value]) => (config.paymentMethods || ['CASH', 'NEQUI', 'CARD']).includes(value));
   const activeZones = (config.deliveryZones || []).filter((zone) => zone.isActive !== false);
-  const distanceKm = deliveryLocation && config.storeCoordinates
+  const storeCoordinates = config.storeCoordinates || (
+    config.storeLatitude != null && config.storeLongitude != null
+      ? { latitude: Number(config.storeLatitude), longitude: Number(config.storeLongitude) }
+      : null
+  );
+  const distanceKm = deliveryLocation && storeCoordinates
     ? 6371 * 2 * Math.asin(Math.sqrt(
-      Math.sin(((deliveryLocation.latitude - config.storeCoordinates.latitude) * Math.PI / 180) / 2) ** 2
-      + Math.cos(config.storeCoordinates.latitude * Math.PI / 180) * Math.cos(deliveryLocation.latitude * Math.PI / 180)
-      * Math.sin(((deliveryLocation.longitude - config.storeCoordinates.longitude) * Math.PI / 180) / 2) ** 2
+      Math.sin(((deliveryLocation.latitude - storeCoordinates.latitude) * Math.PI / 180) / 2) ** 2
+      + Math.cos(storeCoordinates.latitude * Math.PI / 180) * Math.cos(deliveryLocation.latitude * Math.PI / 180)
+      * Math.sin(((deliveryLocation.longitude - storeCoordinates.longitude) * Math.PI / 180) / 2) ** 2
     )) : null;
   const distanceZone = distanceKm === null ? null : activeZones
     .filter((zone) => Number.isFinite(Number(zone.maxKm)) && Number(zone.maxKm) >= distanceKm)
@@ -240,8 +245,102 @@ export function CartPage() {
             {fulfillmentMode === 'DELIVERY' && <span className="label">Direccion de {labels.fulfillmentLabel} {fieldErrors.address && <span className="text-red-500">*</span>}</span>}
             {fulfillmentMode === 'DELIVERY' && <>
               <input name="customerAddress" className={`input ${fieldErrors.address ? 'border-red-400 ring-2 ring-red-100' : ''}`} required value={customer.address} onChange={(event) => updateCustomer('address', event.target.value)} onBlur={(event) => validateField('address', event.target.value)} placeholder="Cra 1 #2-34" />
-              <DeliveryMap address={customer.address} onSelect={(location) => setDeliveryLocation(location)} />
+              <DeliveryMap
+                address={customer.address}
+                initialCenter={storeCoordinates ? [storeCoordinates.longitude, storeCoordinates.latitude] : null}
+                onSelect={(location) => setDeliveryLocation(location)}
+              />
               {deliveryLocation && <p className="mt-2 text-xs text-stone-500">Ubicación seleccionada: {deliveryLocation.latitude.toFixed(5)}, {deliveryLocation.longitude.toFixed(5)}</p>}
+              {storeCoordinates && (
+                <div className="mt-2.5 rounded-xl border border-stone-200 bg-stone-50/80 p-2.5 text-xs">
+                  <p className="font-bold text-stone-700 mb-1.5 flex items-center gap-1.5">
+                    <MapPinned size={14} className="text-primary-600" />
+                    Probar puntos de entrega en Barranquilla (Simulación rápida):
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateCustomer('address', 'Cra 44 #54-20, Barrio Boston, Barranquilla');
+                        setDeliveryLocation({ latitude: 10.9905, longitude: -74.7905 });
+                      }}
+                      className="rounded-lg bg-white px-2 py-1 font-medium text-stone-700 shadow-sm border border-stone-200 hover:bg-stone-100 transition-colors"
+                    >
+                      📍 Boston (~0.6 km)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateCustomer('address', 'Cra 51B #76-12, Alto Prado, Barranquilla');
+                        setDeliveryLocation({ latitude: 11.0042, longitude: -74.8095 });
+                      }}
+                      className="rounded-lg bg-white px-2 py-1 font-medium text-stone-700 shadow-sm border border-stone-200 hover:bg-stone-100 transition-colors"
+                    >
+                      📍 Alto Prado (~2.0 km)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateCustomer('address', 'Calle 78 #53-55, Villa Country, Barranquilla');
+                        setDeliveryLocation({ latitude: 11.0078, longitude: -74.8142 });
+                      }}
+                      className="rounded-lg bg-white px-2 py-1 font-medium text-stone-700 shadow-sm border border-stone-200 hover:bg-stone-100 transition-colors"
+                    >
+                      📍 Villa Country (~2.6 km)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateCustomer('address', 'Calle 98 #51B-10, Buenavista, Barranquilla');
+                        setDeliveryLocation({ latitude: 11.0185, longitude: -74.8290 });
+                      }}
+                      className="rounded-lg bg-white px-2 py-1 font-medium text-stone-700 shadow-sm border border-stone-200 hover:bg-stone-100 transition-colors"
+                    >
+                      📍 Buenavista (~4.6 km)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateCustomer('address', 'Cra 51B km 5, Villa Campestre, Puerto Colombia');
+                        setDeliveryLocation({ latitude: 11.0320, longitude: -74.8560 });
+                      }}
+                      className="rounded-lg bg-white px-2 py-1 font-medium text-stone-700 shadow-sm border border-stone-200 hover:bg-stone-100 transition-colors"
+                    >
+                      📍 Villa Campestre (~8.0 km)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateCustomer('address', 'Plaza Principal de Soledad, Atlántico');
+                        setDeliveryLocation({ latitude: 10.9160, longitude: -74.7640 });
+                      }}
+                      className="rounded-lg bg-white px-2 py-1 font-medium text-stone-700 shadow-sm border border-stone-200 hover:bg-stone-100 transition-colors"
+                    >
+                      📍 Soledad (~9.3 km)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateCustomer('address', 'Plaza Central de Galapa, Atlántico');
+                        setDeliveryLocation({ latitude: 10.8950, longitude: -74.8850 });
+                      }}
+                      className="rounded-lg bg-white px-2 py-1 font-medium text-stone-700 shadow-sm border border-stone-200 hover:bg-stone-100 transition-colors"
+                    >
+                      📍 Galapa (~14.8 km)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateCustomer('address', 'Malecón de Puerto Colombia, Atlántico');
+                        setDeliveryLocation({ latitude: 11.0200, longitude: -74.9600 });
+                      }}
+                      className="rounded-lg bg-white px-2 py-1 font-medium text-red-700 shadow-sm border border-red-200 hover:bg-red-50 transition-colors"
+                    >
+                      📍 Puerto Colombia (~18 km - Fuera)
+                    </button>
+                  </div>
+                </div>
+              )}
             </>}
           </label>
           {labels.showTableNumber ? (

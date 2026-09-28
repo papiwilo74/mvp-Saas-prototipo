@@ -38,10 +38,17 @@ const fallbackConfig = {
 const RestaurantConfigContext = createContext(null);
 
 function normalizeConfig(config) {
-  return {
+  const normalized = {
     ...fallbackConfig,
     ...(config || {})
   };
+  if (!normalized.storeCoordinates && normalized.storeLatitude != null && normalized.storeLongitude != null) {
+    normalized.storeCoordinates = {
+      latitude: Number(normalized.storeLatitude),
+      longitude: Number(normalized.storeLongitude)
+    };
+  }
+  return normalized;
 }
 
 export function RestaurantConfigProvider({ children }) {

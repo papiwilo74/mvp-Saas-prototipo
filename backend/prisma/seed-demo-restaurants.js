@@ -176,7 +176,7 @@ async function main() {
     slug: 'aura-skin',
     email: 'hola@auraskin.com',
     phone: '+57 315 888 1122',
-    address: 'Carrera 7 #72-41, Bogota',
+    address: 'Calle 53 # 46 - 192, Centro Comercial Portal del Prado, Barranquilla, Atlántico',
     adminEmail: 'admin@auraskin.com',
     adminPassword: 'Aura123!',
     products: skincareProducts,
@@ -194,15 +194,16 @@ async function main() {
       fulfillmentLabel: 'entrega',
       showTableNumber: false,
       showKitchenPanel: false,
-      openingHours: 'Lunes a sábado: 9:00 a.m. - 6:00 p.m.',
-      acceptsScheduledOrders: false,
-      deliveryFee: 6000,
-      storeLatitude: 4.667,
-      storeLongitude: -74.056,
+      openingHours: 'Lunes a sábado: 9:00 a.m. - 7:00 p.m.',
+      acceptsScheduledOrders: true,
+      deliveryFee: 5000,
+      storeLatitude: 10.9950,
+      storeLongitude: -74.7940,
       deliveryZones: [
-        { name: 'Hasta 3 km', fee: 5000, maxKm: 3, estimatedMinutes: 30, isActive: true },
-        { name: 'Hasta 6 km', fee: 8000, maxKm: 6, estimatedMinutes: 45, isActive: true },
-        { name: 'Hasta 10 km', fee: 12000, maxKm: 10, estimatedMinutes: 60, isActive: true }
+        { name: 'Zona Centro / Prado (hasta 3 km)', fee: 5000, maxKm: 3, estimatedMinutes: 25, isActive: true },
+        { name: 'Zona Norte / Riomar (hasta 6 km)', fee: 8000, maxKm: 6, estimatedMinutes: 40, isActive: true },
+        { name: 'Zona Buenavista / Corredor (hasta 10 km)', fee: 12000, maxKm: 10, estimatedMinutes: 55, isActive: true },
+        { name: 'Área Metropolitana (hasta 15 km)', fee: 16000, maxKm: 15, estimatedMinutes: 70, isActive: true }
       ],
       paymentMethods: ['CASH', 'NEQUI', 'CARD']
     }

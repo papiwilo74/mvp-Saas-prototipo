@@ -5,7 +5,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN || '';
 mapboxgl.accessToken = mapboxToken.startsWith('pk.') ? mapboxToken : '';
 
-export function DeliveryMap({ address, onSelect }) {
+export function DeliveryMap({ address, onSelect, initialCenter }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
@@ -18,7 +18,15 @@ export function DeliveryMap({ address, onSelect }) {
 
   useEffect(() => {
     if (!containerRef.current || !mapboxgl.accessToken) return undefined;
-    const map = new mapboxgl.Map({ container: containerRef.current, style: 'mapbox://styles/mapbox/streets-v12', center: [-74.0721, 4.711], zoom: 11 });
+    const defaultCenter = initialCenter && Array.isArray(initialCenter) && initialCenter.length === 2
+      ? initialCenter
+      : [-74.0721, 4.711];
+    const map = new mapboxgl.Map({
+      container: containerRef.current,
+      style: 'mapbox://styles/mapbox/streets-v12',
+      center: defaultCenter,
+      zoom: initialCenter ? 13 : 11
+    });
     mapRef.current = map;
     map.addControl(new mapboxgl.NavigationControl(), 'top-right');
     map.on('click', ({ lngLat }) => {
@@ -27,7 +35,7 @@ export function DeliveryMap({ address, onSelect }) {
       onSelectRef.current?.({ latitude: lngLat.lat, longitude: lngLat.lng });
     });
     return () => { markerRef.current?.remove(); map.remove(); mapRef.current = null; };
-  }, []);
+  }, [initialCenter]);
 
   const searchAddress = async () => {
     if (!address?.trim()) return setMessage('Escribe primero una dirección.');
