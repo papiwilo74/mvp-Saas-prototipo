@@ -76,3 +76,9 @@ export const updatePayment = async (req, res) => {
   );
   res.json({ order: toOrderResponse(order) });
 };
+
+export const track = async (req, res) => {
+  const order = await orderService.trackOrder(req.params.id);
+  res.json({ order: toOrderResponse(order) });
+};
+

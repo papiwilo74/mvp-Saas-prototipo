@@ -190,13 +190,6 @@ export const printOrderTicket = (order, config = {}) => {
         <div>¡Gracias por preferirnos!</div>
         <div style="color: #666; margin-top: 2px;">OrderFlow App</div>
       </div>
-
-      <script>
-        window.onload = function() {
-          window.focus();
-          window.print();
-        };
-      </script>
     </body>
     </html>
   `;
@@ -215,6 +208,16 @@ export const printOrderTicket = (order, config = {}) => {
   doc.open();
   doc.write(ticketHtml);
   doc.close();
+
+  // Llamar directamente a focus y print desde JS seguro sin violar Content Security Policy (CSP)
+  setTimeout(() => {
+    try {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+    } catch (err) {
+      console.error('Error al imprimir ticket:', err);
+    }
+  }, 300);
 
   // Limpiar el iframe después de que termine la impresión
   setTimeout(() => {

@@ -178,7 +178,13 @@ export function CartPage() {
       }
 
       clearCart();
-      navigate('/checkout/success', { state: { order: data.order, whatsappUrl, pointsEarned: data.earnedPoints } });
+      const successPayload = { order: data.order, whatsappUrl, pointsEarned: data.earnedPoints };
+      try {
+        sessionStorage.setItem('last_order_details', JSON.stringify(successPayload));
+      } catch {
+        // ignore storage quota errors
+      }
+      navigate('/checkout/success', { state: successPayload });
     } catch (requestError) {
       setError(requestError.response?.data?.message || `No pudimos crear tu ${labels.orderLabel}. Intenta nuevamente.`);
     } finally {
@@ -266,7 +272,7 @@ export function CartPage() {
                       }}
                       className="rounded-lg bg-white px-2 py-1 font-medium text-stone-700 shadow-sm border border-stone-200 hover:bg-stone-100 transition-colors"
                     >
-                      📍 Boston (~0.6 km)
+                      Boston (~0.6 km)
                     </button>
                     <button
                       type="button"
@@ -276,7 +282,7 @@ export function CartPage() {
                       }}
                       className="rounded-lg bg-white px-2 py-1 font-medium text-stone-700 shadow-sm border border-stone-200 hover:bg-stone-100 transition-colors"
                     >
-                      📍 Alto Prado (~2.0 km)
+                      Alto Prado (~2.0 km)
                     </button>
                     <button
                       type="button"
@@ -286,7 +292,7 @@ export function CartPage() {
                       }}
                       className="rounded-lg bg-white px-2 py-1 font-medium text-stone-700 shadow-sm border border-stone-200 hover:bg-stone-100 transition-colors"
                     >
-                      📍 Villa Country (~2.6 km)
+                      Villa Country (~2.6 km)
                     </button>
                     <button
                       type="button"
@@ -296,7 +302,7 @@ export function CartPage() {
                       }}
                       className="rounded-lg bg-white px-2 py-1 font-medium text-stone-700 shadow-sm border border-stone-200 hover:bg-stone-100 transition-colors"
                     >
-                      📍 Buenavista (~4.6 km)
+                      Buenavista (~4.6 km)
                     </button>
                     <button
                       type="button"
@@ -306,7 +312,7 @@ export function CartPage() {
                       }}
                       className="rounded-lg bg-white px-2 py-1 font-medium text-stone-700 shadow-sm border border-stone-200 hover:bg-stone-100 transition-colors"
                     >
-                      📍 Villa Campestre (~8.0 km)
+                      Villa Campestre (~8.0 km)
                     </button>
                     <button
                       type="button"
@@ -316,7 +322,7 @@ export function CartPage() {
                       }}
                       className="rounded-lg bg-white px-2 py-1 font-medium text-stone-700 shadow-sm border border-stone-200 hover:bg-stone-100 transition-colors"
                     >
-                      📍 Soledad (~9.3 km)
+                      Soledad (~9.3 km)
                     </button>
                     <button
                       type="button"
@@ -326,7 +332,7 @@ export function CartPage() {
                       }}
                       className="rounded-lg bg-white px-2 py-1 font-medium text-stone-700 shadow-sm border border-stone-200 hover:bg-stone-100 transition-colors"
                     >
-                      📍 Galapa (~14.8 km)
+                      Galapa (~14.8 km)
                     </button>
                     <button
                       type="button"
@@ -336,7 +342,7 @@ export function CartPage() {
                       }}
                       className="rounded-lg bg-white px-2 py-1 font-medium text-red-700 shadow-sm border border-red-200 hover:bg-red-50 transition-colors"
                     >
-                      📍 Puerto Colombia (~18 km - Fuera)
+                      Puerto Colombia (~18 km - Fuera)
                     </button>
                   </div>
                 </div>

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { env } from '../config/env';
+import { api } from '../services/api';
 import { useRestaurantConfig } from '../context/RestaurantConfigContext';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import { buildWhatsAppOrderUrl, paymentLabels } from '../utils/whatsappOrder';
@@ -19,24 +20,105 @@ function getStatusSteps(labels) {
 
 export function CheckoutSuccessPage() {
   const { state } = useLocation();
-  const order = state?.order;
-  const [currentStatus, setCurrentStatus] = useState(order?.status || 'PENDING');
-  const pointsEarned = state?.pointsEarned || 0;
+
+  const [order, setOrder] = useState(() => {
+    if (state?.order) return state.order;
+    try {
+      const cached = sessionStorage.getItem('last_order_details');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        return parsed?.order || null;
+      }
+    } catch {
+      // ignore JSON parse error
+    }
+    return null;
+  });
+
+  const [pointsEarned] = useState(() => {
+    if (typeof state?.pointsEarned === 'number') return state.pointsEarned;
+    try {
+      const cached = sessionStorage.getItem('last_order_details');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        return parsed?.pointsEarned || 0;
+      }
+    } catch {
+      // ignore
+    }
+    return 0;
+  });
+
+  const currentStatus = order?.status || 'PENDING';
   const { config, labels } = useRestaurantConfig();
-  const whatsappUrl = state?.whatsappUrl || buildWhatsAppOrderUrl({ order, config });
+  const whatsappUrl = useMemo(() => {
+    return state?.whatsappUrl || (order ? buildWhatsAppOrderUrl({ order, config }) : '');
+  }, [state?.whatsappUrl, order, config]);
+
   const scheduledText = order?.scheduledFor ? formatDate(order.scheduledFor) : '';
   const statusSteps = useMemo(() => getStatusSteps(labels), [labels]);
   const currentStep = statusSteps.findIndex((s) => s.status === currentStatus);
 
+  // Consulta activa (polling fallback) para garantizar avance del estado aún sin websocket
   useEffect(() => {
+    if (!order?.id) return;
+
+    let isMounted = true;
+    const fetchLatestStatus = async () => {
+      try {
+        const { data } = await api.get(`/orders/track/${order.id}`);
+        if (isMounted && data?.order) {
+          setOrder((prev) => ({ ...prev, ...data.order }));
+        }
+      } catch {
+        // Red puntual o pedido en proceso
+      }
+    };
+
+    fetchLatestStatus();
+
+    const interval = setInterval(() => {
+      if (['DELIVERED', 'CANCELLED'].includes(currentStatus)) {
+        clearInterval(interval);
+        return;
+      }
+      fetchLatestStatus();
+    }, 6000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [order?.id, currentStatus]);
+
+  // Actualización en tiempo real vía Socket.IO
+  useEffect(() => {
+    if (!order?.id && !config?.id) return;
+
     const socket = io(env.socketUrl, {
-      query: { restaurantId: config.id || '' }
+      query: {
+        restaurantId: config?.id || order?.restaurantId || '',
+        orderId: order?.id || ''
+      },
+      transports: ['websocket', 'polling']
     });
-    socket.on('order-status-changed', (updated) => {
-      if (updated.id === order.id) setCurrentStatus(updated.status);
-    });
-    return () => { socket.disconnect(); };
-  }, [order?.id, config.id]);
+
+    const handleUpdate = (updated) => {
+      if (!updated) return;
+      if (updated.id === order?.id) {
+        setOrder((prev) => ({ ...prev, ...updated }));
+      }
+    };
+
+    socket.on('order-updated', handleUpdate);
+    socket.on('order-status-changed', handleUpdate);
+
+    return () => {
+      socket.off('order-updated', handleUpdate);
+      socket.off('order-status-changed', handleUpdate);
+      socket.disconnect();
+    };
+  }, [order?.id, order?.restaurantId, config?.id]);
 
   return (
     <div className="container-page py-8">

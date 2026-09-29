@@ -313,3 +313,14 @@ export const updatePaymentStatus = async (restaurantId, orderId, paymentStatus) 
   logger.info({ orderId, paymentStatus, restaurantId }, 'Estado de pago de orden actualizado');
   return updatedOrder;
 };
+
+export const trackOrder = async (orderId) => {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { items: { include: { product: true } } }
+  });
+
+  if (!order) throw new ApiError(404, 'Pedido no encontrado');
+  return order;
+};
+
