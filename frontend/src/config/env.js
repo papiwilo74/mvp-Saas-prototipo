@@ -1,22 +1,48 @@
-function getRestaurantSlug() {
+const RESERVED_PATHS = new Set([
+  'saas', 'registro', 'register', 'registro-restaurante', 'registro-negocio', 'registro-cliente',
+  'menu', 'cart', 'admin', 'superadmin', 'login', 'checkout', 'profile', 'orders',
+  'products', 'terms', 'privacy', 'verify-email', 'verificar-email', 'forgot-password', 'reset-password',
+  'icons', 'assets', 'sw.js', 'manifest.json', 'favicon.ico'
+]);
+
+export function getRestaurantSlug() {
   if (typeof window === 'undefined') return import.meta.env.VITE_RESTAURANT_SLUG || 'demo-burger';
 
   const { pathname, search } = window.location;
 
   const params = new URLSearchParams(search);
   const fromQuery = params.get('restaurant');
-  if (fromQuery) return fromQuery;
+  if (fromQuery) {
+    try {
+      sessionStorage.setItem('active_restaurant_slug', fromQuery);
+      localStorage.setItem('active_restaurant_slug', fromQuery);
+    } catch {
+      // ignore storage errors
+    }
+    return fromQuery;
+  }
 
-  const reservedPaths = ['saas', 'registro-restaurante', 'menu', 'cart', 'admin', 'superadmin', 'login', 'checkout', 'profile', 'orders', 'products', 'icons', 'assets', 'sw.js', 'manifest.json', 'favicon.ico'];
-  const pathSlug = pathname.replace(/^\/+|\/+$/g, '');
-  if (pathSlug && !reservedPaths.includes(pathSlug) && !pathSlug.includes('/') && !pathSlug.includes('.')) {
+  const pathParts = pathname.replace(/^\/+|\/+$/g, '').split('/');
+  const pathSlug = pathParts[0];
+  if (pathSlug && !RESERVED_PATHS.has(pathSlug.toLowerCase()) && !pathSlug.includes('.')) {
+    try {
+      sessionStorage.setItem('active_restaurant_slug', pathSlug);
+      localStorage.setItem('active_restaurant_slug', pathSlug);
+    } catch {
+      // ignore storage errors
+    }
     return pathSlug;
+  }
+
+  try {
+    const stored = sessionStorage.getItem('active_restaurant_slug') || localStorage.getItem('active_restaurant_slug');
+    if (stored) return stored;
+  } catch {
+    // ignore storage errors
   }
 
   return import.meta.env.VITE_RESTAURANT_SLUG || 'demo-burger';
 }
-
-const restaurantSlug = getRestaurantSlug();
 
 const getSocketUrl = () => {
   if (import.meta.env.VITE_SOCKET_URL) {
@@ -36,7 +62,11 @@ export const env = {
     ? import.meta.env.VITE_API_URL
     : '/api',
   socketUrl: getSocketUrl(),
-  restaurantSlug,
+  get restaurantSlug() {
+    return getRestaurantSlug();
+  },
   enableOrderHistory: import.meta.env.VITE_ENABLE_ORDER_HISTORY !== 'false',
-  demoMode: import.meta.env.VITE_DEMO_MODE === 'true' || restaurantSlug.includes('demo')
+  get demoMode() {
+    return import.meta.env.VITE_DEMO_MODE === 'true' || getRestaurantSlug().includes('demo');
+  }
 };

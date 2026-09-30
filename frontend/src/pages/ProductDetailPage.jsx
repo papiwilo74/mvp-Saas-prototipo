@@ -5,6 +5,7 @@ import { SEOHead } from '../components/seo/SEOHead';
 import { ProductSkeleton } from '../components/ui/Skeleton';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
+import { useRestaurantConfig } from '../context/RestaurantConfigContext';
 import { useMenu } from '../hooks/useMenu';
 import { formatCurrency } from '../utils/formatters';
 
@@ -13,6 +14,9 @@ export function ProductDetailPage() {
   const { products, loading } = useMenu();
   const { addItem } = useCart();
   const { toast } = useToast();
+  const { activeSlug, config } = useRestaurantConfig() || {};
+  const currentSlug = activeSlug || config?.slug;
+  const tenantQuery = currentSlug ? `?restaurant=${encodeURIComponent(currentSlug)}` : '';
   const [quantity, setQuantity] = useState(1);
   const [selectedVariants, setSelectedVariants] = useState({});
   const product = useMemo(() => products.find((item) => item.id === id), [products, id]);
@@ -172,7 +176,7 @@ export function ProductDetailPage() {
             </button>
           </div>
 
-          <Link to="/cart" className="btn-secondary mt-4 w-full">Ir al carrito</Link>
+          <Link to={`/cart${tenantQuery}`} className="btn-secondary mt-4 w-full">Ir al carrito</Link>
         </div>
       </div>
 
@@ -184,7 +188,7 @@ export function ProductDetailPage() {
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {relatedProducts.map((item) => (
-              <Link key={item.id} to={`/products/${item.id}`} className="safe-panel overflow-hidden transition hover:-translate-y-1">
+              <Link key={item.id} to={`/products/${item.id}${tenantQuery}`} className="safe-panel overflow-hidden transition hover:-translate-y-1">
                 <img src={item.imageUrl} alt={item.name} className="h-40 w-full object-cover" />
                 <div className="p-4">
                   <p className="text-lg font-black">{item.name}</p>

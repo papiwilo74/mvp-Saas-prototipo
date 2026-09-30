@@ -9,7 +9,9 @@ import { useMenu } from '../hooks/useMenu';
 import { formatCurrency } from '../utils/formatters';
 
 export function LandingPage() {
-  const { config } = useRestaurantConfig();
+  const { config, activeSlug } = useRestaurantConfig();
+  const currentSlug = activeSlug || config.slug;
+  const tenantQuery = currentSlug ? `?restaurant=${encodeURIComponent(currentSlug)}` : '';
   const { products, loading } = useMenu();
   const { addItem } = useCart();
   const featured = products.slice(0, 3);
@@ -57,7 +59,7 @@ export function LandingPage() {
                 </span>
               </div>
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                <Link to="/menu" className="btn-primary flex-1 sm:flex-none">
+                <Link to={`/menu${tenantQuery}`} className="btn-primary flex-1 sm:flex-none">
                   {isStore ? 'Ver catálogo y comprar' : 'Ver menú y ordenar'}
                   <ArrowRight size={18} />
                 </Link>
@@ -145,7 +147,7 @@ export function LandingPage() {
             <h2 className="section-title">Destacados que venden solos</h2>
             <p className="section-copy">Una selección pensada para mostrar lo mejor de {config.restaurantName}.</p>
           </div>
-          <Link to="/menu" className="text-sm font-black text-[color:var(--color-primary)]">Ver menu</Link>
+          <Link to={`/menu${tenantQuery}`} className="text-sm font-black text-[color:var(--color-primary)]">Ver menu</Link>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {loading
@@ -229,7 +231,7 @@ export function LandingPage() {
                 Quiero esto para mi negocio
                 <ArrowRight size={18} />
               </a>
-              <Link to="/menu" className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10">
+              <Link to={`/menu${tenantQuery}`} className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10">
                 Ver demo como cliente
               </Link>
             </div>

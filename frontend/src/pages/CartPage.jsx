@@ -27,7 +27,8 @@ const loadCustomer = () => {
 export function CartPage() {
   const navigate = useNavigate();
   const { items, total, updateQuantity, clearCart, stockWarning } = useCart();
-  const { config, labels } = useRestaurantConfig();
+  const { config, labels, activeSlug } = useRestaurantConfig();
+  const currentSlug = activeSlug || config.slug || env.restaurantSlug;
   const [customer, setCustomer] = useState(loadCustomer);
   const [notes, setNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState(config.paymentMethods?.includes('WOMPI') ? 'WOMPI' : (config.paymentMethods?.[0] || 'CASH'));
@@ -140,7 +141,7 @@ export function CartPage() {
 
     try {
       const payload = {
-        restaurantSlug: env.restaurantSlug,
+        restaurantSlug: currentSlug,
         paymentMethod,
         customer,
         notes,
@@ -161,7 +162,7 @@ export function CartPage() {
           amountInCents,
           reference: `${labels.orderLabel}-${Date.now()}`,
           customerEmail: customer.email || undefined,
-          restaurantSlug: env.restaurantSlug
+          restaurantSlug: currentSlug
         });
         payload.wompiTransactionId = paymentData.wompiId;
         await api.post('/orders', payload);
@@ -184,7 +185,8 @@ export function CartPage() {
       } catch {
         // ignore storage quota errors
       }
-      navigate('/checkout/success', { state: successPayload });
+      const tenantQuery = currentSlug ? `?restaurant=${encodeURIComponent(currentSlug)}` : '';
+      navigate(`/checkout/success${tenantQuery}`, { state: successPayload });
     } catch (requestError) {
       setError(requestError.response?.data?.message || `No pudimos crear tu ${labels.orderLabel}. Intenta nuevamente.`);
     } finally {
@@ -193,12 +195,13 @@ export function CartPage() {
   };
 
   if (items.length === 0) {
+    const tenantQuery = currentSlug ? `?restaurant=${encodeURIComponent(currentSlug)}` : '';
     return (
       <div className="container-page py-10">
         <EmptyState
           title="Tu carrito esta vacio"
           description={`Agrega productos del ${labels.catalogLabel.toLowerCase()} para crear tu ${labels.orderLabel}. No necesitas crear cuenta.`}
-          action={<Link to="/" className="btn-primary">Ver {labels.catalogLabel.toLowerCase()}</Link>}
+          action={<Link to={`/menu${tenantQuery}`} className="btn-primary">Ver {labels.catalogLabel.toLowerCase()}</Link>}
         />
       </div>
     );

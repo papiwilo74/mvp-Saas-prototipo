@@ -14,6 +14,12 @@ function DynamicRestaurantRedirect() {
   if (!slug || RESERVED_SLUGS.has(slug.toLowerCase())) {
     return <NotFoundPage />;
   }
+  try {
+    sessionStorage.setItem('active_restaurant_slug', slug);
+    localStorage.setItem('active_restaurant_slug', slug);
+  } catch {
+    // ignore
+  }
   return <Navigate to={`/?restaurant=${encodeURIComponent(slug)}`} replace />;
 }
 
@@ -21,6 +27,12 @@ function DynamicRestaurantMenuRedirect() {
   const { slug } = useParams();
   if (!slug || RESERVED_SLUGS.has(slug.toLowerCase())) {
     return <NotFoundPage />;
+  }
+  try {
+    sessionStorage.setItem('active_restaurant_slug', slug);
+    localStorage.setItem('active_restaurant_slug', slug);
+  } catch {
+    // ignore
   }
   return <Navigate to={`/menu?restaurant=${encodeURIComponent(slug)}`} replace />;
 }

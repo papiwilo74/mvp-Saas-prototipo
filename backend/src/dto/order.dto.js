@@ -16,6 +16,10 @@ export const toOrderItemResponse = (item) => ({
 export const toOrderResponse = (order) => ({
   id: order.id,
   orderNumber: order.orderNumber,
+  restaurantId: order.restaurantId,
+  restaurantSlug: order.restaurant?.slug,
+  restaurantName: order.restaurant?.name,
+  restaurantConfig: order.restaurant?.config,
   status: order.status,
   customerName: order.customerName,
   customerPhone: order.customerPhone,

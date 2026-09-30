@@ -8,6 +8,7 @@ import { useRestaurantConfig } from '../context/RestaurantConfigContext';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import { buildWhatsAppOrderUrl, paymentLabels } from '../utils/whatsappOrder';
 import { printOrderTicket } from '../utils/printTicket';
+import { getBusinessLabels } from '../utils/businessLabels';
 
 function getStatusSteps(labels) {
   return [
@@ -50,7 +51,31 @@ export function CheckoutSuccessPage() {
   });
 
   const currentStatus = order?.status || 'PENDING';
-  const { config, labels } = useRestaurantConfig();
+  const { config: globalConfig, activeSlug } = useRestaurantConfig();
+
+  const orderRestaurantConfig = order?.restaurantConfig;
+  const config = useMemo(() => {
+    if (orderRestaurantConfig) {
+      return { ...globalConfig, ...orderRestaurantConfig };
+    }
+    return globalConfig;
+  }, [globalConfig, orderRestaurantConfig]);
+
+  const labels = useMemo(() => getBusinessLabels(config), [config]);
+  const resolvedSlug = order?.restaurantSlug || activeSlug || config.slug;
+  const tenantQuery = resolvedSlug ? `?restaurant=${encodeURIComponent(resolvedSlug)}` : '';
+
+  useEffect(() => {
+    if (order?.restaurantSlug) {
+      try {
+        sessionStorage.setItem('active_restaurant_slug', order.restaurantSlug);
+        localStorage.setItem('active_restaurant_slug', order.restaurantSlug);
+      } catch {
+        // ignore storage errors
+      }
+    }
+  }, [order?.restaurantSlug]);
+
   const whatsappUrl = useMemo(() => {
     return state?.whatsappUrl || (order ? buildWhatsAppOrderUrl({ order, config }) : '');
   }, [state?.whatsappUrl, order, config]);
@@ -342,11 +367,11 @@ export function CheckoutSuccessPage() {
               Imprimir comprobante
             </button>
           )}
-          <Link to="/menu" className="btn-primary flex-1">
+          <Link to={`/menu${tenantQuery}`} className="btn-primary flex-1">
             Seguir comprando
             <ArrowRight size={18} />
           </Link>
-          <Link to="/" className="btn-secondary flex-1">Volver al inicio</Link>
+          <Link to={`/${tenantQuery}`} className="btn-secondary flex-1">Volver al inicio</Link>
         </div>
       </div>
     </div>

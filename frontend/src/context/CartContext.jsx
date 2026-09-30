@@ -1,13 +1,14 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { env } from '../config/env';
+import { useRestaurantConfig } from './RestaurantConfigContext';
 
 const CartContext = createContext(null);
 
-const CART_STORAGE_KEY = `ff_cart:${env.restaurantSlug}`;
+const getCartStorageKey = (slug) => `ff_cart:${slug || env.restaurantSlug || 'demo-burger'}`;
 
-const loadCart = () => {
+const loadCart = (slug) => {
   try {
-    const stored = localStorage.getItem(CART_STORAGE_KEY);
+    const stored = localStorage.getItem(getCartStorageKey(slug));
     if (!stored) return [];
     const parsed = JSON.parse(stored);
     return Array.isArray(parsed) ? parsed : [];
@@ -16,13 +17,17 @@ const loadCart = () => {
   }
 };
 
-export function CartProvider({ children }) {
-  const [items, setItems] = useState(() => loadCart());
+function InnerCartProvider({ currentSlug, children }) {
+  const [items, setItems] = useState(() => loadCart(currentSlug));
   const [stockWarning, setStockWarning] = useState('');
 
   useEffect(() => {
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
+    try {
+      localStorage.setItem(getCartStorageKey(currentSlug), JSON.stringify(items));
+    } catch {
+      // ignore storage errors
+    }
+  }, [items, currentSlug]);
 
   const addItem = useCallback((product) => {
     setStockWarning('');
@@ -73,6 +78,17 @@ export function CartProvider({ children }) {
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+}
+
+export function CartProvider({ children }) {
+  const { activeSlug } = useRestaurantConfig() || {};
+  const currentSlug = activeSlug || env.restaurantSlug || 'demo-burger';
+
+  return (
+    <InnerCartProvider key={currentSlug} currentSlug={currentSlug}>
+      {children}
+    </InnerCartProvider>
+  );
 }
 
 export const useCart = () => useContext(CartContext);

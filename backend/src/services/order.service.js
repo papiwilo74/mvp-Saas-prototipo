@@ -217,7 +217,10 @@ export const createOrder = async ({
         total,
         items: { create: orderItems }
       },
-      include: { items: { include: { product: true } } }
+      include: {
+        items: { include: { product: true } },
+        restaurant: { select: { id: true, name: true, slug: true, config: true } }
+      }
     });
   });
 
@@ -241,7 +244,10 @@ export const updateOrderStatus = async (restaurantId, orderId, status) => {
   const updatedOrder = await prisma.order.update({
     where: { id: orderId },
     data: { status },
-    include: { items: { include: { product: true } } }
+    include: {
+      items: { include: { product: true } },
+      restaurant: { select: { id: true, name: true, slug: true, config: true } }
+    }
   });
 
   emitOrderStatusChanged(restaurantId, updatedOrder);
@@ -317,7 +323,10 @@ export const updatePaymentStatus = async (restaurantId, orderId, paymentStatus) 
 export const trackOrder = async (orderId) => {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { items: { include: { product: true } } }
+    include: {
+      items: { include: { product: true } },
+      restaurant: { select: { id: true, name: true, slug: true, config: true } }
+    }
   });
 
   if (!order) throw new ApiError(404, 'Pedido no encontrado');

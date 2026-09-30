@@ -13,9 +13,12 @@ const navItems = [
 
 export function AppLayout({ children }) {
   const { count } = useCart();
-  const { config } = useRestaurantConfig();
+  const { config, activeSlug } = useRestaurantConfig();
   const location = useLocation();
-  const tenantQuery = location.search;
+  const currentSlug = activeSlug || config.slug;
+  const tenantQuery = currentSlug
+    ? `?restaurant=${encodeURIComponent(currentSlug)}`
+    : location.search;
   const activeDeliveryZoneCount = (config.deliveryZones || []).filter((zone) => zone.isActive !== false).length;
 
   return (

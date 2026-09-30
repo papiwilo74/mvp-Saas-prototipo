@@ -58,11 +58,42 @@ export function RestaurantConfigProvider({ children }) {
 
   // Determinar el slug activo con prioridad:
   // 1. ?restaurant=slug en URL
-  // 2. user.restaurantSlug si el usuario es administrador de un restaurante
-  // 3. env.restaurantSlug
+  // 2. Ruta directa /:slug
+  // 3. user.restaurantSlug si el usuario es administrador
+  // 4. active_restaurant_slug en sessionStorage/localStorage
+  // 5. env.restaurantSlug
   const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const fromQuery = searchParams?.get('restaurant');
-  const activeSlug = fromQuery || user?.restaurantSlug || env.restaurantSlug;
+
+  const pathParts = typeof window !== 'undefined'
+    ? window.location.pathname.replace(/^\/+|\/+$/g, '').split('/')
+    : [];
+  const reservedSlugs = new Set([
+    'saas', 'registro', 'register', 'registro-restaurante', 'registro-negocio', 'registro-cliente',
+    'menu', 'cart', 'admin', 'superadmin', 'login', 'checkout', 'profile', 'orders',
+    'products', 'terms', 'privacy', 'verify-email', 'verificar-email', 'forgot-password', 'reset-password',
+    'icons', 'assets', 'sw.js', 'manifest.json', 'favicon.ico'
+  ]);
+  const fromPath = pathParts[0] && !reservedSlugs.has(pathParts[0].toLowerCase()) && !pathParts[0].includes('.')
+    ? pathParts[0]
+    : null;
+
+  const storedSlug = typeof window !== 'undefined'
+    ? (sessionStorage.getItem('active_restaurant_slug') || localStorage.getItem('active_restaurant_slug'))
+    : null;
+
+  const activeSlug = fromQuery || fromPath || user?.restaurantSlug || storedSlug || env.restaurantSlug;
+
+  useEffect(() => {
+    if (activeSlug && typeof window !== 'undefined') {
+      try {
+        sessionStorage.setItem('active_restaurant_slug', activeSlug);
+        localStorage.setItem('active_restaurant_slug', activeSlug);
+      } catch {
+        // ignore
+      }
+    }
+  }, [activeSlug]);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: apiQueryKey('restaurantConfig', activeSlug),
