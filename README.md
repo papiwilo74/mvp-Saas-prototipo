@@ -50,7 +50,7 @@ Los restaurantes pequeños en Colombia pagan **comisiones del 20-30%** a platafo
 - **Menú QR** para mesas
 - **Pagos directos** (Nequi QR/Bre-B, Efectivo, Wompi)
 - **Cocina en tiempo real** con pantalla KDS
-- Suscripción mensual accesible ($80.000 - $150.000 COP)
+- Suscripción mensual accesible ($80.000 - $140.000 COP)
 
 ---
 

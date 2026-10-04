@@ -60,7 +60,7 @@ export function TrialPaywallModal({
               </div>
               <p className="mt-1 text-xs text-stone-500">Para locales pequeños y carritos que inician su digitalización.</p>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-3xl font-black text-stone-900">$49.000</span>
+                <span className="text-3xl font-black text-stone-900">$80.000</span>
                 <span className="text-xs font-bold text-stone-500">COP / mes</span>
               </div>
 
@@ -89,7 +89,7 @@ export function TrialPaywallModal({
             </div>
 
             <a
-              href={getWhatsAppUpgradeUrl('Plan Emprendedor', '$49.000 COP/mes')}
+              href={getWhatsAppUpgradeUrl('Plan Emprendedor', '$80.000 COP/mes')}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-secondary mt-6 w-full text-center text-xs font-bold py-2.5 inline-flex items-center justify-center gap-2"
@@ -112,7 +112,7 @@ export function TrialPaywallModal({
               </div>
               <p className="mt-1 text-xs text-stone-500">Para restaurantes con operación activa en cocina y salón.</p>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-3xl font-black text-stone-900">$99.000</span>
+                <span className="text-3xl font-black text-stone-900">$140.000</span>
                 <span className="text-xs font-bold text-stone-500">COP / mes</span>
               </div>
 
@@ -145,7 +145,7 @@ export function TrialPaywallModal({
             </div>
 
             <a
-              href={getWhatsAppUpgradeUrl('Plan Pro Restaurante', '$99.000 COP/mes')}
+              href={getWhatsAppUpgradeUrl('Plan Pro Restaurante', '$140.000 COP/mes')}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary mt-6 w-full text-center text-xs font-bold py-2.5 inline-flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white shadow"

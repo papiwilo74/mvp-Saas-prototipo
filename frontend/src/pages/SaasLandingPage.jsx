@@ -44,7 +44,7 @@ export function SaasLandingPage() {
   const [activeFaq, setActiveFaq] = useState(null);
 
   const deliveryAppCommission = Math.round(monthlySales * 0.25);
-  const orderFlowCost = 79000;
+  const orderFlowCost = 80000;
   const monthlySavings = Math.max(0, deliveryAppCommission - orderFlowCost);
   const yearlySavings = monthlySavings * 12;
 
@@ -266,7 +266,7 @@ export function SaasLandingPage() {
                 Emprendedor
               </span>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-black text-stone-900">$79.000</span>
+                <span className="text-4xl font-black text-stone-900">$80.000</span>
                 <span className="text-xs text-stone-500">COP / mes</span>
               </div>
               <p className="mt-2 text-xs text-stone-600">Para negocios que quieren empezar a vender online directo.</p>
@@ -311,7 +311,7 @@ export function SaasLandingPage() {
                 Pro & Delivery
               </span>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-black text-stone-900">$129.000</span>
+                <span className="text-4xl font-black text-stone-900">$140.000</span>
                 <span className="text-xs text-stone-500">COP / mes</span>
               </div>
               <p className="mt-2 text-xs text-stone-600">Para negocios con alto volumen de pedidos y entregas propias.</p>
