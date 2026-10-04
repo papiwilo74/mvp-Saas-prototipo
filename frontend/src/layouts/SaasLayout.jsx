@@ -28,7 +28,7 @@ export function SaasLayout({ children }) {
               Ingreso
             </Link>
             <Link to="/registro" className="btn-primary min-h-10 px-4 text-xs font-black shadow-sm">
-              Probar 14 días gratis
+              Probar 3 semanas gratis
             </Link>
           </div>
         </div>

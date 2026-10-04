@@ -60,7 +60,7 @@ export function RestaurantRegisterPage() {
         <div className="glass-panel p-6 sm:p-8">
           <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-orange-600">
             <Sparkles size={16} />
-            <span>14 Días de Prueba Gratis · 0% Comisiones</span>
+            <span>3 Semanas de Prueba Gratis · 0% Comisiones</span>
           </div>
 
           <h1 className="mt-2 text-2xl font-black tracking-tight text-stone-900 sm:text-3xl">
@@ -200,7 +200,7 @@ export function RestaurantRegisterPage() {
             <div className="rounded-xl border border-stone-200 bg-stone-50/80 p-3 text-xs text-stone-600 space-y-1">
               <div className="flex items-center gap-1.5 font-bold text-stone-800">
                 <CheckCircle2 size={14} className="text-emerald-600" />
-                <span>Incluido en tu prueba de 14 días:</span>
+                <span>Incluido en tu prueba de 3 semanas:</span>
               </div>
               <p>• Menú digital con QR para mesas y catálogo online</p>
               <p>• Pagos directos con Nequi, Bre-B, Efectivo y Tarjeta</p>
@@ -212,7 +212,7 @@ export function RestaurantRegisterPage() {
               disabled={submitting}
               className="btn-primary w-full justify-center py-3 text-base font-black shadow-md"
             >
-              {submitting ? 'Creando tu negocio...' : 'Comenzar 14 días gratis'}
+              {submitting ? 'Creando tu negocio...' : 'Comenzar 3 semanas gratis'}
             </button>
           </form>
 

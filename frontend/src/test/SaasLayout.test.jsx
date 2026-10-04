@@ -18,7 +18,7 @@ describe('SaasLayout', () => {
     expect(screen.getByText('SaaS para negocios')).toBeInTheDocument();
     expect(screen.getByText('Calculadora de Ahorro')).toBeInTheDocument();
     expect(screen.getByText('Ingreso')).toBeInTheDocument();
-    expect(screen.getByText('Probar 14 días gratis')).toBeInTheDocument();
+    expect(screen.getByText('Probar 3 semanas gratis')).toBeInTheDocument();
 
     // Contenido hijo presente
     expect(screen.getByText('Contenido de Login')).toBeInTheDocument();

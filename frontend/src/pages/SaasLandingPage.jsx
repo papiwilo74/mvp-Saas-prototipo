@@ -52,7 +52,7 @@ export function SaasLandingPage() {
     <div className="min-h-screen bg-stone-50 text-stone-900">
       <SEOHead
         title="OrderFlow | Plataforma de ventas online para negocios"
-        description="Tu propia página de ventas online con marca propia, catálogo, pagos directos y 0% comisiones. Empieza tu prueba gratis de 14 días."
+        description="Tu propia página de ventas online con marca propia, catálogo, pagos directos y 0% comisiones. Empieza tu prueba gratis de 3 semanas."
       />
 
       {/* Hero Section */}
@@ -79,7 +79,7 @@ export function SaasLandingPage() {
               to="/registro-negocio"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-orange-600 px-7 py-3.5 text-base font-black text-white shadow-lg shadow-orange-600/30 transition hover:bg-orange-500"
             >
-              Comenzar prueba gratis de 14 días
+              Comenzar prueba gratis de 3 semanas
               <ArrowRight size={18} />
             </Link>
             <a
@@ -257,7 +257,7 @@ export function SaasLandingPage() {
             Planes Transparentes
           </span>
           <h2 className="mt-3 text-3xl font-black tracking-tight">Precios accesibles para crecer</h2>
-          <p className="mt-2 text-sm text-stone-600">Prueba 14 días gratis sin compromiso. Sin cobros sorpresa.</p>
+          <p className="mt-2 text-sm text-stone-600">Prueba 3 semanas gratis sin compromiso. Sin cobros sorpresa.</p>
 
           <div className="mt-12 grid gap-8 sm:grid-cols-2 text-left">
             {/* Plan Emprendedor */}
@@ -347,7 +347,7 @@ export function SaasLandingPage() {
                 to="/registro-negocio"
                 className="btn-primary mt-8 w-full justify-center font-black shadow-md"
               >
-                Comenzar prueba gratis de 14 días
+                Comenzar prueba gratis de 3 semanas
               </Link>
             </div>
           </div>

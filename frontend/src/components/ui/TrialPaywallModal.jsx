@@ -44,7 +44,7 @@ export function TrialPaywallModal({
           </h2>
           <p className="mt-2 text-sm text-stone-600">
             {isExpired
-              ? 'Tu prueba gratuita de 14 días ha concluido. Activa tu plan para seguir recibiendo pedidos online y comandas en tiempo real sin pagar comisiones.'
+              ? 'Tu prueba gratuita de 3 semanas ha concluido. Activa tu plan para seguir recibiendo pedidos online y comandas en tiempo real sin pagar comisiones.'
               : 'Disfruta de todas las herramientas operativas, KDS de cocina e impresión de comandas sin comisiones por pedido.'}
           </p>
         </div>

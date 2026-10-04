@@ -6,10 +6,10 @@
  */
 export function getTrialStatus(restaurantCreatedAt, isExempt = false) {
   if (!restaurantCreatedAt || isExempt) {
-    return { daysLeft: 14, isTrialExpired: false };
+    return { daysLeft: 21, isTrialExpired: false };
   }
   const createdTime = new Date(restaurantCreatedAt).getTime();
-  const expiryTime = createdTime + 14 * 86400000;
+  const expiryTime = createdTime + 21 * 86400000;
   const remaining = Math.max(0, Math.ceil((expiryTime - Date.now()) / 86400000));
   return {
     daysLeft: remaining,
