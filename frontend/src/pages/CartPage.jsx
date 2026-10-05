@@ -13,14 +13,25 @@ import { isValidColombianPhone } from '../utils/validators';
 import { buildWhatsAppOrderUrl } from '../utils/whatsappOrder';
 import { DeliveryMap } from '../components/ui/DeliveryMap';
 
-const CUSTOMER_STORAGE_KEY = `ff_customer:${env.restaurantSlug}`;
+const SAVED_CUSTOMER_PROFILE_KEY = 'orderflow_saved_customer';
+const SAVED_LOCATION_KEY = 'orderflow_saved_location';
+const LEGACY_STORAGE_KEY = `ff_customer:${env.restaurantSlug}`;
 
-const loadCustomer = () => {
+const loadSavedCustomer = () => {
   try {
-    const stored = localStorage.getItem(CUSTOMER_STORAGE_KEY);
+    const stored = localStorage.getItem(SAVED_CUSTOMER_PROFILE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
     return stored ? JSON.parse(stored) : { name: '', phone: '', address: '', email: '' };
   } catch {
     return { name: '', phone: '', address: '', email: '' };
+  }
+};
+
+const loadSavedLocation = () => {
+  try {
+    const stored = localStorage.getItem(SAVED_LOCATION_KEY);
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    return null;
   }
 };
 
@@ -29,12 +40,12 @@ export function CartPage() {
   const { items, total, updateQuantity, clearCart, stockWarning } = useCart();
   const { config, labels, activeSlug } = useRestaurantConfig();
   const currentSlug = activeSlug || config.slug || env.restaurantSlug;
-  const [customer, setCustomer] = useState(loadCustomer);
+  const [customer, setCustomer] = useState(loadSavedCustomer);
   const [notes, setNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState(config.paymentMethods?.includes('WOMPI') ? 'WOMPI' : (config.paymentMethods?.[0] || 'CASH'));
   const [couponCode, setCouponCode] = useState('');
   const [deliveryZoneName, setDeliveryZoneName] = useState('');
-  const [deliveryLocation, setDeliveryLocation] = useState(null);
+  const [deliveryLocation, setDeliveryLocation] = useState(loadSavedLocation);
   const [fulfillmentMode, setFulfillmentMode] = useState('DELIVERY');
   const [scheduledFor, setScheduledFor] = useState('');
   const [tableNumber, setTableNumber] = useState('');
@@ -83,10 +94,42 @@ export function CartPage() {
   const scheduledPreview = scheduledFor ? formatDate(scheduledFor) : '';
   const loyaltyEnabled = loyalty?.enabled && (loyalty.estimatedPoints > 0 || true);
 
+  const handleSelectLocation = (loc) => {
+    setDeliveryLocation(loc);
+    try {
+      if (loc) {
+        localStorage.setItem(SAVED_LOCATION_KEY, JSON.stringify(loc));
+      } else {
+        localStorage.removeItem(SAVED_LOCATION_KEY);
+      }
+    } catch {
+      // Ignorar errores de acceso a localStorage en modo incognito
+    }
+  };
+
   const updateCustomer = (field, value) => {
     const updated = { ...customer, [field]: value };
     setCustomer(updated);
-    localStorage.setItem(CUSTOMER_STORAGE_KEY, JSON.stringify(updated));
+    try {
+      localStorage.setItem(SAVED_CUSTOMER_PROFILE_KEY, JSON.stringify(updated));
+      localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(updated));
+    } catch {
+      // Ignorar errores de acceso a localStorage en modo incognito
+    }
+  };
+
+  const clearSavedData = () => {
+    const empty = { name: '', phone: '', address: '', email: '' };
+    setCustomer(empty);
+    setDeliveryLocation(null);
+    setDeliveryZoneName('');
+    try {
+      localStorage.removeItem(SAVED_CUSTOMER_PROFILE_KEY);
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+      localStorage.removeItem(SAVED_LOCATION_KEY);
+    } catch {
+      // Ignorar errores de acceso a localStorage en modo incognito
+    }
   };
 
   const validateField = (field, value) => {
@@ -98,9 +141,18 @@ export function CartPage() {
       if (!value.trim()) { errs.phone = true; setPhoneError(''); } else if (!isValidColombianPhone(value)) { errs.phone = true; setPhoneError('Ingresa un numero colombiano valido (ej: 3001234567)'); } else { delete errs.phone; setPhoneError(''); }
     }
     if (field === 'address') {
-      if (!value.trim()) errs.address = true; else delete errs.address;
-      setDeliveryLocation(null);
-      setDeliveryZoneName('');
+      if (!value.trim()) {
+        errs.address = true;
+        setDeliveryLocation(null);
+        setDeliveryZoneName('');
+        try {
+          localStorage.removeItem(SAVED_LOCATION_KEY);
+        } catch {
+          // Ignorar errores de acceso a localStorage en modo incognito
+        }
+      } else {
+        delete errs.address;
+      }
     }
     setFieldErrors(errs);
   };
@@ -143,7 +195,10 @@ export function CartPage() {
       const payload = {
         restaurantSlug: currentSlug,
         paymentMethod,
-        customer,
+        customer: {
+          ...customer,
+          email: customer.email?.trim() || undefined
+        },
         notes,
         couponCode: couponCode.trim() || undefined,
         deliveryZoneName: deliveryZoneName || undefined,
@@ -237,6 +292,21 @@ export function CartPage() {
       <form onSubmit={submitOrder} className="glass-panel h-fit p-5 sm:p-6">
         <h2 className="text-2xl font-black tracking-tight">Datos de tu {labels.orderLabel}</h2>
         <div className="mt-5 space-y-4">
+          {(customer.name?.trim() || customer.phone?.trim() || customer.address?.trim()) && (
+            <div className="flex items-center justify-between rounded-xl bg-amber-50/90 border border-amber-200/80 px-3.5 py-2.5 text-xs text-amber-950">
+              <span className="flex items-center gap-1.5 font-medium">
+                <span>⚡</span>
+                <span>Tus datos fueron cargados automáticamente</span>
+              </span>
+              <button
+                type="button"
+                onClick={clearSavedData}
+                className="font-bold text-amber-800 hover:text-amber-950 underline ml-2"
+              >
+                Limpiar datos
+              </button>
+            </div>
+          )}
           <label className="block space-y-1">
             <span className="label">Nombre {fieldErrors.name && <span className="text-red-500">*</span>}</span>
             <input name="customerName" className={`input ${fieldErrors.name ? 'border-red-400 ring-2 ring-red-100' : ''}`} required value={customer.name} onChange={(event) => updateCustomer('name', event.target.value)} onBlur={(event) => validateField('name', event.target.value)} />
@@ -256,8 +326,14 @@ export function CartPage() {
               <input name="customerAddress" className={`input ${fieldErrors.address ? 'border-red-400 ring-2 ring-red-100' : ''}`} required value={customer.address} onChange={(event) => updateCustomer('address', event.target.value)} onBlur={(event) => validateField('address', event.target.value)} placeholder="Cra 1 #2-34" />
               <DeliveryMap
                 address={customer.address}
-                initialCenter={storeCoordinates ? [storeCoordinates.longitude, storeCoordinates.latitude] : null}
-                onSelect={(location) => setDeliveryLocation(location)}
+                initialCenter={
+                  deliveryLocation
+                    ? [deliveryLocation.longitude, deliveryLocation.latitude]
+                    : storeCoordinates
+                    ? [storeCoordinates.longitude, storeCoordinates.latitude]
+                    : null
+                }
+                onSelect={(location) => handleSelectLocation(location)}
               />
               {deliveryLocation && <p className="mt-2 text-xs text-stone-500">Ubicación seleccionada: {deliveryLocation.latitude.toFixed(5)}, {deliveryLocation.longitude.toFixed(5)}</p>}
               {storeCoordinates && (
@@ -271,7 +347,7 @@ export function CartPage() {
                       type="button"
                       onClick={() => {
                         updateCustomer('address', 'Cra 44 #54-20, Barrio Boston, Barranquilla');
-                        setDeliveryLocation({ latitude: 10.9905, longitude: -74.7905 });
+                        handleSelectLocation({ latitude: 10.9905, longitude: -74.7905 });
                       }}
                       className="rounded-lg bg-white px-2 py-1 font-medium text-stone-700 shadow-sm border border-stone-200 hover:bg-stone-100 transition-colors"
                     >
@@ -281,7 +357,7 @@ export function CartPage() {
                       type="button"
                       onClick={() => {
                         updateCustomer('address', 'Cra 51B #76-12, Alto Prado, Barranquilla');
-                        setDeliveryLocation({ latitude: 11.0042, longitude: -74.8095 });
+                        handleSelectLocation({ latitude: 11.0042, longitude: -74.8095 });
                       }}
                       className="rounded-lg bg-white px-2 py-1 font-medium text-stone-700 shadow-sm border border-stone-200 hover:bg-stone-100 transition-colors"
                     >
@@ -291,7 +367,7 @@ export function CartPage() {
                       type="button"
                       onClick={() => {
                         updateCustomer('address', 'Calle 78 #53-55, Villa Country, Barranquilla');
-                        setDeliveryLocation({ latitude: 11.0078, longitude: -74.8142 });
+                        handleSelectLocation({ latitude: 11.0078, longitude: -74.8142 });
                       }}
                       className="rounded-lg bg-white px-2 py-1 font-medium text-stone-700 shadow-sm border border-stone-200 hover:bg-stone-100 transition-colors"
                     >
@@ -301,7 +377,7 @@ export function CartPage() {
                       type="button"
                       onClick={() => {
                         updateCustomer('address', 'Calle 98 #51B-10, Buenavista, Barranquilla');
-                        setDeliveryLocation({ latitude: 11.0185, longitude: -74.8290 });
+                        handleSelectLocation({ latitude: 11.0185, longitude: -74.8290 });
                       }}
                       className="rounded-lg bg-white px-2 py-1 font-medium text-stone-700 shadow-sm border border-stone-200 hover:bg-stone-100 transition-colors"
                     >
@@ -311,7 +387,7 @@ export function CartPage() {
                       type="button"
                       onClick={() => {
                         updateCustomer('address', 'Cra 51B km 5, Villa Campestre, Puerto Colombia');
-                        setDeliveryLocation({ latitude: 11.0320, longitude: -74.8560 });
+                        handleSelectLocation({ latitude: 11.0320, longitude: -74.8560 });
                       }}
                       className="rounded-lg bg-white px-2 py-1 font-medium text-stone-700 shadow-sm border border-stone-200 hover:bg-stone-100 transition-colors"
                     >
@@ -321,7 +397,7 @@ export function CartPage() {
                       type="button"
                       onClick={() => {
                         updateCustomer('address', 'Plaza Principal de Soledad, Atlántico');
-                        setDeliveryLocation({ latitude: 10.9160, longitude: -74.7640 });
+                        handleSelectLocation({ latitude: 10.9160, longitude: -74.7640 });
                       }}
                       className="rounded-lg bg-white px-2 py-1 font-medium text-stone-700 shadow-sm border border-stone-200 hover:bg-stone-100 transition-colors"
                     >
@@ -331,7 +407,7 @@ export function CartPage() {
                       type="button"
                       onClick={() => {
                         updateCustomer('address', 'Plaza Central de Galapa, Atlántico');
-                        setDeliveryLocation({ latitude: 10.8950, longitude: -74.8850 });
+                        handleSelectLocation({ latitude: 10.8950, longitude: -74.8850 });
                       }}
                       className="rounded-lg bg-white px-2 py-1 font-medium text-stone-700 shadow-sm border border-stone-200 hover:bg-stone-100 transition-colors"
                     >
@@ -341,7 +417,7 @@ export function CartPage() {
                       type="button"
                       onClick={() => {
                         updateCustomer('address', 'Malecón de Puerto Colombia, Atlántico');
-                        setDeliveryLocation({ latitude: 11.0200, longitude: -74.9600 });
+                        handleSelectLocation({ latitude: 11.0200, longitude: -74.9600 });
                       }}
                       className="rounded-lg bg-white px-2 py-1 font-medium text-red-700 shadow-sm border border-red-200 hover:bg-red-50 transition-colors"
                     >
@@ -362,8 +438,18 @@ export function CartPage() {
             </label>
           ) : null}
           <label className="block space-y-1">
-            <span className="label">Email</span>
-            <input className="input" type="email" value={customer.email} onChange={(event) => updateCustomer('email', event.target.value)} />
+            <span className="label flex items-center justify-between">
+              <span>Correo electrónico (opcional)</span>
+              <span className="text-[11px] font-normal text-stone-400">Para recibir confirmación</span>
+            </span>
+            <input
+              name="customerEmail"
+              className="input"
+              type="email"
+              value={customer.email}
+              onChange={(event) => updateCustomer('email', event.target.value)}
+              placeholder="ejemplo@correo.com"
+            />
           </label>
           {fulfillmentMode === 'DELIVERY' && activeZones.length && deliveryLocation ? (
             <div className="rounded-xl border p-3.5">
