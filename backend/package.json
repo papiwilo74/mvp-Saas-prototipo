@@ -19,6 +19,7 @@
     "env:validate": "node ./src/config/env.js",
     "verify:deploy": "node scripts/deploy-verify.js",
     "verify:local": "node scripts/deploy-verify.js --url=http://localhost:4000/api",
+    "keep-alive": "node scripts/keep-alive.js",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write \"src/**/*.js\"",
