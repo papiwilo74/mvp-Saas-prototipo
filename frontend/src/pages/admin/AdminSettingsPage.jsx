@@ -1,4 +1,4 @@
-import { Check, Copy, ExternalLink, QrCode, Save } from 'lucide-react';
+import { Check, Copy, ExternalLink, Image as ImageIcon, QrCode, Save, Sparkles, Trash2, Upload } from 'lucide-react';
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { QRCode } from '../../components/ui/QRCode';
@@ -15,6 +15,14 @@ const paymentOptions = [
   ['WOMPI', 'Pago en linea (Wompi)']
 ];
 
+const HERO_PRESETS = [
+  { label: '🛍️ Tienda / Variedades', url: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8' },
+  { label: '🍔 Comida Rápida', url: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd' },
+  { label: '🍕 Pizzería', url: 'https://images.unsplash.com/photo-1513104890138-7c749659a591' },
+  { label: '☕ Café / Panadería', url: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb' },
+  { label: '✨ Moda / Belleza', url: 'https://images.unsplash.com/photo-1556228578-8c89e6adf883' },
+];
+
 function SettingsForm({ config, setConfig, menuUrl }) {
   const [form, setForm] = useState(() => ({
     ...(config || {}),
@@ -28,6 +36,24 @@ function SettingsForm({ config, setConfig, menuUrl }) {
   const [errorMessage, setErrorMessage] = useState('');
   const [showQR, setShowQR] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [uploadingField, setUploadingField] = useState(null);
+
+  const uploadImage = async (file, field) => {
+    if (!file) return;
+    const body = new FormData();
+    body.append('image', file);
+    setUploadingField(field);
+    try {
+      const { data } = await api.post('/products/upload-image', body, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      update(field, data.imageUrl);
+    } catch (err) {
+      setErrorMessage(getErrorMessage(err, 'Error al subir la imagen'));
+    } finally {
+      setUploadingField(null);
+    }
+  };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(menuUrl);
@@ -89,13 +115,156 @@ function SettingsForm({ config, setConfig, menuUrl }) {
           <input className="input" value={form.restaurantName || ''} onChange={(event) => update('restaurantName', event.target.value)} />
         </label>
         <label className="block space-y-1 sm:col-span-2">
-          <span className="label">Logo URL</span>
-          <input className="input" value={form.logoUrl || ''} onChange={(event) => update('logoUrl', event.target.value)} />
+          <span className="label">Tipo de negocio</span>
+          <select
+            className="input font-semibold"
+            value={form.businessType || 'restaurant'}
+            onChange={(event) => {
+              const type = event.target.value;
+              update('businessType', type);
+              if (type === 'store') {
+                update('businessLabel', 'tienda');
+                update('catalogLabel', 'Catálogo');
+                update('orderLabel', 'compra');
+                update('productLabel', 'producto');
+                update('fulfillmentLabel', 'entrega');
+              } else if (type === 'cafe') {
+                update('businessLabel', 'cafetería');
+                update('catalogLabel', 'Carta');
+                update('orderLabel', 'pedido');
+                update('productLabel', 'producto');
+                update('fulfillmentLabel', 'entrega');
+              } else {
+                update('businessLabel', 'restaurante');
+                update('catalogLabel', 'Menú');
+                update('orderLabel', 'pedido');
+                update('productLabel', 'plato');
+                update('fulfillmentLabel', 'domicilio');
+              }
+            }}
+          >
+            <option value="restaurant">🍔 Restaurante / Comidas Rápidas</option>
+            <option value="store">🛍️ Tienda / Variedades / Retail</option>
+            <option value="cafe">☕ Cafetería / Panadería / Repostería</option>
+          </select>
         </label>
-        <label className="block space-y-1 sm:col-span-2">
-          <span className="label">Imagen Hero (Landing)</span>
-          <input className="input" value={form.heroImageUrl || ''} onChange={(event) => update('heroImageUrl', event.target.value)} placeholder="https://..." />
-        </label>
+
+        {/* Logo Section */}
+        <div className="rounded-xl border border-stone-200 bg-stone-50/50 p-4 sm:col-span-2">
+          <span className="label">Logo del negocio</span>
+          <p className="mt-1 text-xs text-stone-500">Aparece en la cabecera, checkout y navegación de clientes.</p>
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+            {form.logoUrl ? (
+              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
+                <img src={form.logoUrl} alt="Logo" className="h-full w-full object-contain p-1" />
+                <button
+                  type="button"
+                  onClick={() => update('logoUrl', '')}
+                  className="absolute right-1 top-1 rounded-md bg-stone-900/80 p-1 text-white hover:bg-red-600 transition"
+                  title="Eliminar logo"
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
+            ) : (
+              <div className="grid h-20 w-20 shrink-0 place-items-center rounded-xl border border-dashed border-stone-300 bg-white text-stone-400">
+                <ImageIcon size={24} />
+              </div>
+            )}
+            <div className="flex-1 space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <label className="btn-secondary cursor-pointer text-xs py-2 px-3 inline-flex items-center gap-1.5">
+                  <Upload size={14} />
+                  <span>{uploadingField === 'logoUrl' ? 'Subiendo logo...' : 'Subir logo desde PC/móvil'}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploadingField === 'logoUrl'}
+                    onChange={(e) => uploadImage(e.target.files?.[0], 'logoUrl')}
+                  />
+                </label>
+              </div>
+              <input
+                className="input text-xs"
+                value={form.logoUrl || ''}
+                onChange={(event) => update('logoUrl', event.target.value)}
+                placeholder="O pega una URL: https://..."
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Hero Image Section */}
+        <div className="rounded-xl border border-stone-200 bg-stone-50/50 p-4 sm:col-span-2">
+          <span className="label">Foto Principal (Banner Hero de la Landing)</span>
+          <p className="mt-1 text-xs text-stone-500">Imagen principal de presentación que verán los clientes en la portada.</p>
+          <div className="mt-3 space-y-3">
+            {form.heroImageUrl ? (
+              <div className="relative h-44 w-full overflow-hidden rounded-xl border border-stone-200 bg-stone-950 shadow-sm">
+                <img src={form.heroImageUrl} alt="Hero Banner" className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => update('heroImageUrl', '')}
+                  className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-lg bg-stone-900/80 px-2.5 py-1.5 text-xs font-bold text-white shadow hover:bg-red-600 transition"
+                >
+                  <Trash2 size={13} />
+                  Eliminar imagen
+                </button>
+              </div>
+            ) : (
+              <div className="grid h-28 w-full place-items-center rounded-xl border border-dashed border-stone-300 bg-white text-center text-stone-400">
+                <div>
+                  <ImageIcon size={28} className="mx-auto mb-1 text-stone-400" />
+                  <p className="text-xs">No hay foto principal configurada. Se usará la sugerida por defecto.</p>
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <label className="btn-secondary cursor-pointer text-xs py-2 px-3 inline-flex items-center justify-center gap-1.5 shrink-0">
+                <Upload size={14} />
+                <span>{uploadingField === 'heroImageUrl' ? 'Subiendo imagen...' : 'Subir foto desde dispositivo'}</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={uploadingField === 'heroImageUrl'}
+                  onChange={(e) => uploadImage(e.target.files?.[0], 'heroImageUrl')}
+                />
+              </label>
+              <input
+                className="input text-xs flex-1"
+                value={form.heroImageUrl || ''}
+                onChange={(event) => update('heroImageUrl', event.target.value)}
+                placeholder="O pega una URL directa: https://images.unsplash.com/..."
+              />
+            </div>
+
+            <div>
+              <p className="text-xs font-bold text-stone-600 mb-1.5 flex items-center gap-1">
+                <Sparkles size={13} className="text-amber-500" />
+                O elige una imagen predeterminada de alta resolución:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {HERO_PRESETS.map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => update('heroImageUrl', preset.url)}
+                    className={`rounded-lg border px-2.5 py-1 text-xs font-semibold transition ${
+                      form.heroImageUrl === preset.url
+                        ? 'border-orange-500 bg-orange-50 text-orange-700'
+                        : 'border-stone-200 bg-white text-stone-700 hover:bg-stone-50'
+                    }`}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
         <label className="block space-y-1">
           <span className="label">Color primario</span>
           <input className="input h-12" type="color" value={form.primaryColor || '#ea580c'} onChange={(event) => update('primaryColor', event.target.value)} />

@@ -247,6 +247,7 @@ async function main() {
     config: {
       restaurantName: 'Variedades Martha',
       logoUrl: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc',
+      heroImageUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8',
       primaryColor: '#db2777',
       secondaryColor: '#312e81',
       businessType: 'store',

@@ -19,8 +19,12 @@ export function LandingPage() {
   const topZone = (config.deliveryZones || []).find((zone) => zone.isActive !== false);
   const isStore = config.businessType === 'store';
   const whatsappUrl = `https://wa.me/${config.whatsapp?.replace(/\D/g, '') || ''}`;
+  const starItem = combos[0] || featured[0];
+  const starLabel = isStore ? (starItem?.isCombo ? 'Kit destacado' : 'Más vendido') : (starItem?.isCombo ? 'Combo estrella' : 'Plato estrella');
+  const starName = starItem?.name || (isStore ? 'Producto estrella' : 'Especial de la casa');
+  const starPrice = starItem?.price ? formatCurrency(starItem.price) : (isStore ? formatCurrency(25000) : formatCurrency(29900));
   const heroImage = config.heroImageUrl || (isStore
-    ? 'https://images.unsplash.com/photo-1612817288484-6f916006741a'
+    ? 'https://images.unsplash.com/photo-1441986300917-64674bd600d8'
     : 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd');
 
   return (
@@ -74,9 +78,9 @@ export function LandingPage() {
                   <p className="mt-1 text-sm text-stone-600">{topZone ? topZone.name : 'Cobertura principal'}</p>
                 </div>
                 <div className="safe-panel p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.2em] text-stone-500">{isStore ? 'Más vendido' : 'Combo estrella'}</p>
-                  <p className="mt-2 text-lg font-black">{combos[0]?.name || 'Burger + papas'}</p>
-                  <p className="mt-1 text-sm text-stone-600">{formatCurrency(combos[0]?.price || 29900)}</p>
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-stone-500">{starLabel}</p>
+                  <p className="mt-2 text-lg font-black truncate">{starName}</p>
+                  <p className="mt-1 text-sm text-stone-600">{starPrice}</p>
                 </div>
                 <div className="safe-panel p-4">
                   <p className="text-xs font-black uppercase tracking-[0.2em] text-stone-500">Horario</p>

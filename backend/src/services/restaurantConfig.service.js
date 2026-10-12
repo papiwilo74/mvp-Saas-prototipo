@@ -6,7 +6,7 @@ const PUBLIC_CONFIG_FIELDS = [
   'phone', 'whatsapp', 'address', 'email', 'facebookUrl', 'instagramUrl',
   'openingHours', 'businessHours', 'acceptsScheduledOrders', 'leadTimeMinutes',
   'deliveryFee', 'deliveryZones', 'storeLatitude', 'storeLongitude', 'deliveryModes', 'coupons', 'paymentMethods', 'wompiPublicKey',
-  'loyaltyProgram',
+  'loyaltyProgram', 'businessType', 'businessLabel', 'catalogLabel', 'orderLabel', 'productLabel', 'fulfillmentLabel', 'showTableNumber', 'showKitchenPanel',
 ];
 
 export const getPublicConfig = async (restaurantSlug = DEFAULT_RESTAURANT_SLUG) => {
