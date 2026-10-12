@@ -16,11 +16,11 @@ const paymentOptions = [
 ];
 
 const HERO_PRESETS = [
-  { label: '🛍️ Tienda / Variedades', url: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8' },
-  { label: '🍔 Comida Rápida', url: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd' },
-  { label: '🍕 Pizzería', url: 'https://images.unsplash.com/photo-1513104890138-7c749659a591' },
-  { label: '☕ Café / Panadería', url: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb' },
-  { label: '✨ Moda / Belleza', url: 'https://images.unsplash.com/photo-1556228578-8c89e6adf883' },
+  { label: 'Tienda / Comercio', url: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8' },
+  { label: 'Comidas Rápidas', url: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd' },
+  { label: 'Pizzería', url: 'https://images.unsplash.com/photo-1513104890138-7c749659a591' },
+  { label: 'Cafetería / Panadería', url: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb' },
+  { label: 'Moda / Cosmética', url: 'https://images.unsplash.com/photo-1556228578-8c89e6adf883' },
 ];
 
 function SettingsForm({ config, setConfig, menuUrl }) {
@@ -143,9 +143,9 @@ function SettingsForm({ config, setConfig, menuUrl }) {
               }
             }}
           >
-            <option value="restaurant">🍔 Restaurante / Comidas Rápidas</option>
-            <option value="store">🛍️ Tienda / Variedades / Retail</option>
-            <option value="cafe">☕ Cafetería / Panadería / Repostería</option>
+            <option value="restaurant">Restaurante / Comidas Rápidas</option>
+            <option value="store">Tienda / Variedades / Comercio</option>
+            <option value="cafe">Cafetería / Panadería / Repostería</option>
           </select>
         </label>
 
@@ -490,13 +490,13 @@ function SettingsForm({ config, setConfig, menuUrl }) {
 
       {saved && (
         <p className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-bold text-emerald-800">
-          ✓ Configuración guardada exitosamente
+          Configuración guardada exitosamente
         </p>
       )}
 
       {errorMessage && (
         <p className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-bold text-red-800">
-          ⚠️ {errorMessage}
+          {errorMessage}
         </p>
       )}
 

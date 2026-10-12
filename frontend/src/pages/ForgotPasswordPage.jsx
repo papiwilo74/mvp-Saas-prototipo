@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Mail } from 'lucide-react';
+import { ArrowLeft, Check, Mail } from 'lucide-react';
 import { SEOHead } from '../components/seo/SEOHead';
 import { api } from '../services/api';
 
@@ -29,7 +29,9 @@ export function ForgotPasswordPage() {
       <div className="container-page flex min-h-[70dvh] items-center justify-center py-10">
         <SEOHead title="Correo enviado" />
         <div className="w-full max-w-md text-center">
-          <div className="mx-auto grid h-16 w-16 place-items-center rounded-[28px] bg-emerald-100 text-2xl text-emerald-700">✓</div>
+          <div className="mx-auto grid h-16 w-16 place-items-center rounded-[28px] bg-emerald-100 text-emerald-700">
+            <Check size={32} />
+          </div>
           <h1 className="mt-6 text-2xl font-black tracking-tight">Correo enviado</h1>
           <p className="mt-3 text-sm leading-6 text-stone-500">Si el correo existe en nuestra base de datos, recibiras instrucciones para restablecer tu contrasena.</p>
           <Link to="/login" className="btn-primary mt-8 inline-flex items-center gap-2">

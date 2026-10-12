@@ -73,7 +73,7 @@ export function PrivacyPage() {
                 <li>Prevenir fraudes y garantizar la integridad de las transacciones comerciales.</li>
               </ul>
               <p className="font-semibold text-stone-800">
-                🔒 No comercializamos, alquilamos ni transferimos tus datos personales a terceros con fines publicitarios no autorizados.
+                No comercializamos, alquilamos ni transferimos tus datos personales a terceros con fines publicitarios no autorizados.
               </p>
             </div>
           </section>

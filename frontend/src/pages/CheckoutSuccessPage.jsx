@@ -289,7 +289,8 @@ export function CheckoutSuccessPage() {
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 rounded-2xl border border-purple-200 bg-white p-3.5 text-xs text-purple-800">
-                      <span>✓ Transferencia inmediata sin comisión desde cualquier cuenta Nequi o Bancolombia.</span>
+                      <CheckCircle2 size={16} className="text-purple-600 shrink-0" />
+                      <span>Transferencia inmediata sin comisión desde cualquier cuenta Nequi o Bancolombia.</span>
                     </div>
                   )}
                 </div>

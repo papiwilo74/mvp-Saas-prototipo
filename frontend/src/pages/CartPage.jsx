@@ -1,4 +1,4 @@
-import { Clock3, CreditCard, MapPinned, ShieldCheck, Star, Ticket, QrCode, Smartphone, Banknote } from 'lucide-react';
+import { Clock3, CreditCard, MapPinned, ShieldCheck, Star, Ticket, QrCode, Smartphone, Banknote, Zap } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CartItem } from '../components/cart/CartItem';
@@ -295,7 +295,7 @@ export function CartPage() {
           {(customer.name?.trim() || customer.phone?.trim() || customer.address?.trim()) && (
             <div className="flex items-center justify-between rounded-xl bg-amber-50/90 border border-amber-200/80 px-3.5 py-2.5 text-xs text-amber-950">
               <span className="flex items-center gap-1.5 font-medium">
-                <span>⚡</span>
+                <Zap size={14} className="text-amber-600 shrink-0" />
                 <span>Tus datos fueron cargados automáticamente</span>
               </span>
               <button

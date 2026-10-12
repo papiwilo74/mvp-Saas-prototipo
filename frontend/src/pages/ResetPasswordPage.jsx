@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Eye, EyeOff, Lock } from 'lucide-react';
+import { ArrowLeft, Check, Eye, EyeOff, Lock } from 'lucide-react';
 import { SEOHead } from '../components/seo/SEOHead';
 import { api } from '../services/api';
 
@@ -59,7 +59,9 @@ export function ResetPasswordPage() {
       <div className="container-page flex min-h-[70dvh] items-center justify-center py-10">
         <SEOHead title="Contrasena actualizada" />
         <div className="w-full max-w-md text-center">
-          <div className="mx-auto grid h-16 w-16 place-items-center rounded-[28px] bg-emerald-100 text-2xl text-emerald-700">✓</div>
+          <div className="mx-auto grid h-16 w-16 place-items-center rounded-[28px] bg-emerald-100 text-emerald-700">
+            <Check size={32} />
+          </div>
           <h1 className="mt-6 text-2xl font-black tracking-tight">Contrasena actualizada</h1>
           <p className="mt-3 text-sm leading-6 text-stone-500">Tu contrasena fue cambiada exitosamente.</p>
           <Link to="/login" className="btn-primary mt-8 inline-flex items-center gap-2">

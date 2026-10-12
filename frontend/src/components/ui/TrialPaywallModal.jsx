@@ -82,7 +82,7 @@ export function TrialPaywallModal({
                   <span>Personalización de marca (colores y logo)</span>
                 </li>
                 <li className="flex items-center gap-2 text-stone-400">
-                  <span className="h-4 w-4 shrink-0 text-center font-bold">✕</span>
+                  <X size={16} className="shrink-0 text-stone-400" />
                   <span>Sin pantalla KDS ni impresión térmica</span>
                 </li>
               </ul>

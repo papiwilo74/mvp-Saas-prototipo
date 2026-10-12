@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ChefHat, Clock, Printer, Volume2, VolumeX, CheckCircle, ArrowRight } from 'lucide-react';
+import { ChefHat, Clock, Printer, Volume2, VolumeX, CheckCircle, ArrowRight, MapPin, FileText } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { useAuth } from '../../context/AuthContext';
@@ -138,18 +138,19 @@ export function AdminKitchenPage() {
                             </span>
                             {order.paymentStatus === 'APPROVED' ? (
                               <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-800">
-                                ✓ Pagado
+                                Pagado
                               </span>
                             ) : (
                               <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-800">
-                                ⚠️ {order.paymentMethod === 'NEQUI' ? 'Nequi sin verificar' : 'Pago pendiente'}
+                                {order.paymentMethod === 'NEQUI' ? 'Nequi sin verificar' : 'Pago pendiente'}
                               </span>
                             )}
                           </div>
                           <p className="text-xs font-bold text-stone-700">{order.customerName}</p>
                           {order.customerAddress && (
-                            <p className="text-[11px] text-stone-500 truncate max-w-[200px]">
-                              📍 {order.customerAddress}
+                            <p className="text-[11px] text-stone-500 truncate max-w-[200px] flex items-center gap-1">
+                              <MapPin size={11} className="shrink-0" />
+                              <span>{order.customerAddress}</span>
                             </p>
                           )}
                         </div>
@@ -168,8 +169,9 @@ export function AdminKitchenPage() {
                       </div>
 
                       {order.notes && (
-                        <div className="rounded bg-amber-50 p-2 text-[11px] text-amber-800 font-medium">
-                          📝 {order.notes}
+                        <div className="rounded bg-amber-50 p-2 text-[11px] text-amber-800 font-medium flex items-center gap-1">
+                          <FileText size={11} className="shrink-0" />
+                          <span>{order.notes}</span>
                         </div>
                       )}
 

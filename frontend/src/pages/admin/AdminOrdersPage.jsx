@@ -204,12 +204,12 @@ export function AdminOrdersPage() {
                           </span>
                           {order.paymentStatus === 'APPROVED' ? (
                             <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800">
-                              ✓ Pagado
+                              Pagado
                             </span>
                           ) : (
                             <div className="flex flex-col gap-1">
                               <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-800">
-                                {order.paymentMethod === 'NEQUI' ? '⚠️ Nequi por verificar' : '⏳ Pendiente'}
+                                {order.paymentMethod === 'NEQUI' ? 'Nequi por verificar' : 'Pendiente'}
                               </span>
                               <button
                                 type="button"
