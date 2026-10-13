@@ -12,16 +12,21 @@ const DIM = '\x1b[2m';
 
 const DEFAULT_TARGETS = [
   'https://mvp-saas-prototipo.onrender.com/api/health',
-  'https://orderflowapp.online/api/health'
+  'https://www.orderflowapp.online/api/health'
 ];
 
-function httpGet(urlStr, timeoutMs = 35000) {
+function httpGet(urlStr, timeoutMs = 35000, maxRedirects = 3) {
   const parsed = new URL(urlStr);
   const transport = parsed.protocol === 'https:' ? getHttps : get;
   const start = Date.now();
 
   return new Promise((resolve, reject) => {
     const req = transport(urlStr, { timeout: timeoutMs }, (res) => {
+      if ([301, 302, 307, 308].includes(res.statusCode) && res.headers.location && maxRedirects > 0) {
+        const nextUrl = new URL(res.headers.location, urlStr).toString();
+        return httpGet(nextUrl, timeoutMs, maxRedirects - 1).then(resolve).catch(reject);
+      }
+
       let data = '';
       res.on('data', (chunk) => { data += chunk; });
       res.on('end', () => {

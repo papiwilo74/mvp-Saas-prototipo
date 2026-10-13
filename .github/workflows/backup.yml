@@ -8,6 +8,7 @@ on:
 jobs:
   backup:
     runs-on: ubuntu-latest
+    if: ${{ secrets.DATABASE_URL != '' && secrets.BACKUP_BUCKET != '' }}
     steps:
       - uses: actions/checkout@v4
 

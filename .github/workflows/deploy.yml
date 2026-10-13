@@ -7,6 +7,7 @@ on:
 jobs:
   deploy-backend:
     runs-on: ubuntu-latest
+    if: ${{ secrets.RAILWAY_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -19,6 +20,7 @@ jobs:
 
   deploy-frontend:
     runs-on: ubuntu-latest
+    if: ${{ secrets.VERCEL_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
 
