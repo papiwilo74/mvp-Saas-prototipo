@@ -8,7 +8,6 @@ on:
 jobs:
   backup:
     runs-on: ubuntu-latest
-    if: ${{ secrets.DATABASE_URL != '' && secrets.BACKUP_BUCKET != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -17,7 +16,12 @@ jobs:
 
       - name: Run backup script
         working-directory: backend
-        run: node scripts/backup.js
+        run: |
+          if [ -z "$DATABASE_URL" ] || [ -z "$BACKUP_BUCKET" ]; then
+            echo "DATABASE_URL or BACKUP_BUCKET not set. Skipping backup."
+            exit 0
+          fi
+          node scripts/backup.js
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           BACKUP_BUCKET: ${{ secrets.BACKUP_BUCKET }}

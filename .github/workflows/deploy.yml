@@ -1,17 +1,16 @@
 name: Deploy
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 jobs:
   deploy-backend:
     runs-on: ubuntu-latest
-    if: ${{ secrets.RAILWAY_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Deploy to Railway
+        if: env.RAILWAY_TOKEN != ''
         run: |
           curl -fsSL https://railway.app/install.sh | sh
           railway up --service backend
@@ -20,11 +19,11 @@ jobs:
 
   deploy-frontend:
     runs-on: ubuntu-latest
-    if: ${{ secrets.VERCEL_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Deploy to Vercel
+        if: env.VERCEL_TOKEN != ''
         uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
