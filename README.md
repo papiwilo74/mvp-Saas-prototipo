@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🍔 BcaXen — SaaS de Pedidos Online para Restaurantes
+# orderfloapp - saas de tiendas online
 
 [![Node.js](https://img.shields.io/badge/Node.js-22.x-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-19.x-61DAFB?logo=react&logoColor=black)](https://react.dev/)
@@ -19,7 +19,7 @@
 
 ---
 
-## 📋 Tabla de Contenidos
+##  Tabla de Contenidos
 
 - [El Problema](#-el-problema)
 - [La Solución](#-la-solución)
@@ -54,7 +54,7 @@ Los restaurantes pequeños en Colombia pagan **comisiones del 20-30%** a platafo
 
 ---
 
-## 🏗 Arquitectura
+##  Arquitectura
 
 ```mermaid
 graph TB
